@@ -1155,7 +1155,9 @@ export default function App() {
                     <ShoppingBag className="w-4 h-4 mr-2" />Store
                   </Button>
                   <Button onClick={() => setView('draws')} variant={view === 'draws' ? 'default' : 'ghost'}>My Draws</Button>
-                  <Button onClick={() => setView('admin')} variant={view === 'admin' ? 'default' : 'ghost'}>Admin</Button>
+                  {isAdmin && (
+                    <Button onClick={() => setView('admin')} variant={view === 'admin' ? 'default' : 'ghost'}>Admin</Button>
+                  )}
                   <Button onClick={handleSignOut} variant="ghost" size="sm"><LogOut className="w-4 h-4" /></Button>
                   <div className="text-sm text-gray-600">{user.email}</div>
                 </>
