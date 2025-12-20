@@ -536,6 +536,7 @@ function GamePlayView({
             setCurrentCard={setCurrentBlack}
             isFlipped={blackFlipped}
             setIsFlipped={setBlackFlipped}
+            disabled={sharingStarted}
           />
         )}
         {showWhiteCard && (
@@ -548,6 +549,7 @@ function GamePlayView({
             setCurrentCard={setCurrentWhite}
             isFlipped={whiteFlipped}
             setIsFlipped={setWhiteFlipped}
+            disabled={sharingStarted}
           />
         )}
       </div>
