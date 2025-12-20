@@ -477,10 +477,11 @@ function GamePlayView({
         timerState={timerState}
         seconds={seconds}
         onTimerClick={handleTimerClick}
+        onReset={handleNextPlayerClick}
       />
       
       {/* Card piles */}
-      <div className="flex flex-row gap-8 sm:gap-12 mb-8">
+      <div className="flex flex-row gap-8 sm:gap-12">
         <CardPile 
           color="black"
           deck={blackDeck}
@@ -501,16 +502,6 @@ function GamePlayView({
           isFlipped={whiteFlipped}
           setIsFlipped={setWhiteFlipped}
         />
-      </div>
-      
-      {/* Reset button - always visible below cards */}
-      <div className="mt-8">
-        <button
-          onClick={handleNextPlayerClick}
-          className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-500 rounded-lg font-medium hover:border-gray-400 hover:text-gray-600 transition-colors"
-        >
-          Reset
-        </button>
       </div>
     </div>
   )
