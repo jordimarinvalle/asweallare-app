@@ -82,16 +82,16 @@ export async function GET(request) {
       let query = supabase
         .from('cards')
         .select('*')
-        .eq('isActive', true)
-        .order('createdAt', { ascending: false })
+        .eq('isactive', true)
+        .order('createdat', { ascending: false })
       
       // If user is not logged in or doesn't have paid access, only return demo cards
       if (!user) {
-        query = query.eq('isDemo', true)
+        query = query.eq('isdemo', true)
       } else {
         const { hasPaidAccess } = await checkUserAccess(user.id)
         if (!hasPaidAccess) {
-          query = query.eq('isDemo', true)
+          query = query.eq('isdemo', true)
         }
       }
       
