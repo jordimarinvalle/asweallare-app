@@ -430,7 +430,8 @@ function useGameTimer(bothCardsFlipped) {
   
   // Handle timer click
   const handleTimerClick = () => {
-    if (timerState === 'waiting') {
+    if (timerState === 'countdown' || timerState === 'waiting') {
+      // Can start during countdown (early) or after countdown ends
       setTimerState('countup')
       setSeconds(0)
     } else if (timerState === 'countup') {
