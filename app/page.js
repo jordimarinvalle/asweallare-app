@@ -250,9 +250,14 @@ function GameStatusText({
   switch (timerState) {
     case 'idle':
       return (
-        <p className="text-gray-500 text-center text-lg mb-8">
-          Click on the cards to flip them and start your turn
-        </p>
+        <div className="text-center mb-8">
+          <button
+            disabled
+            className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-500 rounded-lg font-medium cursor-default"
+          >
+            Click on the cards to flip them and start your turn
+          </button>
+        </div>
       )
     
     case 'countdown':
