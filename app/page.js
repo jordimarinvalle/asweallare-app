@@ -289,21 +289,17 @@ export default function App() {
   
   const handleWhiteClick = () => {
     if (!currentWhite && whiteDeck.length > 0) {
-      // Draw card - use timestamp to force state change
+      // Draw card - increment flip state to force change
       const [card, ...remaining] = whiteDeck
       setWhiteDeck(remaining)
       setDrawnWhiteCards([...drawnWhiteCards, card])
       setCurrentWhite(card)
-      // Force state change with timestamp
-      const newKey = Date.now()
-      setRenderKey(newKey)
-      // Set flipped to timestamp % 2 to alternate between 0 and 1 (truthy/falsy pattern)
-      setWhiteFlipped(newKey % 2 === 0)
-      // Then immediately set to false for display
-      setTimeout(() => setWhiteFlipped(false), 10)
+      // Increment flip state (starts at 0=face-down, then increments)
+      setWhiteFlipState(prev => prev + 1)
+      setRenderKey(prev => prev + 1)
     } else if (currentWhite) {
-      // Toggle flip
-      setWhiteFlipped(!whiteFlipped)
+      // Toggle flip by incrementing state
+      setWhiteFlipState(prev => prev + 1)
     }
   }
   
