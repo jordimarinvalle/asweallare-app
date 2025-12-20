@@ -335,6 +335,7 @@ export default function App() {
     setTimerRunning(false)
     setTimerSeconds(0)
     setBellPlayed({ two: false, three: false })
+    setRenderKey(prev => prev + 1) // Force re-render after reset
   }
   
   const startTimer = () => {
