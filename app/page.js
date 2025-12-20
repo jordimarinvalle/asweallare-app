@@ -201,18 +201,30 @@ function CardPile({
                 transform: 'rotateY(180deg)'
               }}
             >
-              <div className={`w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg flex items-center justify-center p-8`}>
-                <div className="text-center">
-                  <h2 className={`${textColor} text-2xl font-serif mb-4`}>
-                    {currentCard?.title || ''}
-                  </h2>
-                  {currentCard?.hint && (
-                    <p className={`${hintColor} text-sm italic`}>
-                      {currentCard.hint}
-                    </p>
-                  )}
+              {currentCard?.imagePath ? (
+                // Show image if available
+                <div className={`w-full h-full border-2 ${borderColor} rounded-lg overflow-hidden`}>
+                  <img 
+                    src={`/cards/${currentCard.imagePath}`}
+                    alt={currentCard.title || 'Card'}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              </div>
+              ) : (
+                // Fallback to text
+                <div className={`w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg flex items-center justify-center p-8`}>
+                  <div className="text-center">
+                    <h2 className={`${textColor} text-2xl font-serif mb-4`}>
+                      {currentCard?.title || ''}
+                    </h2>
+                    {currentCard?.hint && (
+                      <p className={`${hintColor} text-sm italic`}>
+                        {currentCard.hint}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
