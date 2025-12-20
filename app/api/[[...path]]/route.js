@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServer } from '../../../lib/supabase-server'
-import { stripe } from '../../../lib/stripe'
+import { getStripe } from '../../../lib/stripe'
 import { v4 as uuidv4 } from 'uuid'
 
 // CORS helper
