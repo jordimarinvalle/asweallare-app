@@ -31,18 +31,15 @@ export default function App() {
   const [drawnWhiteCards, setDrawnWhiteCards] = useState([])
   const [currentBlack, setCurrentBlack] = useState(null)
   const [currentWhite, setCurrentWhite] = useState(null)
-  const [blackFlipped, setBlackFlipped] = useState(false)
-  const [whiteFlipped, setWhiteFlipped] = useState(false)
+  const [blackFlipState, setBlackFlipState] = useState(0) // 0=face-down, number increments
+  const [whiteFlipState, setWhiteFlipState] = useState(0) // 0=face-down, number increments
   const [cardDrawAnimation, setCardDrawAnimation] = useState({ black: false, white: false })
   const [renderKey, setRenderKey] = useState(0) // Force re-render
   const [forceUpdate, setForceUpdate] = useState(0)
   
-  // Force re-render when cards change
-  useEffect(() => {
-    if (currentBlack || currentWhite) {
-      setForceUpdate(prev => prev + 1)
-    }
-  }, [currentBlack, currentWhite])
+  // Calculate if flipped based on flip state (even = face-down, odd = face-up)
+  const blackFlipped = blackFlipState % 2 === 1
+  const whiteFlipped = whiteFlipState % 2 === 1
   
   // Timer
   const [timerRunning, setTimerRunning] = useState(false)
