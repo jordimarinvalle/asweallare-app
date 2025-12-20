@@ -168,13 +168,21 @@ export default function App() {
         setTimerSeconds(prev => {
           const newValue = prev + 1
           
+          // Bell at 1 minute (60 seconds)
+          if (newValue === 60 && !bellPlayed.one) {
+            playBell(1)
+            setBellPlayed(prev => ({ ...prev, one: true }))
+          }
+          
+          // Bell at 2 minutes (120 seconds)
           if (newValue === 120 && !bellPlayed.two) {
-            playBell()
+            playBell(2)
             setBellPlayed(prev => ({ ...prev, two: true }))
           }
           
+          // Bell at 3 minutes (180 seconds)
           if (newValue === 180 && !bellPlayed.three) {
-            playBell()
+            playBell(3)
             setBellPlayed(prev => ({ ...prev, three: true }))
           }
           
@@ -186,9 +194,15 @@ export default function App() {
     return () => clearInterval(interval)
   }, [timerRunning, bellPlayed])
   
-  const playBell = () => {
+  const playBell = (count) => {
     if (audioRef.current) {
-      audioRef.current.play()
+      // Play bell 'count' times with delay
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          audioRef.current.currentTime = 0
+          audioRef.current.play()
+        }, i * 400) // 400ms between each ding
+      }
     }
   }
   
