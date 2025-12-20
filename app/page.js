@@ -715,7 +715,10 @@ export default function App() {
               <div className="flex flex-col items-center gap-4">
                 {/* Show pile if no current card */}
                 {!currentWhite && whiteDeck.length > 0 && (
-                  <div onClick={handleWhiteClick} className={`cursor-pointer ${cardDrawAnimation.white ? 'card-draw-animation' : ''}`}>
+                  <div 
+                    onClick={handleWhiteClick} 
+                    className={`cursor-pointer ${cardDrawAnimation.white ? 'card-draw-animation' : ''}`}
+                  >
                     <Card className="w-64 h-96 bg-white border-2 border-gray-300 flex items-center justify-center hover:shadow-xl transition-shadow card-stack text-gray-800">
                       <CardContent className="p-8 text-center">
                         <p className="text-gray-900 text-xl font-serif">White Card</p>
@@ -739,9 +742,13 @@ export default function App() {
                   </Card>
                 )}
                 
-                {/* Show drawn card with flip */}
+                {/* Show drawn card with flip - KEY PROP FORCES RE-RENDER */}
                 {currentWhite && (
-                  <div onClick={handleWhiteClick} className="cursor-pointer perspective-1000">
+                  <div 
+                    key={currentWhite.id}
+                    onClick={handleWhiteClick} 
+                    className="cursor-pointer perspective-1000"
+                  >
                     <div className={`w-64 h-96 transition-transform duration-500 transform-style-3d ${whiteFlipped ? 'rotate-y-180' : ''}`}>
                       {/* Face down */}
                       <div className="absolute inset-0 backface-hidden">
