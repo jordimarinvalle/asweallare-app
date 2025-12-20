@@ -2,8 +2,8 @@
 // Inspired by react-hot-toast library
 import * as React from "react"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 3
+const TOAST_REMOVE_DELAY = 5000 // Auto-dismiss after 5 seconds
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -55,8 +55,6 @@ export const reducer = (state, action) => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -125,12 +123,22 @@ function toast({
     },
   })
 
+  // Auto dismiss after TOAST_REMOVE_DELAY
+  setTimeout(() => {
+    dismiss()
+  }, TOAST_REMOVE_DELAY)
+
   return {
     id: id,
     dismiss,
     update,
   }
 }
+
+// Helper functions for different toast types
+toast.success = (message) => toast({ title: message, variant: "success" })
+toast.error = (message) => toast({ title: message, variant: "destructive" })
+toast.info = (message) => toast({ title: message, variant: "info" })
 
 function useToast() {
   const [state, setState] = React.useState(memoryState)
