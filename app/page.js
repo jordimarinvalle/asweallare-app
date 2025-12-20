@@ -1082,6 +1082,86 @@ export default function App() {
     }
   }
   
+  // Load user purchases
+  const loadPurchases = async () => {
+    const response = await fetch('/api/purchases')
+    const data = await response.json()
+    if (data.purchases) {
+      setPurchases(data.purchases)
+    }
+  }
+  
+  // Cancel subscription
+  const handleCancelSubscription = async (purchaseId) => {
+    if (!confirm('Are you sure you want to cancel this subscription? You will lose access at the end of the current period.')) {
+      return
+    }
+    
+    const response = await fetch('/api/payment/cancel-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ purchaseId })
+    })
+    
+    const data = await response.json()
+    if (data.success) {
+      alert('Subscription cancelled successfully')
+      loadPurchases()
+      // Refresh boxes to update access
+      const boxResponse = await fetch('/api/boxes')
+      const boxData = await boxResponse.json()
+      if (boxData.boxes) {
+        setBoxes(boxData.boxes)
+        setHasAllAccess(boxData.hasAllAccess || false)
+      }
+    } else {
+      alert(data.error || 'Failed to cancel subscription')
+    }
+  }
+  
+  // Handle image upload
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    // Get box folder from selected box
+    const selectedBox = adminBoxes.find(b => b.id === cardForm.boxId)
+    let boxFolder = 'uploads'
+    
+    if (cardForm.boxId === 'box_demo') boxFolder = 'white-box-demo'
+    else if (cardForm.boxId === 'box_white') boxFolder = 'white-box-108'
+    else if (cardForm.boxId === 'box_white_xl') boxFolder = 'white-box-216'
+    else if (cardForm.boxId === 'box_black') boxFolder = 'black-box-108'
+    else if (cardForm.boxId === 'box_red') boxFolder = 'red-box-108'
+    
+    setUploadingImage(true)
+    
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('boxFolder', boxFolder)
+      formData.append('cardColor', cardForm.color)
+      
+      const response = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setCardForm(prev => ({ ...prev, imagePath: data.imagePath }))
+        alert('Image uploaded successfully!')
+      } else {
+        alert(data.error || 'Failed to upload image')
+      }
+    } catch (error) {
+      alert('Error uploading image: ' + error.message)
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+  
   const handlePayment = async () => {
     const response = await fetch('/api/payment/create-checkout', {
       method: 'POST',
