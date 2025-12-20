@@ -112,4 +112,17 @@
   .card-draw-animation {
     animation: draw-card 0.4s ease-out;
   }
+  
+  /* Phone rotate animation */
+  @keyframes phone-rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(-90deg);
+    }
+  }
+  .animate-phone-rotate {
+    animation: phone-rotate 1.5s ease-in-out infinite alternate;
+  }
 }
