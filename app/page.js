@@ -458,11 +458,35 @@ function GamePlayView({
   onBackToBoxes,
   onNextPlayer
 }) {
-  // Check if both cards are flipped
+  // Check if both cards are flipped (showing fronts)
   const bothCardsFlipped = currentBlack && currentWhite && blackFlipped && whiteFlipped
+  
+  // Check which cards are showing their fronts (after being drawn)
+  const blackShowingFront = currentBlack && blackFlipped
+  const whiteShowingFront = currentWhite && whiteFlipped
+  const blackShowingBack = currentBlack && !blackFlipped
+  const whiteShowingBack = currentWhite && !whiteFlipped
+  
+  // Both cards drawn but both showing backs = disable start button
+  const bothShowingBacks = blackShowingBack && whiteShowingBack
+  
+  // At least one card showing front = can interact with timer
+  const atLeastOneShowingFront = blackShowingFront || whiteShowingFront
   
   // Use the timer hook
   const { timerState, seconds, handleTimerClick, resetTimer } = useGameTimer(bothCardsFlipped)
+  
+  // Determine if we should hide cards (only when timer is active, not idle)
+  const timerActive = timerState !== 'idle'
+  
+  // Should we show each card?
+  // - Always show if timer is idle (initial state)
+  // - If timer is active: hide cards showing backs IF the other card shows front
+  const showBlackCard = !timerActive || !blackShowingBack || !whiteShowingFront
+  const showWhiteCard = !timerActive || !whiteShowingBack || !blackShowingFront
+  
+  // Should the start button be disabled?
+  const startButtonDisabled = timerActive && bothShowingBacks
   
   // Handle next player - reset cards AND timer state
   const handleNextPlayerClick = () => {
@@ -485,30 +509,35 @@ function GamePlayView({
         seconds={seconds}
         onTimerClick={handleTimerClick}
         onReset={handleNextPlayerClick}
+        disabled={startButtonDisabled}
       />
       
       {/* Card piles */}
-      <div className="flex flex-row gap-8 sm:gap-12">
-        <CardPile 
-          color="black"
-          deck={blackDeck}
-          setDeck={setBlackDeck}
-          allCards={allCards}
-          currentCard={currentBlack}
-          setCurrentCard={setCurrentBlack}
-          isFlipped={blackFlipped}
-          setIsFlipped={setBlackFlipped}
-        />
-        <CardPile 
-          color="white"
-          deck={whiteDeck}
-          setDeck={setWhiteDeck}
-          allCards={allCards}
-          currentCard={currentWhite}
-          setCurrentCard={setCurrentWhite}
-          isFlipped={whiteFlipped}
-          setIsFlipped={setWhiteFlipped}
-        />
+      <div className="flex flex-row gap-8 sm:gap-12 justify-center">
+        {showBlackCard && (
+          <CardPile 
+            color="black"
+            deck={blackDeck}
+            setDeck={setBlackDeck}
+            allCards={allCards}
+            currentCard={currentBlack}
+            setCurrentCard={setCurrentBlack}
+            isFlipped={blackFlipped}
+            setIsFlipped={setBlackFlipped}
+          />
+        )}
+        {showWhiteCard && (
+          <CardPile 
+            color="white"
+            deck={whiteDeck}
+            setDeck={setWhiteDeck}
+            allCards={allCards}
+            currentCard={currentWhite}
+            setCurrentCard={setCurrentWhite}
+            isFlipped={whiteFlipped}
+            setIsFlipped={setWhiteFlipped}
+          />
+        )}
       </div>
       
       {/* Reset button below cards */}
