@@ -526,7 +526,7 @@ export async function POST(request) {
       
       if (couponCode) {
         try {
-          const coupons = await stripe.coupons.list({ limit: 100 })
+          const coupons = await getStripe().coupons.list({ limit: 100 })
           const validCoupon = coupons.data.find(c => c.id.toLowerCase() === couponCode.toLowerCase())
           
           if (validCoupon) {
