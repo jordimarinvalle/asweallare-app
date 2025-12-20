@@ -264,32 +264,56 @@ export default function App() {
   }
   
   const handleBlackClick = () => {
-    console.log('handleBlackClick - currentBlack:', currentBlack, 'blackFlipped:', blackFlipped)
+    console.log('=== BLACK CLICK ===')
+    console.log('currentBlack:', currentBlack)
+    console.log('blackFlipped:', blackFlipped)
+    console.log('blackDeck.length:', blackDeck.length)
+    
     if (!currentBlack) {
-      // Draw card - it will appear face down
-      console.log('No current card, drawing...')
-      drawBlackCard()
+      // Draw card
+      if (blackDeck.length > 0) {
+        const [card, ...remaining] = blackDeck
+        console.log('Drawing card:', card)
+        setCurrentBlack(card)
+        setBlackDeck(remaining)
+        setDrawnBlackCards([...drawnBlackCards, card])
+        setBlackFlipped(false)
+        
+        // Animation
+        setCardDrawAnimation(prev => ({ ...prev, black: true }))
+        setTimeout(() => setCardDrawAnimation(prev => ({ ...prev, black: false })), 400)
+      }
     } else if (!blackFlipped) {
-      // Flip the card face up
-      console.log('Card exists but not flipped, flipping...')
+      // Flip card
+      console.log('Flipping card')
       setBlackFlipped(true)
-    } else {
-      console.log('Card already flipped, no action')
     }
   }
   
   const handleWhiteClick = () => {
-    console.log('handleWhiteClick - currentWhite:', currentWhite, 'whiteFlipped:', whiteFlipped)
+    console.log('=== WHITE CLICK ===')
+    console.log('currentWhite:', currentWhite)
+    console.log('whiteFlipped:', whiteFlipped)
+    console.log('whiteDeck.length:', whiteDeck.length)
+    
     if (!currentWhite) {
-      // Draw card - it will appear face down
-      console.log('No current card, drawing...')
-      drawWhiteCard()
+      // Draw card
+      if (whiteDeck.length > 0) {
+        const [card, ...remaining] = whiteDeck
+        console.log('Drawing card:', card)
+        setCurrentWhite(card)
+        setWhiteDeck(remaining)
+        setDrawnWhiteCards([...drawnWhiteCards, card])
+        setWhiteFlipped(false)
+        
+        // Animation
+        setCardDrawAnimation(prev => ({ ...prev, white: true }))
+        setTimeout(() => setCardDrawAnimation(prev => ({ ...prev, white: false })), 400)
+      }
     } else if (!whiteFlipped) {
-      // Flip the card face up
-      console.log('Card exists but not flipped, flipping...')
+      // Flip card
+      console.log('Flipping card')
       setWhiteFlipped(true)
-    } else {
-      console.log('Card already flipped, no action')
     }
   }
   
