@@ -131,7 +131,7 @@ ON CONFLICT (id) DO UPDATE SET
 -- ============================================
 -- 7. UPDATE EXISTING DEMO CARDS TO DEMO BOX
 -- ============================================
-UPDATE cards SET box_id = 'box_demo' WHERE "isDemo" = true AND box_id IS NULL;
+UPDATE cards SET box_id = 'box_demo' WHERE isdemo = true AND box_id IS NULL;
 
 -- ============================================
 -- SETUP COMPLETE!
