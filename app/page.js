@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '../lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,6 +12,303 @@ import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Bell, Save, Clock, LogOut, Plus, Edit, Trash2, CreditCard, Info, RotateCw, Smartphone } from 'lucide-react'
 
+// ============================================================================
+// CARD PILE COMPONENT - Isolated state for reliable single-click draws
+// ============================================================================
+function CardPile({ 
+  color, 
+  deck,
+  setDeck,
+  allCards,
+  currentCard,
+  setCurrentCard
+}) {
+  const [isFlipped, setIsFlipped] = useState(false)
+  
+  // Determine styling based on color
+  const isBlack = color === 'black'
+  const cardBackImage = isBlack ? '/black-card-back.png' : '/white-card-back.png'
+  const bgColor = isBlack ? 'bg-black' : 'bg-white'
+  const textColor = isBlack ? 'text-white' : 'text-gray-900'
+  const hintColor = isBlack ? 'text-gray-400' : 'text-gray-600'
+  const borderColor = 'border-gray-400' // Light gray but noticeable
+  
+  // Handle click on the pile/card area
+  const handleClick = () => {
+    if (!currentCard && deck.length > 0) {
+      // Draw a new card from the deck
+      const [card, ...remaining] = deck
+      setCurrentCard(card)
+      setDeck(remaining)
+      setIsFlipped(false) // Start face-down
+    } else if (currentCard) {
+      // Toggle flip state
+      setIsFlipped(prev => !prev)
+    }
+  }
+  
+  // Reset flip state when current card changes to null (Next Player)
+  useEffect(() => {
+    if (!currentCard) {
+      setIsFlipped(false)
+    }
+  }, [currentCard])
+  
+  // Handle reshuffle click
+  const handleReshuffle = (e) => {
+    e.stopPropagation()
+    setCurrentCard(null)
+    setIsFlipped(false)
+    // Shuffle all cards of this color
+    const colorCards = allCards.filter(c => c.color === color)
+    const shuffled = [...colorCards].sort(() => Math.random() - 0.5)
+    setDeck(shuffled)
+  }
+  
+  // Empty deck and no current card
+  if (deck.length === 0 && !currentCard) {
+    return (
+      <div className="flex flex-col items-center gap-4">
+        <div 
+          className="cursor-pointer"
+          style={{ width: '252px', height: '352px' }}
+        >
+          <div className={`w-full h-full bg-gray-100 border-2 ${borderColor} rounded-lg flex items-center justify-center`}>
+            <div className="p-8 text-center">
+              <p className="text-gray-500 text-lg font-serif mb-4">No Cards Left</p>
+              <Button onClick={handleReshuffle} size="sm" variant="outline">
+                <RotateCw className="w-4 h-4 mr-2" />
+                Reshuffle
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div 
+        onClick={handleClick}
+        className="cursor-pointer"
+        style={{ 
+          width: '252px', 
+          height: '352px',
+          perspective: '1000px'
+        }}
+      >
+        {!currentCard ? (
+          // Show the pile (clickable to draw)
+          <div className="relative w-full h-full">
+            <div 
+              className={`w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg flex items-center justify-center hover:shadow-xl transition-shadow overflow-hidden relative`}
+            >
+              <img 
+                src={cardBackImage} 
+                alt="Card pile" 
+                className="absolute inset-0 w-full h-full object-cover rounded-lg" 
+              />
+            </div>
+            {/* Stack effect - offset cards behind */}
+            <div className={`absolute top-1 left-1 w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg -z-10 opacity-70`}></div>
+            <div className={`absolute top-2 left-2 w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg -z-20 opacity-40`}></div>
+          </div>
+        ) : (
+          // Show the drawn card with flip animation
+          <div 
+            className="w-full h-full transition-transform duration-500"
+            style={{ 
+              transformStyle: 'preserve-3d',
+              transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+            }}
+          >
+            {/* Card Back */}
+            <div 
+              className="absolute inset-0 w-full h-full"
+              style={{ backfaceVisibility: 'hidden' }}
+            >
+              <div className={`w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg flex items-center justify-center overflow-hidden relative`}>
+                <img 
+                  src={cardBackImage} 
+                  alt="Card back" 
+                  className="absolute inset-0 w-full h-full object-cover rounded-lg" 
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className={`${isBlack ? 'text-white' : 'text-gray-700'} text-sm font-sans opacity-80 bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm`}>
+                    Tap to flip
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Card Front */}
+            <div 
+              className="absolute inset-0 w-full h-full"
+              style={{ 
+                backfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)'
+              }}
+            >
+              <div className={`w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg flex items-center justify-center p-8`}>
+                <div className="text-center">
+                  <h2 className={`${textColor} text-2xl font-serif mb-4`}>
+                    {currentCard?.title || ''}
+                  </h2>
+                  {currentCard?.hint && (
+                    <p className={`${hintColor} text-sm italic`}>
+                      {currentCard.hint}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// GAME TIMER COMPONENT - Handles bell sounds at 1, 2, 3 minutes
+// ============================================================================
+function GameTimer({ isRunning, setIsRunning, seconds, setSeconds }) {
+  const [bellsPlayed, setBellsPlayed] = useState({ one: false, two: false, three: false })
+  const audioContextRef = useRef(null)
+  
+  // Format time display
+  const formatTime = (totalSeconds) => {
+    const mins = Math.floor(totalSeconds / 60)
+    const secs = totalSeconds % 60
+    
+    if (mins === 0) {
+      return `${secs}s`
+    }
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+  
+  // Play bell sound using Web Audio API
+  const playBell = useCallback((count) => {
+    try {
+      // Create audio context on first use
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)()
+      }
+      
+      const audioContext = audioContextRef.current
+      
+      // Resume if suspended (browser autoplay policy)
+      if (audioContext.state === 'suspended') {
+        audioContext.resume()
+      }
+      
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          // Create a more realistic bell sound
+          const oscillator = audioContext.createOscillator()
+          const gainNode = audioContext.createGain()
+          
+          oscillator.connect(gainNode)
+          gainNode.connect(audioContext.destination)
+          
+          // Boxing bell: bright metallic sound
+          oscillator.frequency.value = 1200
+          oscillator.type = 'sine'
+          
+          // Start loud and decay
+          const now = audioContext.currentTime
+          gainNode.gain.setValueAtTime(0.4, now)
+          gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.6)
+          
+          oscillator.start(now)
+          oscillator.stop(now + 0.6)
+        }, i * 400) // 400ms between dings
+      }
+    } catch (error) {
+      console.error('Error playing bell:', error)
+    }
+  }, [])
+  
+  // Timer effect
+  useEffect(() => {
+    let interval
+    
+    if (isRunning) {
+      interval = setInterval(() => {
+        setSeconds(prev => {
+          const newValue = prev + 1
+          
+          // Bell at 1 minute (60 seconds)
+          if (newValue === 60 && !bellsPlayed.one) {
+            playBell(1)
+            setBellsPlayed(p => ({ ...p, one: true }))
+          }
+          
+          // Bell at 2 minutes (120 seconds)
+          if (newValue === 120 && !bellsPlayed.two) {
+            playBell(2)
+            setBellsPlayed(p => ({ ...p, two: true }))
+          }
+          
+          // Bell at 3 minutes (180 seconds)
+          if (newValue === 180 && !bellsPlayed.three) {
+            playBell(3)
+            setBellsPlayed(p => ({ ...p, three: true }))
+          }
+          
+          return newValue
+        })
+      }, 1000)
+    }
+    
+    return () => clearInterval(interval)
+  }, [isRunning, bellsPlayed, playBell, setSeconds])
+  
+  // Reset bells when timer is reset
+  useEffect(() => {
+    if (seconds === 0) {
+      setBellsPlayed({ one: false, two: false, three: false })
+    }
+  }, [seconds])
+  
+  // Start timer
+  const startTimer = () => {
+    setIsRunning(true)
+    setSeconds(0)
+    setBellsPlayed({ one: false, two: false, three: false })
+  }
+  
+  // Stop timer
+  const stopTimer = () => {
+    setIsRunning(false)
+  }
+  
+  return (
+    <Button 
+      onClick={isRunning ? stopTimer : startTimer} 
+      size="lg" 
+      variant="outline" 
+      className="border-red-600 text-red-600 hover:bg-red-50 w-[180px] font-mono"
+    >
+      {isRunning ? (
+        <>
+          <Clock className="w-5 h-5 mr-2" />
+          {formatTime(seconds)}
+        </>
+      ) : (
+        <>
+          <Clock className="w-5 h-5 mr-2" />
+          Start Sharing
+        </>
+      )}
+    </Button>
+  )
+}
+
+// ============================================================================
+// MAIN APP COMPONENT
+// ============================================================================
 export default function App() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -23,28 +320,16 @@ export default function App() {
   const [authSuccess, setAuthSuccess] = useState('')
   const [isLandscape, setIsLandscape] = useState(true)
   
-  // Game state with deck management
-  const [cards, setCards] = useState([])
+  // Game state - separated for black and white cards
+  const [allCards, setAllCards] = useState([])
   const [blackDeck, setBlackDeck] = useState([])
   const [whiteDeck, setWhiteDeck] = useState([])
-  const [drawnBlackCards, setDrawnBlackCards] = useState([])
-  const [drawnWhiteCards, setDrawnWhiteCards] = useState([])
   const [currentBlack, setCurrentBlack] = useState(null)
   const [currentWhite, setCurrentWhite] = useState(null)
-  const [blackFlipState, setBlackFlipState] = useState(0) // 0=face-down, number increments
-  const [whiteFlipState, setWhiteFlipState] = useState(0) // 0=face-down, number increments
-  const [cardDrawAnimation, setCardDrawAnimation] = useState({ black: false, white: false })
-  const [renderKey, setRenderKey] = useState(0) // Force re-render
-  const [forceUpdate, setForceUpdate] = useState(0)
   
-  // Calculate if flipped based on flip state (even = face-down, odd = face-up)
-  const blackFlipped = blackFlipState % 2 === 1
-  const whiteFlipped = whiteFlipState % 2 === 1
-  
-  // Timer
+  // Timer state (lifted to parent for Next Player reset)
   const [timerRunning, setTimerRunning] = useState(false)
   const [timerSeconds, setTimerSeconds] = useState(0)
-  const [bellPlayed, setBellPlayed] = useState({ one: false, two: false, three: false })
   
   // Other screens
   const [view, setView] = useState('game')
@@ -65,7 +350,6 @@ export default function App() {
   })
   
   const supabase = createClient()
-  // audioRef no longer needed - using Web Audio API
   
   // Check orientation
   useEffect(() => {
@@ -110,7 +394,7 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
   
-  // Shuffle deck
+  // Shuffle deck helper
   const shuffleDeck = (deck) => {
     const shuffled = [...deck]
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -137,7 +421,7 @@ export default function App() {
         createdAt: card.createdat
       }))
       
-      setCards(normalizedCards)
+      setAllCards(normalizedCards)
       const blacks = normalizedCards.filter(c => c.color === 'black')
       const whites = normalizedCards.filter(c => c.color === 'white')
       setBlackDeck(shuffleDeck([...blacks]))
@@ -149,206 +433,12 @@ export default function App() {
     loadCards()
   }, [user])
   
-  // Reshuffle deck
-  const reshuffleBlackDeck = () => {
-    const allBlackCards = cards.filter(c => c.color === 'black')
-    setBlackDeck(shuffleDeck([...allBlackCards]))
-    setDrawnBlackCards([])
-    setCurrentBlack(null)
-    setBlackFlipState(0) // Reset to face-down
-    setRenderKey(prev => prev + 1)
-  }
-  
-  const reshuffleWhiteDeck = () => {
-    const allWhiteCards = cards.filter(c => c.color === 'white')
-    setWhiteDeck(shuffleDeck([...allWhiteCards]))
-    setDrawnWhiteCards([])
-    setCurrentWhite(null)
-    setWhiteFlipState(0) // Reset to face-down
-    setRenderKey(prev => prev + 1)
-  }
-  
-  // Timer
-  useEffect(() => {
-    let interval
-    if (timerRunning) {
-      interval = setInterval(() => {
-        setTimerSeconds(prev => {
-          const newValue = prev + 1
-          
-          // Bell at 1 minute (60 seconds)
-          if (newValue === 60 && !bellPlayed.one) {
-            playBell(1)
-            setBellPlayed(prev => ({ ...prev, one: true }))
-          }
-          
-          // Bell at 2 minutes (120 seconds)
-          if (newValue === 120 && !bellPlayed.two) {
-            playBell(2)
-            setBellPlayed(prev => ({ ...prev, two: true }))
-          }
-          
-          // Bell at 3 minutes (180 seconds)
-          if (newValue === 180 && !bellPlayed.three) {
-            playBell(3)
-            setBellPlayed(prev => ({ ...prev, three: true }))
-          }
-          
-          return newValue
-        })
-      }, 1000)
-    }
-    
-    return () => clearInterval(interval)
-  }, [timerRunning, bellPlayed])
-  
-  const playBell = (count) => {
-    // Create bell sound using Web Audio API since we don't have an audio file yet
-    try {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      
-      for (let i = 0; i < count; i++) {
-        setTimeout(() => {
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          
-          // Boxing bell sound - higher frequency with decay
-          oscillator.frequency.value = 1200;
-          oscillator.type = 'sine';
-          
-          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-          
-          oscillator.start(audioContext.currentTime);
-          oscillator.stop(audioContext.currentTime + 0.5);
-        }, i * 500) // 500ms between each ding
-      }
-    } catch (error) {
-      console.error('Error playing bell:', error)
-    }
-  }
-  
-  const drawBlackCard = () => {
-    console.log('drawBlackCard called, blackDeck.length:', blackDeck.length, 'currentBlack:', currentBlack)
-    if (blackDeck.length === 0) return
-    if (currentBlack) {
-      console.log('Already have a current black card, not drawing')
-      return
-    }
-    
-    const [card, ...remaining] = blackDeck
-    console.log('Drawing card:', card)
-    setCurrentBlack(card)
-    setBlackDeck(remaining)
-    setDrawnBlackCards([...drawnBlackCards, card])
-    setBlackFlipState(0) // Start face-down
-    
-    // Trigger animation
-    setCardDrawAnimation(prev => ({ ...prev, black: true }))
-    setTimeout(() => setCardDrawAnimation(prev => ({ ...prev, black: false })), 400)
-  }
-  
-  const drawWhiteCard = () => {
-    console.log('drawWhiteCard called, whiteDeck.length:', whiteDeck.length, 'currentWhite:', currentWhite)
-    if (whiteDeck.length === 0) return
-    if (currentWhite) {
-      console.log('Already have a current white card, not drawing')
-      return
-    }
-    
-    const [card, ...remaining] = whiteDeck
-    console.log('Drawing card:', card)
-    setCurrentWhite(card)
-    setWhiteDeck(remaining)
-    setDrawnWhiteCards([...drawnWhiteCards, card])
-    setWhiteFlipState(0) // Start face-down
-    
-    // Trigger animation
-    setCardDrawAnimation(prev => ({ ...prev, white: true }))
-    setTimeout(() => setCardDrawAnimation(prev => ({ ...prev, white: false })), 400)
-  }
-  
-  const handleBlackClick = () => {
-    if (!currentBlack && blackDeck.length > 0) {
-      // Draw card
-      const [card, ...remaining] = blackDeck
-      setBlackDeck(remaining)
-      setDrawnBlackCards([...drawnBlackCards, card])
-      setCurrentBlack(card)
-      setBlackFlipState(0) // Start at 0 (face-down)
-      setRenderKey(prev => prev + 1)
-    } else if (currentBlack) {
-      // Toggle flip by incrementing
-      setBlackFlipState(prev => prev + 1)
-    }
-  }
-  
-  const handleWhiteClick = () => {
-    if (!currentWhite && whiteDeck.length > 0) {
-      // Draw card
-      const [card, ...remaining] = whiteDeck
-      setWhiteDeck(remaining)
-      setDrawnWhiteCards([...drawnWhiteCards, card])
-      setCurrentWhite(card)
-      setWhiteFlipState(0) // Start at 0 (face-down)
-      setRenderKey(prev => prev + 1)
-    } else if (currentWhite) {
-      // Toggle flip by incrementing
-      setWhiteFlipState(prev => prev + 1)
-    }
-  }
-  
-  const flipBackBlackCard = () => {
-    setBlackFlipState(prev => prev % 2 === 1 ? prev + 1 : prev) // Ensure even (face-down)
-  }
-  
-  const flipBackWhiteCard = () => {
-    setWhiteFlipState(prev => prev % 2 === 1 ? prev + 1 : prev) // Ensure even (face-down)
-  }
-  
-  const discardBlackCard = () => {
-    setCurrentBlack(null)
-    setBlackFlipState(0) // Reset to face-down
-  }
-  
-  const discardWhiteCard = () => {
-    setCurrentWhite(null)
-    setWhiteFlipState(0) // Reset to face-down
-  }
-  
+  // Next Player - reset for next turn
   const handleNextPlayer = () => {
-    // Clear current cards and reset for next player
     setCurrentBlack(null)
     setCurrentWhite(null)
-    setBlackFlipState(0) // Reset to face-down
-    setWhiteFlipState(0) // Reset to face-down
     setTimerRunning(false)
     setTimerSeconds(0)
-    setBellPlayed({ one: false, two: false, three: false })
-    setRenderKey(prev => prev + 1) // Force re-render after reset
-  }
-  
-  const startTimer = () => {
-    setTimerRunning(true)
-    setTimerSeconds(0)
-    setBellPlayed({ one: false, two: false, three: false })
-  }
-  
-  const stopTimer = () => {
-    setTimerRunning(false)
-  }
-  
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    
-    if (mins === 0) {
-      return `${secs}s`
-    }
-    return `${mins}:${secs.toString().padStart(2, '0')}`
   }
   
   const handleAuth = async (e) => {
@@ -366,7 +456,6 @@ export default function App() {
       const data = await response.json()
       
       if (data.error) {
-        // Provide helpful error messages
         if (data.error.includes('Email not confirmed')) {
           setAuthError('Please check your email and click the confirmation link before signing in.')
         } else if (data.error.includes('Invalid login credentials')) {
@@ -379,7 +468,6 @@ export default function App() {
           setAuthSuccess('Success! Please check your email to confirm your account before signing in.')
           setEmail('')
           setPassword('')
-          // Auto-switch to signin mode after 3 seconds
           setTimeout(() => {
             setAuthMode('signin')
             setAuthSuccess('')
@@ -622,116 +710,24 @@ export default function App() {
             {/* Card piles */}
             <div className="flex flex-row gap-8 sm:gap-12 mb-12">
               {/* Black card pile */}
-              <div className="flex flex-col items-center gap-4">
-                <div 
-                  onClick={handleBlackClick} 
-                  className="cursor-pointer perspective-1000"
-                  style={{ width: '252px', height: '352px' }}
-                >
-                  {blackDeck.length === 0 && !currentBlack ? (
-                    /* Empty */
-                    <div className="w-full h-full bg-gray-100 border-2 border-gray-300 rounded-lg flex items-center justify-center">
-                      <div className="p-8 text-center">
-                        <p className="text-gray-500 text-lg font-serif mb-4">No Cards Left</p>
-                        <Button onClick={(e) => { e.stopPropagation(); reshuffleBlackDeck(); }} size="sm" variant="outline">
-                          <RotateCw className="w-4 h-4 mr-2" />
-                          Reshuffle
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Card or Pile */
-                    <div 
-                      className="w-full h-full transition-transform duration-500"
-                      style={{ 
-                        transformStyle: 'preserve-3d',
-                        transform: blackFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
-                      }}
-                    >
-                      {/* Back */}
-                      <div 
-                        className="absolute inset-0 w-full h-full"
-                        style={{ backfaceVisibility: 'hidden' }}
-                      >
-                        <div className="w-full h-full bg-black border-2 border-gray-800 rounded-lg flex items-center justify-center hover:shadow-xl overflow-hidden">
-                          <img src="/black-card-back.png" alt="Card back" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
-                        </div>
-                      </div>
-                      {/* Front */}
-                      <div 
-                        className="absolute inset-0 w-full h-full"
-                        style={{ 
-                          backfaceVisibility: 'hidden',
-                          transform: 'rotateY(180deg)'
-                        }}
-                      >
-                        <div className="w-full h-full bg-black border-2 border-gray-800 rounded-lg flex items-center justify-center p-8">
-                          <div className="text-center">
-                            <h2 className="text-white text-2xl font-serif mb-4">{currentBlack?.title || ''}</h2>
-                            {currentBlack?.hint && <p className="text-gray-400 text-sm italic">{currentBlack.hint}</p>}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <CardPile 
+                color="black"
+                deck={blackDeck}
+                setDeck={setBlackDeck}
+                allCards={allCards}
+                currentCard={currentBlack}
+                setCurrentCard={setCurrentBlack}
+              />
               
               {/* White card pile */}
-              <div className="flex flex-col items-center gap-4">
-                <div 
-                  onClick={handleWhiteClick} 
-                  className="cursor-pointer perspective-1000"
-                  style={{ width: '252px', height: '352px' }}
-                >
-                  {whiteDeck.length === 0 && !currentWhite ? (
-                    /* Empty */
-                    <div className="w-full h-full bg-gray-100 border-2 border-gray-300 rounded-lg flex items-center justify-center">
-                      <div className="p-8 text-center">
-                        <p className="text-gray-500 text-lg font-serif mb-4">No Cards Left</p>
-                        <Button onClick={(e) => { e.stopPropagation(); reshuffleWhiteDeck(); }} size="sm" variant="outline">
-                          <RotateCw className="w-4 h-4 mr-2" />
-                          Reshuffle
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Card or Pile */
-                    <div 
-                      className="w-full h-full transition-transform duration-500"
-                      style={{ 
-                        transformStyle: 'preserve-3d',
-                        transform: whiteFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
-                      }}
-                    >
-                      {/* Back */}
-                      <div 
-                        className="absolute inset-0 w-full h-full"
-                        style={{ backfaceVisibility: 'hidden' }}
-                      >
-                        <div className="w-full h-full bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center hover:shadow-xl overflow-hidden">
-                          <img src="/white-card-back.png" alt="Card back" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
-                        </div>
-                      </div>
-                      {/* Front */}
-                      <div 
-                        className="absolute inset-0 w-full h-full"
-                        style={{ 
-                          backfaceVisibility: 'hidden',
-                          transform: 'rotateY(180deg)'
-                        }}
-                      >
-                        <div className="w-full h-full bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center p-8">
-                          <div className="text-center">
-                            <h2 className="text-gray-900 text-2xl font-serif mb-4">{currentWhite?.title || ''}</h2>
-                            {currentWhite?.hint && <p className="text-gray-600 text-sm italic">{currentWhite.hint}</p>}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <CardPile 
+                color="white"
+                deck={whiteDeck}
+                setDeck={setWhiteDeck}
+                allCards={allCards}
+                currentCard={currentWhite}
+                setCurrentCard={setCurrentWhite}
+              />
             </div>
             
             {/* Controls */}
@@ -740,24 +736,12 @@ export default function App() {
                 Next Player
               </Button>
               
-              <Button 
-                onClick={timerRunning ? stopTimer : startTimer} 
-                size="lg" 
-                variant="outline" 
-                className="border-red-600 text-red-600 hover:bg-red-50 w-[180px] font-mono"
-              >
-                {timerRunning ? (
-                  <>
-                    <Clock className="w-5 h-5 mr-2" />
-                    {formatTime(timerSeconds)}
-                  </>
-                ) : (
-                  <>
-                    <Clock className="w-5 h-5 mr-2" />
-                    Start Sharing
-                  </>
-                )}
-              </Button>
+              <GameTimer 
+                isRunning={timerRunning}
+                setIsRunning={setTimerRunning}
+                seconds={timerSeconds}
+                setSeconds={setTimerSeconds}
+              />
               
               <Button onClick={saveDraw} size="lg" variant="outline">
                 <Save className="w-5 h-5 mr-2" />
