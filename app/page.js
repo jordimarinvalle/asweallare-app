@@ -259,10 +259,10 @@ function GameStatusText({
   }
   
   // Reset icon button component
-  const ResetButton = () => (
+  const ResetButton = ({ className = "" }) => (
     <button
       onClick={onReset}
-      className="p-3 rounded-lg transition-colors hover:bg-red-50"
+      className={`p-3 rounded-lg transition-colors hover:bg-red-50 ${className}`}
       style={{ color: '#D12128' }}
       title="Reset"
     >
@@ -275,11 +275,11 @@ function GameStatusText({
     case 'idle':
       return (
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2">
+          <div className="relative inline-flex items-center">
             <span className="inline-block px-6 py-3 bg-white border border-white text-gray-500 rounded-lg font-medium">
               Click on the cards to flip them and start your turn
             </span>
-            <ResetButton />
+            <ResetButton className="absolute -right-12" />
           </div>
         </div>
       )
@@ -287,7 +287,7 @@ function GameStatusText({
     case 'countdown':
       return (
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2">
+          <div className="relative inline-flex items-center">
             <button
               onClick={onTimerClick}
               disabled={disabled}
@@ -300,7 +300,7 @@ function GameStatusText({
             >
               {disabled ? `Flip a card to start (${seconds}s)` : `Click here to start (${seconds}s)`}
             </button>
-            <ResetButton />
+            <ResetButton className="absolute -right-12" />
           </div>
         </div>
       )
@@ -308,7 +308,7 @@ function GameStatusText({
     case 'waiting':
       return (
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2">
+          <div className="relative inline-flex items-center">
             <button
               onClick={onTimerClick}
               disabled={disabled}
@@ -321,7 +321,7 @@ function GameStatusText({
             >
               {disabled ? 'Flip a card to start' : 'Time is over. Click here to start.'}
             </button>
-            <ResetButton />
+            <ResetButton className="absolute -right-12" />
           </div>
         </div>
       )
@@ -329,14 +329,14 @@ function GameStatusText({
     case 'countup':
       return (
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2">
+          <div className="relative inline-flex items-center">
             <button
               onClick={onTimerClick}
               className="min-w-[380px] px-6 py-3 bg-white border border-gray-400 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
             >
               Click here when you are done.
             </button>
-            <ResetButton />
+            <ResetButton className="absolute -right-12" />
           </div>
         </div>
       )
@@ -344,14 +344,14 @@ function GameStatusText({
     case 'finished':
       return (
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2">
+          <div className="relative inline-flex items-center">
             <button
               onClick={onReset}
               className="min-w-[380px] px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
             >
               {formatTime(seconds)} - Sharing is done, click here to reset.
             </button>
-            <ResetButton />
+            <ResetButton className="absolute -right-12" />
           </div>
         </div>
       )
