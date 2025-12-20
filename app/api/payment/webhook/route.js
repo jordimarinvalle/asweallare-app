@@ -17,8 +17,12 @@ export async function POST(request) {
     )
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message)
-    return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
+    console.error('Received signature:', signature?.substring(0, 50) + '...')
+    console.error('Using secret:', process.env.STRIPE_WEBHOOK_SECRET?.substring(0, 20) + '...')
+    return NextResponse.json({ error: `Webhook signature verification failed: ${err.message}` }, { status: 400 })
   }
+  
+  console.log('✅ Webhook verified, event type:', event.type)
 
   const supabase = createSupabaseServer()
 
