@@ -224,10 +224,15 @@ export default function App() {
   }
   
   const drawBlackCard = () => {
+    console.log('drawBlackCard called, blackDeck.length:', blackDeck.length, 'currentBlack:', currentBlack)
     if (blackDeck.length === 0) return
-    if (currentBlack) return // Prevent drawing if card already exists
+    if (currentBlack) {
+      console.log('Already have a current black card, not drawing')
+      return
+    }
     
     const [card, ...remaining] = blackDeck
+    console.log('Drawing card:', card)
     setCurrentBlack(card)
     setBlackDeck(remaining)
     setDrawnBlackCards([...drawnBlackCards, card])
@@ -239,10 +244,15 @@ export default function App() {
   }
   
   const drawWhiteCard = () => {
+    console.log('drawWhiteCard called, whiteDeck.length:', whiteDeck.length, 'currentWhite:', currentWhite)
     if (whiteDeck.length === 0) return
-    if (currentWhite) return // Prevent drawing if card already exists
+    if (currentWhite) {
+      console.log('Already have a current white card, not drawing')
+      return
+    }
     
     const [card, ...remaining] = whiteDeck
+    console.log('Drawing card:', card)
     setCurrentWhite(card)
     setWhiteDeck(remaining)
     setDrawnWhiteCards([...drawnWhiteCards, card])
@@ -254,25 +264,33 @@ export default function App() {
   }
   
   const handleBlackClick = () => {
+    console.log('handleBlackClick - currentBlack:', currentBlack, 'blackFlipped:', blackFlipped)
     if (!currentBlack) {
       // Draw card - it will appear face down
+      console.log('No current card, drawing...')
       drawBlackCard()
     } else if (!blackFlipped) {
       // Flip the card face up
+      console.log('Card exists but not flipped, flipping...')
       setBlackFlipped(true)
+    } else {
+      console.log('Card already flipped, no action')
     }
-    // If already flipped, do nothing (use flip back or discard buttons)
   }
   
   const handleWhiteClick = () => {
+    console.log('handleWhiteClick - currentWhite:', currentWhite, 'whiteFlipped:', whiteFlipped)
     if (!currentWhite) {
       // Draw card - it will appear face down
+      console.log('No current card, drawing...')
       drawWhiteCard()
     } else if (!whiteFlipped) {
       // Flip the card face up
+      console.log('Card exists but not flipped, flipping...')
       setWhiteFlipped(true)
+    } else {
+      console.log('Card already flipped, no action')
     }
-    // If already flipped, do nothing (use flip back or discard buttons)
   }
   
   const flipBackBlackCard = () => {
