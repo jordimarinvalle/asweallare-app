@@ -334,7 +334,7 @@ function GameStatusText({
               onClick={onTimerClick}
               className="min-w-[380px] px-6 py-3 bg-white border border-gray-400 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
             >
-              Click here when you are done ({formatTime(seconds)})
+              Click here when you are done.
             </button>
             <ResetButton />
           </div>
