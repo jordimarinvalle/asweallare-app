@@ -279,14 +279,14 @@ export default function App() {
     console.log('blackDeck.length:', blackDeck.length)
     
     if (!currentBlack && blackDeck.length > 0) {
-      // Draw card
+      // Draw card - TOGGLE flipped state to force change
       const [card, ...remaining] = blackDeck
       console.log('Drawing card:', card)
       setCurrentBlack(card)
       setBlackDeck(remaining)
       setDrawnBlackCards([...drawnBlackCards, card])
-      setBlackFlipped(false)
-      setRenderKey(prev => prev + 1) // Force re-render
+      setBlackFlipped(prev => !prev) // TOGGLE instead of setting false
+      setRenderKey(prev => prev + 1)
     } else if (currentBlack) {
       // Toggle flip
       console.log('Toggling flip from', blackFlipped, 'to', !blackFlipped)
@@ -301,14 +301,14 @@ export default function App() {
     console.log('whiteDeck.length:', whiteDeck.length)
     
     if (!currentWhite && whiteDeck.length > 0) {
-      // Draw card
+      // Draw card - TOGGLE flipped state to force change
       const [card, ...remaining] = whiteDeck
       console.log('Drawing card:', card)
       setCurrentWhite(card)
       setWhiteDeck(remaining)
       setDrawnWhiteCards([...drawnWhiteCards, card])
-      setWhiteFlipped(false)
-      setRenderKey(prev => prev + 1) // Force re-render
+      setWhiteFlipped(prev => !prev) // TOGGLE instead of setting false
+      setRenderKey(prev => prev + 1)
     } else if (currentWhite) {
       // Toggle flip
       console.log('Toggling flip from', whiteFlipped, 'to', !whiteFlipped)
