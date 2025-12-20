@@ -680,19 +680,24 @@ export default function App() {
                 Next Player
               </Button>
               
-              {!timerRunning ? (
-                <Button onClick={startTimer} size="lg" variant="outline" className="border-red-600 text-red-600 hover:bg-red-50">
-                  <Clock className="w-5 h-5 mr-2" />
-                  Start Sharing
-                </Button>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <div className="text-2xl font-serif text-red-600">{formatTime(timerSeconds)}</div>
-                  <Button onClick={stopTimer} size="sm" variant="ghost">
-                    Stop
-                  </Button>
-                </div>
-              )}
+              <Button 
+                onClick={timerRunning ? stopTimer : startTimer} 
+                size="lg" 
+                variant="outline" 
+                className="border-red-600 text-red-600 hover:bg-red-50 min-w-[160px]"
+              >
+                {timerRunning ? (
+                  <>
+                    <Clock className="w-5 h-5 mr-2" />
+                    {formatTime(timerSeconds)}
+                  </>
+                ) : (
+                  <>
+                    <Clock className="w-5 h-5 mr-2" />
+                    Start Sharing
+                  </>
+                )}
+              </Button>
               
               <Button onClick={saveDraw} size="lg" variant="outline">
                 <Save className="w-5 h-5 mr-2" />
