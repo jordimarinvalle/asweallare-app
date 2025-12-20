@@ -1412,6 +1412,83 @@ export default function App() {
           </div>
         )}
         
+        {view === 'purchases' && (
+          <div className="max-w-4xl mx-auto p-8">
+            <h2 className="text-3xl font-serif text-gray-900 mb-8">My Purchases</h2>
+            {purchases.length === 0 ? (
+              <div className="text-center py-12">
+                <Receipt className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-600 mb-4">No purchases yet.</p>
+                <Button onClick={() => setView('store')} variant="outline">
+                  <ShoppingBag className="w-4 h-4 mr-2" />
+                  Browse Store
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {purchases.map(purchase => (
+                  <Card key={purchase.id} className="p-6">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div 
+                            className="w-10 h-10 rounded-lg flex items-center justify-center"
+                            style={{ backgroundColor: purchase.boxes?.color === '#FFFFFF' ? '#F3F4F6' : purchase.boxes?.color || '#9CA3AF' }}
+                          >
+                            <Package className={`w-5 h-5 ${purchase.boxes?.color === '#000000' || purchase.boxes?.color === '#D12128' ? 'text-white' : 'text-gray-600'}`} />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900">
+                              {purchase.purchase_type === 'all_access' ? 'All Access Subscription' : purchase.boxes?.name || 'Unknown Box'}
+                            </h3>
+                            <p className="text-sm text-gray-500">
+                              {purchase.purchase_type === 'one_time' ? 'One-time purchase' : 
+                               purchase.purchase_type === 'all_access' ? 'Subscription' : 
+                               purchase.purchase_type}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <span>Purchased: {new Date(purchase.created_at).toLocaleDateString()}</span>
+                          {purchase.expires_at && (
+                            <span>
+                              {new Date(purchase.expires_at) > new Date() 
+                                ? `Renews: ${new Date(purchase.expires_at).toLocaleDateString()}`
+                                : `Expired: ${new Date(purchase.expires_at).toLocaleDateString()}`
+                              }
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        {purchase.is_active ? (
+                          <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Active</span>
+                        ) : (
+                          <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">Inactive</span>
+                        )}
+                        
+                        {purchase.stripe_subscription_id && purchase.is_active && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={() => handleCancelSubscription(purchase.id)}
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            Cancel
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        
         {view === 'admin' && isAdmin && (
           <div className="max-w-6xl mx-auto p-8">
             <div className="flex justify-between items-center mb-8">
