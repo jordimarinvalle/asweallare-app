@@ -160,18 +160,40 @@ STRIPE_WEBHOOK_SECRET=whsec_... (needs to be configured)
 ```
 /app
 ├── app/
-│   ├── page.js              # Main game UI
+│   ├── page.js              # Main game UI (with CardPile & GameTimer components)
 │   ├── layout.js            # Root layout with fonts
 │   ├── globals.css          # Premium styling
 │   ├── api/[[...path]]/route.js  # Backend API
 │   └── auth/callback/page.js     # OAuth callback
+├── components/
+│   ├── ui/                  # shadcn components
+│   └── game/                # Game-specific components
+│       ├── CardPile.jsx     # Card pile with draw/flip logic
+│       ├── GameTimer.jsx    # Timer with bell sounds
+│       └── index.js         # Exports
 ├── lib/
 │   ├── supabase.js          # Browser Supabase client
 │   ├── supabase-server.js   # Server Supabase client
 │   └── stripe.js            # Stripe client
-├── components/ui/           # shadcn components
+├── public/
+│   ├── sounds/              # Bell sound files (see README inside)
+│   │   ├── README.md        # Sound file documentation
+│   │   └── bell-*.mp3       # (optional) Custom bell sounds
+│   ├── black-card-back.png  # Black card back image
+│   └── white-card-back.png  # White card back image
 └── .env                     # Environment variables
 ```
+
+## 🔔 Sound Files
+
+The timer uses Web Audio API to generate bell sounds programmatically. To use custom audio files:
+
+1. Add your MP3 files to `/public/sounds/`:
+   - `bell-1.mp3` - Single ding (1 minute mark)
+   - `bell-2.mp3` - Double ding (2 minute mark)
+   - `bell-3.mp3` - Triple ding (3 minute mark)
+
+2. See `/public/sounds/README.md` for detailed specifications
 
 ## 🐛 Known Limitations
 
