@@ -25,6 +25,37 @@ function CardPile({
 }) {
   const [isFlipped, setIsFlipped] = useState(false)
   
+  // Generate random rotations for stack effect (like messy pile)
+  const getRandomRotation = () => {
+    const choices = [-3, -2, -1, 0, 1, 2, 3]
+    const weights = [20, 60, 80, 20, 80, 60, 20]
+    const totalWeight = weights.reduce((a, b) => a + b, 0)
+    let random = Math.random() * totalWeight
+    for (let i = 0; i < choices.length; i++) {
+      random -= weights[i]
+      if (random <= 0) return choices[i]
+    }
+    return 0
+  }
+  
+  // Store random rotations for stack cards (regenerate on mount/reset)
+  const [stackRotations, setStackRotations] = useState(() => [
+    getRandomRotation(),
+    getRandomRotation(),
+    getRandomRotation()
+  ])
+  
+  // Regenerate rotations when deck resets
+  useEffect(() => {
+    if (!currentCard && deck.length > 0) {
+      setStackRotations([
+        getRandomRotation(),
+        getRandomRotation(),
+        getRandomRotation()
+      ])
+    }
+  }, [currentCard, deck.length])
+  
   // Determine styling based on color
   const isBlack = color === 'black'
   const cardBackImage = isBlack ? '/black-card-back.png' : '/white-card-back.png'
