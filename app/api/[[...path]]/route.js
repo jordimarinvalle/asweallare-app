@@ -492,6 +492,49 @@ export async function POST(request) {
       return handleCORS(NextResponse.json({ url: session.url }))
     }
 
+    // CANCEL SUBSCRIPTION
+    if (path === 'payment/cancel-subscription') {
+      const { user, error: authError } = await getAuthenticatedUser()
+      
+      if (authError || !user) {
+        return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
+      }
+      
+      const { purchaseId } = body
+      
+      // Get the purchase record
+      const { data: purchase, error: purchaseError } = await supabase
+        .from('user_products')
+        .select('*')
+        .eq('id', purchaseId)
+        .eq('user_id', user.id)
+        .single()
+      
+      if (purchaseError || !purchase) {
+        return handleCORS(NextResponse.json({ error: 'Purchase not found' }, { status: 404 }))
+      }
+      
+      if (!purchase.stripe_subscription_id) {
+        return handleCORS(NextResponse.json({ error: 'This is not a subscription' }, { status: 400 }))
+      }
+      
+      try {
+        // Cancel the subscription in Stripe
+        await getStripe().subscriptions.cancel(purchase.stripe_subscription_id)
+        
+        // Update our database
+        await supabase
+          .from('user_products')
+          .update({ is_active: false })
+          .eq('id', purchaseId)
+        
+        return handleCORS(NextResponse.json({ success: true, message: 'Subscription cancelled' }))
+      } catch (stripeError) {
+        console.error('Stripe cancellation error:', stripeError)
+        return handleCORS(NextResponse.json({ error: 'Failed to cancel subscription' }, { status: 500 }))
+      }
+    }
+
     // Legacy payment route (for backward compatibility)
     if (path === 'payment/create-checkout') {
       const { user, error: authError } = await getAuthenticatedUser()
