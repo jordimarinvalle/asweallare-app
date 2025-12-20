@@ -668,11 +668,6 @@ export default function App() {
                       >
                         <div className="w-full h-full bg-black border-2 border-gray-800 rounded-lg flex items-center justify-center hover:shadow-xl overflow-hidden">
                           <img src="/black-card-back.png" alt="Card back" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
-                          <div className="relative z-10 text-center p-8">
-                            <p className="text-red-600 text-sm font-medium">
-                              {currentBlack ? 'Tap to flip' : 'Tap to draw'}
-                            </p>
-                          </div>
                         </div>
                       </div>
                       {/* Front */}
