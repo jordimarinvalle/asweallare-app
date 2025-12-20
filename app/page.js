@@ -1294,6 +1294,9 @@ export default function App() {
                   <Button onClick={() => setView('store')} variant={view === 'store' ? 'default' : 'ghost'}>
                     <ShoppingBag className="w-4 h-4 mr-2" />Store
                   </Button>
+                  <Button onClick={() => setView('purchases')} variant={view === 'purchases' ? 'default' : 'ghost'}>
+                    <Receipt className="w-4 h-4 mr-2" />Purchases
+                  </Button>
                   <Button onClick={() => setView('draws')} variant={view === 'draws' ? 'default' : 'ghost'}>My Draws</Button>
                   {isAdmin && (
                     <Button onClick={() => setView('admin')} variant={view === 'admin' ? 'default' : 'ghost'}>Admin</Button>
