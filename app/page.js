@@ -325,8 +325,32 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
     )
   }
   
-  const accessibleBoxes = boxes.filter(b => b.hasAccess)
-  const lockedBoxes = boxes.filter(b => !b.hasAccess)
+  // Smart box filtering logic:
+  // - Hide demo box if white box (108) is owned
+  // - Hide white box (108) if white box XL (216) is owned
+  const hasWhiteBox = boxes.some(b => b.id === 'box_white' && b.hasAccess)
+  const hasWhiteBoxXL = boxes.some(b => b.id === 'box_white_xl' && b.hasAccess)
+  
+  const filterAccessibleBoxes = (box) => {
+    if (!box.hasAccess) return false
+    // Hide demo if user has white box or white box XL
+    if (box.id === 'box_demo' && (hasWhiteBox || hasWhiteBoxXL)) return false
+    // Hide white box 108 if user has white box XL (216)
+    if (box.id === 'box_white' && hasWhiteBoxXL) return false
+    return true
+  }
+  
+  const filterLockedBoxes = (box) => {
+    if (box.hasAccess) return false
+    // Don't show demo box in purchasable list
+    if (box.is_demo) return false
+    // Hide white box 108 from purchase if user already has XL
+    if (box.id === 'box_white' && hasWhiteBoxXL) return false
+    return true
+  }
+  
+  const accessibleBoxes = boxes.filter(filterAccessibleBoxes)
+  const lockedBoxes = boxes.filter(filterLockedBoxes)
   const canStart = selectedBoxIds.length > 0
   
   return (
