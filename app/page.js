@@ -1462,55 +1462,23 @@ export default function App() {
         )}
         
         {view === 'game' && gameStarted && (
-          <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 sm:p-8">
-            {/* Back to boxes button */}
-            <div className="absolute top-20 left-4">
-              <Button variant="ghost" size="sm" onClick={handleBackToBoxes}>
-                ← Change Boxes
-              </Button>
-            </div>
-            
-            {/* Card piles */}
-            <div className="flex flex-row gap-8 sm:gap-12 mb-12">
-              <CardPile 
-                color="black"
-                deck={blackDeck}
-                setDeck={setBlackDeck}
-                allCards={allCards}
-                currentCard={currentBlack}
-                setCurrentCard={setCurrentBlack}
-                isFlipped={blackFlipped}
-                setIsFlipped={setBlackFlipped}
-              />
-              <CardPile 
-                color="white"
-                deck={whiteDeck}
-                setDeck={setWhiteDeck}
-                allCards={allCards}
-                currentCard={currentWhite}
-                setCurrentCard={setCurrentWhite}
-                isFlipped={whiteFlipped}
-                setIsFlipped={setWhiteFlipped}
-              />
-            </div>
-            
-            {/* Controls */}
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <GameTimer 
-                bothCardsFlipped={bothCardsFlipped}
-                onTurnEnd={handleNextPlayer}
-              />
-              <Button 
-                onClick={handleNextPlayer} 
-                size="lg" 
-                variant="outline"
-                className="border-gray-400 text-gray-700 hover:bg-gray-100"
-              >
-                <SkipForward className="w-5 h-5 mr-2" />
-                Next Player
-              </Button>
-            </div>
-          </div>
+          <GamePlayView 
+            blackDeck={blackDeck}
+            setBlackDeck={setBlackDeck}
+            whiteDeck={whiteDeck}
+            setWhiteDeck={setWhiteDeck}
+            allCards={allCards}
+            currentBlack={currentBlack}
+            setCurrentBlack={setCurrentBlack}
+            currentWhite={currentWhite}
+            setCurrentWhite={setCurrentWhite}
+            blackFlipped={blackFlipped}
+            setBlackFlipped={setBlackFlipped}
+            whiteFlipped={whiteFlipped}
+            setWhiteFlipped={setWhiteFlipped}
+            onBackToBoxes={handleBackToBoxes}
+            onNextPlayer={handleNextPlayer}
+          />
         )}
         
         {view === 'purchases' && (
