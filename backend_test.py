@@ -9,8 +9,8 @@ import json
 import os
 from datetime import datetime
 
-# Get base URL from environment
-BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://agilecacti-unawarde.webapprun.net')
+# Get base URL from environment - use localhost for internal testing
+BASE_URL = "http://localhost:3000"
 API_BASE = f"{BASE_URL}/api"
 
 # Test data
