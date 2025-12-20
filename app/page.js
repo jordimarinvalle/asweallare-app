@@ -258,72 +258,99 @@ function GameStatusText({
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
   
+  // Reset icon button component
+  const ResetButton = () => (
+    <button
+      onClick={onReset}
+      className="p-3 rounded-lg transition-colors hover:bg-red-50"
+      style={{ color: '#D12128' }}
+      title="Reset"
+    >
+      <RotateCw className="w-5 h-5" />
+    </button>
+  )
+  
   // Render based on timer state
   switch (timerState) {
     case 'idle':
       return (
         <div className="text-center mb-8">
-          <span className="inline-block px-6 py-3 bg-white border border-white text-gray-500 rounded-lg font-medium">
-            Click on the cards to flip them and start your turn
-          </span>
+          <div className="flex items-center justify-center gap-2">
+            <span className="inline-block px-6 py-3 bg-white border border-white text-gray-500 rounded-lg font-medium">
+              Click on the cards to flip them and start your turn
+            </span>
+            <ResetButton />
+          </div>
         </div>
       )
     
     case 'countdown':
       return (
         <div className="text-center mb-8">
-          <button
-            onClick={onTimerClick}
-            disabled={disabled}
-            className={`min-w-[320px] px-6 py-3 bg-white border rounded-lg font-medium transition-colors ${
-              disabled 
-                ? 'border-gray-300 text-gray-400 cursor-not-allowed' 
-                : 'border-green-600 text-green-600 hover:bg-green-50'
-            }`}
-          >
-            {disabled ? `Flip a card to start (${seconds}s)` : `Click here to start (${seconds}s)`}
-          </button>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={onTimerClick}
+              disabled={disabled}
+              className={`min-w-[320px] px-6 py-3 bg-white border rounded-lg font-medium transition-colors ${
+                disabled 
+                  ? 'border-gray-300 text-gray-400 cursor-not-allowed' 
+                  : 'border-green-600 text-green-600 hover:bg-green-50'
+              }`}
+            >
+              {disabled ? `Flip a card to start (${seconds}s)` : `Click here to start (${seconds}s)`}
+            </button>
+            <ResetButton />
+          </div>
         </div>
       )
     
     case 'waiting':
       return (
         <div className="text-center mb-8">
-          <button
-            onClick={onTimerClick}
-            disabled={disabled}
-            className={`min-w-[320px] px-6 py-3 bg-white border rounded-lg font-medium transition-colors ${
-              disabled 
-                ? 'border-gray-300 text-gray-400 cursor-not-allowed' 
-                : 'border-green-600 text-green-600 hover:bg-green-50'
-            }`}
-          >
-            {disabled ? 'Flip a card to start' : 'Time is over. Click here to start.'}
-          </button>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={onTimerClick}
+              disabled={disabled}
+              className={`min-w-[320px] px-6 py-3 bg-white border rounded-lg font-medium transition-colors ${
+                disabled 
+                  ? 'border-gray-300 text-gray-400 cursor-not-allowed' 
+                  : 'border-green-600 text-green-600 hover:bg-green-50'
+              }`}
+            >
+              {disabled ? 'Flip a card to start' : 'Time is over. Click here to start.'}
+            </button>
+            <ResetButton />
+          </div>
         </div>
       )
     
     case 'countup':
       return (
         <div className="text-center mb-8">
-          <button
-            onClick={onTimerClick}
-            className="min-w-[380px] px-6 py-3 bg-white border border-gray-400 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-          >
-            Click here when you are done ({formatTime(seconds)})
-          </button>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={onTimerClick}
+              className="min-w-[380px] px-6 py-3 bg-white border border-gray-400 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            >
+              Click here when you are done ({formatTime(seconds)})
+            </button>
+            <ResetButton />
+          </div>
         </div>
       )
     
     case 'finished':
       return (
         <div className="text-center mb-8">
-          <button
-            onClick={onReset}
-            className="min-w-[380px] px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
-          >
-            {formatTime(seconds)} - Sharing is done, click here to reset.
-          </button>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={onReset}
+              className="min-w-[380px] px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+            >
+              {formatTime(seconds)} - Sharing is done, click here to reset.
+            </button>
+            <ResetButton />
+          </div>
         </div>
       )
     
