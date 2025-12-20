@@ -438,6 +438,93 @@ function useGameTimer(bothCardsFlipped) {
 }
 
 // ============================================================================
+// GAME PLAY VIEW COMPONENT - Main game area with cards and timer
+// ============================================================================
+function GamePlayView({
+  blackDeck, setBlackDeck,
+  whiteDeck, setWhiteDeck,
+  allCards,
+  currentBlack, setCurrentBlack,
+  currentWhite, setCurrentWhite,
+  blackFlipped, setBlackFlipped,
+  whiteFlipped, setWhiteFlipped,
+  onBackToBoxes,
+  onNextPlayer
+}) {
+  // Check if both cards are flipped
+  const bothCardsFlipped = currentBlack && currentWhite && blackFlipped && whiteFlipped
+  
+  // Use the timer hook
+  const { timerState, seconds, handleTimerClick } = useGameTimer(bothCardsFlipped)
+  
+  // Handle next player - also reset timer state
+  const handleNextPlayerClick = () => {
+    onNextPlayer()
+  }
+  
+  return (
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 sm:p-8">
+      {/* Back to boxes button */}
+      <div className="absolute top-20 left-4">
+        <Button variant="ghost" size="sm" onClick={onBackToBoxes}>
+          ← Change Boxes
+        </Button>
+      </div>
+      
+      {/* Status text above cards */}
+      <GameStatusText 
+        timerState={timerState}
+        seconds={seconds}
+        onTimerClick={handleTimerClick}
+      />
+      
+      {/* Card piles */}
+      <div className="flex flex-row gap-8 sm:gap-12 mb-8">
+        <CardPile 
+          color="black"
+          deck={blackDeck}
+          setDeck={setBlackDeck}
+          allCards={allCards}
+          currentCard={currentBlack}
+          setCurrentCard={setCurrentBlack}
+          isFlipped={blackFlipped}
+          setIsFlipped={setBlackFlipped}
+        />
+        <CardPile 
+          color="white"
+          deck={whiteDeck}
+          setDeck={setWhiteDeck}
+          allCards={allCards}
+          currentCard={currentWhite}
+          setCurrentCard={setCurrentWhite}
+          isFlipped={whiteFlipped}
+          setIsFlipped={setWhiteFlipped}
+        />
+      </div>
+      
+      {/* Next Player text - styled as text, highlighted when turn is finished */}
+      <div className="mt-4">
+        {timerState === 'finished' ? (
+          <button
+            onClick={handleNextPlayerClick}
+            className="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+          >
+            Finish and next player goes
+          </button>
+        ) : (
+          <p 
+            onClick={handleNextPlayerClick}
+            className="text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
+          >
+            Finish and next player goes
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
 // BOX SELECTION COMPONENT
 // ============================================================================
 function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartPlaying, onGoToStore, user }) {
