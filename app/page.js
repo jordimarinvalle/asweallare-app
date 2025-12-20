@@ -36,13 +36,13 @@ function CardPile({
   // Handle click on the pile/card area
   const handleClick = () => {
     if (!currentCard && deck.length > 0) {
-      // Draw a new card from the deck
+      // Draw a card AND flip it immediately (show content)
       const [card, ...remaining] = deck
       setCurrentCard(card)
       setDeck(remaining)
-      setIsFlipped(false) // Start face-down
+      setIsFlipped(true) // Immediately show content
     } else if (currentCard) {
-      // Toggle flip state
+      // Toggle flip state (allow flipping back and forth)
       setIsFlipped(prev => !prev)
     }
   }
