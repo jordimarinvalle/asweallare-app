@@ -229,12 +229,12 @@ export async function POST(request) {
       
       const draw = {
         id: uuidv4(),
-        userId: user.id,
-        userEmail: user.email,
-        blackCardId,
-        whiteCardId,
-        blackCardTitle,
-        whiteCardTitle,
+        userid: user.id,
+        useremail: user.email,
+        blackcardid: blackCardId,
+        whitecardid: whiteCardId,
+        blackcardtitle: blackCardTitle,
+        whitecardtitle: whiteCardTitle,
         timestamp: new Date().toISOString()
       }
       
