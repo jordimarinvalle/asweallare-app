@@ -25,7 +25,8 @@ function CardPile({
   currentCard,
   setCurrentCard,
   isFlipped,
-  setIsFlipped
+  setIsFlipped,
+  disabled = false
 }) {
   // Generate random rotations for stack effect (like messy pile)
   const getRandomRotation = () => {
@@ -68,6 +69,9 @@ function CardPile({
   
   // Handle click on the pile/card area
   const handleClick = () => {
+    // Don't do anything if disabled
+    if (disabled) return
+    
     if (!currentCard && deck.length > 0) {
       // Draw a card from the deck
       const [card, ...remaining] = deck
