@@ -236,7 +236,8 @@ function CardPile({
 function GameStatusText({ 
   timerState, 
   seconds, 
-  onTimerClick 
+  onTimerClick,
+  onReset
 }) {
   const formatTime = (totalSeconds) => {
     const mins = Math.floor(Math.abs(totalSeconds) / 60)
@@ -257,14 +258,11 @@ function GameStatusText({
     case 'countdown':
       return (
         <div className="text-center mb-8">
-          <p className="text-amber-600 text-4xl font-mono font-bold animate-pulse mb-4">
-            {seconds}s
-          </p>
           <button
             onClick={onTimerClick}
             className="px-6 py-3 bg-white border-2 border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
           >
-            Click here to start
+            Click here to start ({seconds}s)
           </button>
         </div>
       )
@@ -276,7 +274,7 @@ function GameStatusText({
             onClick={onTimerClick}
             className="px-6 py-3 bg-white border-2 border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
           >
-            Click here to start
+            Time is over. Click here to start.
           </button>
         </div>
       )
@@ -284,14 +282,11 @@ function GameStatusText({
     case 'countup':
       return (
         <div className="text-center mb-8">
-          <p className="text-gray-700 text-4xl font-mono font-bold mb-4">
-            {formatTime(seconds)}
-          </p>
           <button
             onClick={onTimerClick}
             className="px-6 py-3 bg-white border-2 border-gray-400 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
           >
-            Click here when you are done
+            Click here when you are done ({formatTime(seconds)})
           </button>
         </div>
       )
@@ -299,14 +294,11 @@ function GameStatusText({
     case 'finished':
       return (
         <div className="text-center mb-8">
-          <p className="text-gray-500 text-2xl font-mono mb-4">
-            {formatTime(seconds)}
-          </p>
           <button
-            disabled
-            className="px-6 py-3 bg-black text-white rounded-lg font-medium cursor-default"
+            onClick={onReset}
+            className="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
           >
-            Sharing is done
+            {formatTime(seconds)} - Sharing is done, click here to reset.
           </button>
         </div>
       )
