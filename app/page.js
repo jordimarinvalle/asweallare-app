@@ -672,9 +672,14 @@ export default function App() {
                 </div>
                 
                 {currentWhite && whiteFlipped && (
-                  <Button onClick={discardWhiteCard} size="sm" variant="outline">
-                    Discard
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={flipBackWhiteCard} size="sm" variant="outline">
+                      Flip Back
+                    </Button>
+                    <Button onClick={discardWhiteCard} size="sm" variant="outline" className="text-red-600">
+                      Discard
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
