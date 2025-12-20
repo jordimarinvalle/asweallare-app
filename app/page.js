@@ -734,7 +734,9 @@ export default function App() {
                           <div className="relative z-10 text-center p-8">
                             <p className="text-gray-900 text-xl font-serif">White Card</p>
                             <p className="text-gray-500 text-sm mt-4">{currentWhite ? 'Tap to flip' : 'Tap to draw'}</p>
-                            {!currentWhite && <p className="text-gray-400 text-xs mt-8">{whiteDeck.length} cards left</p>}
+                            <p className="text-gray-400 text-xs mt-8" style={{ minHeight: '1rem' }}>
+                              {!currentWhite && whiteDeck.length > 0 ? `${whiteDeck.length} cards left` : '\u00A0'}
+                            </p>
                           </div>
                         </div>
                       </div>
