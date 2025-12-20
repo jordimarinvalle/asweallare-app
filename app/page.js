@@ -1606,19 +1606,34 @@ export default function App() {
                 .map(card => (
                 <Card key={card.id} className="p-4">
                   <div className="flex justify-between items-start">
+                    {/* Thumbnail */}
+                    {card.imagePath && (
+                      <div className="w-16 h-20 mr-4 flex-shrink-0 border rounded overflow-hidden bg-gray-100">
+                        <img 
+                          src={`/cards/${card.imagePath}`}
+                          alt={card.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    {!card.imagePath && (
+                      <div className="w-16 h-20 mr-4 flex-shrink-0 border rounded bg-gray-100 flex items-center justify-center">
+                        <Image className="w-6 h-6 text-gray-300" />
+                      </div>
+                    )}
+                    
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <span className={`px-2 py-1 text-xs rounded ${card.color === 'black' ? 'bg-black text-white' : 'bg-white text-black border'}`}>{card.color}</span>
                         {card.boxName && <span className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">{card.boxName}</span>}
                         {card.isDemo && <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">Demo</span>}
                         {!card.isActive && <span className="px-2 py-1 text-xs rounded bg-red-100 text-red-800">Inactive</span>}
-                        {card.imagePath && <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-800">Has Image</span>}
                       </div>
                       <div className="font-serif text-lg mb-1">{card.title}</div>
                       {card.hint && <div className="text-sm text-gray-600 italic">{card.hint}</div>}
                     </div>
                     <div className="flex gap-2">
-                      <Button onClick={() => { setEditingCard(card); setCardForm({ color: card.color, title: card.title, hint: card.hint || '', language: card.language, isDemo: card.isDemo, isActive: card.isActive, boxId: card.boxId || '' }) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                      <Button onClick={() => { setEditingCard(card); setCardForm({ color: card.color, title: card.title, hint: card.hint || '', language: card.language, isDemo: card.isDemo, isActive: card.isActive, boxId: card.boxId || '', imagePath: card.imagePath || '' }) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
                       <Button onClick={() => handleDeleteCard(card.id)} size="sm" variant="ghost" className="text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
                     </div>
                   </div>
