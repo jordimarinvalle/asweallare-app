@@ -20,6 +20,7 @@ export default function App() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
+  const [authSuccess, setAuthSuccess] = useState('')
   const [isLandscape, setIsLandscape] = useState(true)
   
   // Game state with deck management
