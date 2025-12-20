@@ -630,6 +630,7 @@ export default function App() {
               {/* Black card pile */}
               <div className="flex flex-col items-center gap-4">
                 <div 
+                  key={renderKey}
                   onClick={handleBlackClick} 
                   className="cursor-pointer perspective-1000"
                   style={{ width: '252px', height: '352px' }}
@@ -687,17 +688,6 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-                
-                {currentBlack && blackFlipped && (
-                  <div className="flex gap-2">
-                    <Button onClick={flipBackBlackCard} size="sm" variant="outline">
-                      Flip Back
-                    </Button>
-                    <Button onClick={discardBlackCard} size="sm" variant="outline" className="text-red-600">
-                      Discard
-                    </Button>
-                  </div>
-                )}
               </div>
               
               {/* White card pile */}
