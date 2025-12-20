@@ -276,13 +276,18 @@ export default function App() {
   
   const handleBlackClick = () => {
     if (!currentBlack && blackDeck.length > 0) {
-      // Draw card
+      // Draw card - use timestamp to force state change
       const [card, ...remaining] = blackDeck
       setBlackDeck(remaining)
       setDrawnBlackCards([...drawnBlackCards, card])
-      setRenderKey(prev => prev + 1)
       setCurrentBlack(card)
-      setBlackFlipped(false)
+      // Force state change with timestamp
+      const newKey = Date.now()
+      setRenderKey(newKey)
+      // Set flipped to timestamp % 2 to alternate between 0 and 1 (truthy/falsy pattern)
+      setBlackFlipped(newKey % 2 === 0)
+      // Then immediately set to false for display
+      setTimeout(() => setBlackFlipped(false), 10)
     } else if (currentBlack) {
       // Toggle flip
       setBlackFlipped(!blackFlipped)
@@ -291,13 +296,18 @@ export default function App() {
   
   const handleWhiteClick = () => {
     if (!currentWhite && whiteDeck.length > 0) {
-      // Draw card
+      // Draw card - use timestamp to force state change
       const [card, ...remaining] = whiteDeck
       setWhiteDeck(remaining)
       setDrawnWhiteCards([...drawnWhiteCards, card])
-      setRenderKey(prev => prev + 1)
       setCurrentWhite(card)
-      setWhiteFlipped(false)
+      // Force state change with timestamp
+      const newKey = Date.now()
+      setRenderKey(newKey)
+      // Set flipped to timestamp % 2 to alternate between 0 and 1 (truthy/falsy pattern)
+      setWhiteFlipped(newKey % 2 === 0)
+      // Then immediately set to false for display
+      setTimeout(() => setWhiteFlipped(false), 10)
     } else if (currentWhite) {
       // Toggle flip
       setWhiteFlipped(!whiteFlipped)
