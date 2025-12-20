@@ -194,6 +194,7 @@ export default function App() {
   
   const drawBlackCard = () => {
     if (blackDeck.length === 0) return
+    if (currentBlack) return // Prevent drawing if card already exists
     
     const [card, ...remaining] = blackDeck
     setCurrentBlack(card)
@@ -208,6 +209,7 @@ export default function App() {
   
   const drawWhiteCard = () => {
     if (whiteDeck.length === 0) return
+    if (currentWhite) return // Prevent drawing if card already exists
     
     const [card, ...remaining] = whiteDeck
     setCurrentWhite(card)
@@ -234,6 +236,14 @@ export default function App() {
     } else if (!whiteFlipped) {
       setWhiteFlipped(true)
     }
+  }
+  
+  const flipBackBlackCard = () => {
+    setBlackFlipped(false)
+  }
+  
+  const flipBackWhiteCard = () => {
+    setWhiteFlipped(false)
   }
   
   const discardBlackCard = () => {
