@@ -264,7 +264,7 @@ export default function App() {
     setCurrentWhite(card)
     setWhiteDeck(remaining)
     setDrawnWhiteCards([...drawnWhiteCards, card])
-    setWhiteFlipped(false)
+    setWhiteFlipState(0) // Start face-down
     
     // Trigger animation
     setCardDrawAnimation(prev => ({ ...prev, white: true }))
