@@ -1306,13 +1306,29 @@ export default function App() {
   }
   
   const handleSignOut = async () => {
-    // Sign out on server
-    await fetch('/api/auth/signout', { method: 'POST' })
+    try {
+      // Sign out on server first (this clears server-side cookies)
+      await fetch('/api/auth/signout', { method: 'POST' })
+      
+      // Also sign out on client to clear local session and any localStorage
+      await supabase.auth.signOut({ scope: 'global' })
+      
+      // Clear any remaining localStorage items from Supabase
+      if (typeof window !== 'undefined') {
+        const keysToRemove = []
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+            keysToRemove.push(key)
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key))
+      }
+    } catch (error) {
+      console.error('Sign out error:', error)
+    }
     
-    // Also sign out on client to clear local session
-    await supabase.auth.signOut()
-    
-    // Clear ALL user-related state
+    // Clear ALL user-related state regardless of API success
     setUser(null)
     setView('game')
     setGameStarted(false)
@@ -1328,13 +1344,17 @@ export default function App() {
     setWhiteFlipped(false)
     
     // Reload boxes to get fresh data without user access
-    const response = await fetch('/api/boxes')
-    const data = await response.json()
-    if (data.boxes) {
-      setBoxes(data.boxes)
-      // Auto-select only demo boxes for non-authenticated user
-      const demoBoxIds = data.boxes.filter(b => b.is_demo && b.hasAccess).map(b => b.id)
-      setSelectedBoxIds(demoBoxIds)
+    try {
+      const response = await fetch('/api/boxes')
+      const data = await response.json()
+      if (data.boxes) {
+        setBoxes(data.boxes)
+        // Auto-select only demo boxes for non-authenticated user
+        const demoBoxIds = data.boxes.filter(b => b.is_demo && b.hasAccess).map(b => b.id)
+        setSelectedBoxIds(demoBoxIds)
+      }
+    } catch (error) {
+      console.error('Failed to reload boxes:', error)
     }
   }
   
