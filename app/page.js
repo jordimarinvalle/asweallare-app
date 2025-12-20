@@ -251,12 +251,9 @@ function GameStatusText({
     case 'idle':
       return (
         <div className="text-center mb-8">
-          <button
-            disabled
-            className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-500 rounded-lg font-medium cursor-default"
-          >
+          <span className="inline-block px-6 py-3 text-gray-500 font-medium">
             Click on the cards to flip them and start your turn
-          </button>
+          </span>
         </div>
       )
     
@@ -265,7 +262,7 @@ function GameStatusText({
         <div className="text-center mb-8">
           <button
             onClick={onTimerClick}
-            className="px-6 py-3 bg-white border-2 border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+            className="min-w-[320px] px-6 py-3 bg-white border-2 border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
           >
             Click here to start ({seconds}s)
           </button>
@@ -277,7 +274,7 @@ function GameStatusText({
         <div className="text-center mb-8">
           <button
             onClick={onTimerClick}
-            className="px-6 py-3 bg-white border-2 border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+            className="min-w-[320px] px-6 py-3 bg-white border-2 border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
           >
             Time is over. Click here to start.
           </button>
@@ -289,7 +286,7 @@ function GameStatusText({
         <div className="text-center mb-8">
           <button
             onClick={onTimerClick}
-            className="px-6 py-3 bg-white border-2 border-gray-400 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            className="min-w-[380px] px-6 py-3 bg-white border-2 border-gray-400 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
           >
             Click here when you are done ({formatTime(seconds)})
           </button>
@@ -301,7 +298,7 @@ function GameStatusText({
         <div className="text-center mb-8">
           <button
             onClick={onReset}
-            className="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+            className="min-w-[380px] px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
           >
             {formatTime(seconds)} - Sharing is done, click here to reset.
           </button>
