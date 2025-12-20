@@ -381,7 +381,7 @@ export async function POST(request) {
         return handleCORS(NextResponse.json({ error: 'Demo box is free' }, { status: 400 }))
       }
       
-      const session = await stripe.checkout.sessions.create({
+      const session = await getStripe().checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [{
           price_data: {
@@ -440,7 +440,7 @@ export async function POST(request) {
         intervalCount = 1
       }
       
-      const session = await stripe.checkout.sessions.create({
+      const session = await getStripe().checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [{
           price_data: {
