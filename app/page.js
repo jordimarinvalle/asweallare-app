@@ -372,7 +372,7 @@ function useGameTimer(bothCardsFlipped) {
     }
   }, [])
   
-  // Auto-start countdown when both cards are flipped
+  // Auto-start countdown when both cards are flipped (only once)
   useEffect(() => {
     if (bothCardsFlipped && timerState === 'idle') {
       setTimerState('countdown')
@@ -380,13 +380,8 @@ function useGameTimer(bothCardsFlipped) {
     }
   }, [bothCardsFlipped, timerState])
   
-  // Reset when cards are reset
-  useEffect(() => {
-    if (!bothCardsFlipped) {
-      setTimerState('idle')
-      setSeconds(15)
-    }
-  }, [bothCardsFlipped])
+  // Note: Timer does NOT reset when cards are flipped back
+  // It only resets when Reset button is clicked (handled by parent component)
   
   // Countdown timer effect
   useEffect(() => {
