@@ -705,66 +705,58 @@ export default function App() {
               
               {/* White card pile */}
               <div className="flex flex-col items-center gap-4">
-                {/* Show pile if no current card */}
-                {!currentWhite && whiteDeck.length > 0 && (
-                  <div 
-                    onClick={handleWhiteClick} 
-                    className={`cursor-pointer ${cardDrawAnimation.white ? 'card-draw-animation' : ''}`}
-                  >
-                    <Card className="w-64 h-96 bg-white border-2 border-gray-300 flex items-center justify-center hover:shadow-xl transition-shadow card-stack text-gray-800">
+                <div 
+                  onClick={handleWhiteClick} 
+                  className="cursor-pointer perspective-1000"
+                >
+                  {whiteDeck.length === 0 && !currentWhite ? (
+                    /* Empty deck */
+                    <Card className="w-64 h-96 bg-gray-100 border-2 border-gray-300 flex items-center justify-center">
                       <CardContent className="p-8 text-center">
+                        <p className="text-gray-500 text-lg font-serif mb-4">No Cards Left</p>
+                        <Button onClick={(e) => { e.stopPropagation(); reshuffleWhiteDeck(); }} size="sm" variant="outline">
+                          <RotateCw className="w-4 h-4 mr-2" />
+                          Reshuffle Deck
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ) : !currentWhite ? (
+                    /* Pile */
+                    <div className="w-64 h-96 bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center hover:shadow-xl transition-shadow card-stack relative overflow-hidden">
+                      <img src="/white-card-back.png" alt="Card back" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
+                      <div className="relative z-10 text-center p-8">
                         <p className="text-gray-900 text-xl font-serif">White Card</p>
                         <p className="text-gray-500 text-sm mt-4">Tap to draw</p>
                         <p className="text-gray-400 text-xs mt-8">{whiteDeck.length} cards left</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                )}
-                
-                {/* Show empty state */}
-                {!currentWhite && whiteDeck.length === 0 && (
-                  <Card className="w-64 h-96 bg-gray-100 border-2 border-gray-300 flex items-center justify-center">
-                    <CardContent className="p-8 text-center">
-                      <p className="text-gray-500 text-lg font-serif mb-4">No Cards Left</p>
-                      <Button onClick={reshuffleWhiteDeck} size="sm" variant="outline">
-                        <RotateCw className="w-4 h-4 mr-2" />
-                        Reshuffle Deck
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
-                
-                {/* Show drawn card with flip - KEY PROP FORCES RE-RENDER */}
-                {currentWhite && (
-                  <div 
-                    key={currentWhite.id}
-                    onClick={handleWhiteClick} 
-                    className="cursor-pointer perspective-1000"
-                  >
+                      </div>
+                    </div>
+                  ) : (
+                    /* Drawn card with flip */
                     <div className={`w-64 h-96 transition-transform duration-500 transform-style-3d ${whiteFlipped ? 'rotate-y-180' : ''}`}>
                       {/* Face down */}
                       <div className="absolute inset-0 backface-hidden">
-                        <Card className="w-64 h-96 bg-white border-2 border-gray-300 flex items-center justify-center hover:shadow-xl transition-shadow">
-                          <CardContent className="p-8 text-center">
+                        <div className="w-64 h-96 bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center hover:shadow-xl transition-shadow relative overflow-hidden">
+                          <img src="/white-card-back.png" alt="Card back" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
+                          <div className="relative z-10 text-center p-8">
                             <p className="text-gray-900 text-xl font-serif">White Card</p>
                             <p className="text-gray-500 text-sm mt-4">Tap to flip</p>
-                          </CardContent>
-                        </Card>
+                          </div>
+                        </div>
                       </div>
                       {/* Face up */}
                       <div className="absolute inset-0 backface-hidden rotate-y-180">
-                        <Card className="w-64 h-96 bg-white border-2 border-gray-300 flex items-center justify-center">
-                          <CardContent className="p-8 text-center">
+                        <div className="w-64 h-96 bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center">
+                          <div className="p-8 text-center">
                             <h2 className="text-gray-900 text-2xl font-serif mb-4">{currentWhite.title}</h2>
                             {currentWhite.hint && (
                               <p className="text-gray-600 text-sm italic">{currentWhite.hint}</p>
                             )}
-                          </CardContent>
-                        </Card>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
                 
                 {currentWhite && whiteFlipped && (
                   <div className="flex gap-2">
