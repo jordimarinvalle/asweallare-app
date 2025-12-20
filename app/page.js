@@ -1487,7 +1487,6 @@ export default function App() {
           
           {/* Instructions */}
           <div className="text-center">
-            <h2 className="text-2xl font-serif text-gray-900 mb-3">Rotate Your Device</h2>
             <p className="text-gray-600 mb-6">
               Please rotate your phone to landscape mode for the best experience.
             </p>
