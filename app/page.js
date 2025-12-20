@@ -958,6 +958,12 @@ export default function App() {
               </div>
             )}
             
+            {authSuccess && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-md text-sm text-green-800">
+                {authSuccess}
+              </div>
+            )}
+            
             <div>
               <Label htmlFor="email">Email</Label>
               <Input
