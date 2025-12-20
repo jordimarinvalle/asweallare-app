@@ -38,7 +38,7 @@ export default function App() {
   // Timer
   const [timerRunning, setTimerRunning] = useState(false)
   const [timerSeconds, setTimerSeconds] = useState(0)
-  const [bellPlayed, setBellPlayed] = useState({ two: false, three: false })
+  const [bellPlayed, setBellPlayed] = useState({ one: false, two: false, three: false })
   
   // Other screens
   const [view, setView] = useState('game')
