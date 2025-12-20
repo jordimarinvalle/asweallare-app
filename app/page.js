@@ -1239,6 +1239,26 @@ export default function App() {
     setAuthSuccess('')
     
     try {
+      // Handle password reset separately
+      if (authMode === 'forgot') {
+        const response = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        })
+        
+        const data = await response.json()
+        
+        if (data.error) {
+          setAuthError(data.error)
+        } else {
+          setAuthSuccess('Password reset email sent! Check your inbox for a link to reset your password.')
+          setEmail('')
+          setTimeout(() => { setAuthMode('signin'); setAuthSuccess('') }, 5000)
+        }
+        return
+      }
+      
       const response = await fetch(`/api/auth/${authMode}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
