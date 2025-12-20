@@ -1239,6 +1239,7 @@ export default function App() {
   
   useEffect(() => {
     if (view === 'draws') loadSavedDraws()
+    else if (view === 'purchases') loadPurchases()
     else if (view === 'admin') { loadAdminCards(); loadAdminBoxes() }
   }, [view])
   
