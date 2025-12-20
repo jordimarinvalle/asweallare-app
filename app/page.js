@@ -253,7 +253,7 @@ function GameStatusText({
     case 'idle':
       return (
         <div className="text-center mb-8">
-          <span className="inline-block px-6 py-3 bg-white border-2 border-white text-gray-500 rounded-lg font-medium">
+          <span className="inline-block px-6 py-3 bg-white border border-white text-gray-500 rounded-lg font-medium">
             Click on the cards to flip them and start your turn
           </span>
         </div>
@@ -264,7 +264,7 @@ function GameStatusText({
         <div className="text-center mb-8">
           <button
             onClick={onTimerClick}
-            className="min-w-[320px] px-6 py-3 bg-white border-2 border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+            className="min-w-[320px] px-6 py-3 bg-white border border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
           >
             Click here to start ({seconds}s)
           </button>
@@ -276,7 +276,7 @@ function GameStatusText({
         <div className="text-center mb-8">
           <button
             onClick={onTimerClick}
-            className="min-w-[320px] px-6 py-3 bg-white border-2 border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+            className="min-w-[320px] px-6 py-3 bg-white border border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
           >
             Time is over. Click here to start.
           </button>
@@ -288,7 +288,7 @@ function GameStatusText({
         <div className="text-center mb-8">
           <button
             onClick={onTimerClick}
-            className="min-w-[380px] px-6 py-3 bg-white border-2 border-gray-400 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            className="min-w-[380px] px-6 py-3 bg-white border border-gray-400 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
           >
             Click here when you are done ({formatTime(seconds)})
           </button>
