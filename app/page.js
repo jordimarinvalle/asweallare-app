@@ -158,7 +158,8 @@ export default function App() {
     setBlackDeck(shuffleDeck([...allBlackCards]))
     setDrawnBlackCards([])
     setCurrentBlack(null)
-    setBlackFlipped(prev => !prev) // Toggle to force state change
+    setBlackFlipped(false) // Reset to face-down
+    setRenderKey(prev => prev + 1)
   }
   
   const reshuffleWhiteDeck = () => {
