@@ -558,8 +558,6 @@ export default function App() {
   
   return (
     <div className="min-h-screen bg-white">
-      <audio ref={audioRef} src="/sounds/bell-option-1.mp3" preload="auto" />
-      
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
