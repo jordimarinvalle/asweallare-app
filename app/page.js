@@ -1152,8 +1152,20 @@ export default function App() {
             selectedBoxIds={selectedBoxIds}
             setSelectedBoxIds={setSelectedBoxIds}
             onStartPlaying={handleStartPlaying}
-            onPurchaseBox={handlePurchaseBox}
+            onGoToStore={handleGoToStore}
             user={user}
+          />
+        )}
+        
+        {view === 'store' && (
+          <StoreScreen
+            boxes={boxes}
+            plans={plans}
+            onPurchaseBox={handlePurchaseBox}
+            onSubscribe={handleSubscribe}
+            onBack={() => { setView('game'); setGameStarted(false) }}
+            user={user}
+            hasAllAccess={hasAllAccess}
           />
         )}
         
