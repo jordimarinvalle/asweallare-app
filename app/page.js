@@ -781,19 +781,30 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
   
-  // Load boxes
+  // Load boxes and plans
   useEffect(() => {
     const loadBoxes = async () => {
       const response = await fetch('/api/boxes')
       const data = await response.json()
       if (data.boxes) {
         setBoxes(data.boxes)
+        setHasAllAccess(data.hasAllAccess || false)
         // Auto-select demo boxes
         const demoBoxIds = data.boxes.filter(b => b.is_demo && b.hasAccess).map(b => b.id)
         setSelectedBoxIds(demoBoxIds)
       }
     }
+    
+    const loadPlans = async () => {
+      const response = await fetch('/api/plans')
+      const data = await response.json()
+      if (data.plans) {
+        setPlans(data.plans)
+      }
+    }
+    
     loadBoxes()
+    loadPlans()
   }, [user])
   
   // Shuffle deck helper
