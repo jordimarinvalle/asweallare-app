@@ -313,7 +313,7 @@ export default function App() {
   
   const discardBlackCard = () => {
     setCurrentBlack(null)
-    setBlackFlipped(false)
+    setBlackFlipState(0) // Reset to face-down
   }
   
   const discardWhiteCard = () => {
