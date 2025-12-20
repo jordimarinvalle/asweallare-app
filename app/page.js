@@ -718,7 +718,7 @@ export default function App() {
                 onClick={timerRunning ? stopTimer : startTimer} 
                 size="lg" 
                 variant="outline" 
-                className="border-red-600 text-red-600 hover:bg-red-50 min-w-[160px]"
+                className="border-red-600 text-red-600 hover:bg-red-50 w-[180px] font-mono"
               >
                 {timerRunning ? (
                   <>
