@@ -278,7 +278,18 @@ export default function App() {
     const response = await fetch('/api/draws')
     const data = await response.json()
     if (data.draws) {
-      setSavedDraws(data.draws)
+      // Normalize draw data from database
+      const normalizedDraws = data.draws.map(draw => ({
+        id: draw.id,
+        userId: draw.userid,
+        userEmail: draw.useremail,
+        blackCardId: draw.blackcardid,
+        whiteCardId: draw.whitecardid,
+        blackCardTitle: draw.blackcardtitle,
+        whiteCardTitle: draw.whitecardtitle,
+        timestamp: draw.timestamp
+      }))
+      setSavedDraws(normalizedDraws)
     }
   }
   
