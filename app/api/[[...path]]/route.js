@@ -325,7 +325,28 @@ export async function POST(request) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 400 }))
       }
       
-      return handleCORS(NextResponse.json({ success: true }))
+      // Create response and clear auth cookies
+      const response = NextResponse.json({ success: true })
+      
+      // Clear Supabase auth cookies by setting them to expire
+      const cookieOptions = {
+        path: '/',
+        expires: new Date(0),
+        maxAge: 0
+      }
+      
+      response.cookies.set('sb-access-token', '', cookieOptions)
+      response.cookies.set('sb-refresh-token', '', cookieOptions)
+      
+      // Also try to clear any Supabase project-specific cookies
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+      const projectRef = supabaseUrl.match(/https:\/\/([^.]+)/)?.[1]
+      if (projectRef) {
+        response.cookies.set(`sb-${projectRef}-auth-token`, '', cookieOptions)
+        response.cookies.set(`sb-${projectRef}-auth-token-code-verifier`, '', cookieOptions)
+      }
+      
+      return handleCORS(response)
     }
 
     if (path === 'auth/google') {
