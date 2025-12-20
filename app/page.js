@@ -251,7 +251,7 @@ function GameStatusText({
     case 'idle':
       return (
         <div className="text-center mb-8">
-          <span className="inline-block px-6 py-3 text-gray-500 font-medium">
+          <span className="inline-block px-6 py-3 bg-white border-2 border-white text-gray-500 rounded-lg font-medium">
             Click on the cards to flip them and start your turn
           </span>
         </div>
