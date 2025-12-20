@@ -276,6 +276,7 @@ export default function App() {
   const handleAuth = async (e) => {
     e.preventDefault()
     setAuthError('')
+    setAuthSuccess('')
     
     try {
       const response = await fetch(`/api/auth/${authMode}`, {
@@ -287,14 +288,32 @@ export default function App() {
       const data = await response.json()
       
       if (data.error) {
-        setAuthError(data.error)
+        // Provide helpful error messages
+        if (data.error.includes('Email not confirmed')) {
+          setAuthError('Please check your email and click the confirmation link before signing in.')
+        } else if (data.error.includes('Invalid login credentials')) {
+          setAuthError('Invalid email or password. Please try again.')
+        } else {
+          setAuthError(data.error)
+        }
       } else {
-        setAuthOpen(false)
-        setEmail('')
-        setPassword('')
+        if (authMode === 'signup') {
+          setAuthSuccess('Success! Please check your email to confirm your account before signing in.')
+          setEmail('')
+          setPassword('')
+          // Auto-switch to signin mode after 3 seconds
+          setTimeout(() => {
+            setAuthMode('signin')
+            setAuthSuccess('')
+          }, 3000)
+        } else {
+          setAuthOpen(false)
+          setEmail('')
+          setPassword('')
+        }
       }
     } catch (error) {
-      setAuthError('Authentication failed')
+      setAuthError('Authentication failed. Please try again.')
     }
   }
   
