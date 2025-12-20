@@ -59,7 +59,7 @@ export default function App() {
   })
   
   const supabase = createClient()
-  const audioRef = useRef(null)
+  // audioRef no longer needed - using Web Audio API
   
   // Check orientation
   useEffect(() => {
