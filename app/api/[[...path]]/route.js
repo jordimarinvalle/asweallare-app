@@ -343,6 +343,25 @@ export async function POST(request) {
       return handleCORS(NextResponse.json({ url: data.url }))
     }
 
+    // Password Reset Request
+    if (path === 'auth/reset-password') {
+      const { email } = body
+      
+      if (!email) {
+        return handleCORS(NextResponse.json({ error: 'Email is required' }, { status: 400 }))
+      }
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/reset-callback`
+      })
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 400 }))
+      }
+      
+      return handleCORS(NextResponse.json({ success: true, message: 'Password reset email sent' }))
+    }
+
     // SAVED DRAWS
     if (path === 'draws/save') {
       const { user, error: authError } = await getAuthenticatedUser()
