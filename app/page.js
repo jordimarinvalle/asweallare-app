@@ -650,8 +650,9 @@ export default function App() {
                   className={`cursor-pointer perspective-1000 ${cardDrawAnimation.white ? 'card-draw-animation' : ''}`}
                 >
                   <div className={`w-64 h-96 transition-transform duration-500 transform-style-3d ${whiteFlipped ? 'rotate-y-180' : ''}`}>
+                    {/* Face down side */}
                     <div className="absolute inset-0 backface-hidden">
-                      {whiteDeck.length > 0 ? (
+                      {!currentWhite && whiteDeck.length > 0 ? (
                         <Card className="w-full h-full bg-white border-2 border-gray-300 flex items-center justify-center hover:shadow-xl transition-shadow card-stack text-gray-800">
                           <CardContent className="p-8 text-center">
                             <p className="text-gray-900 text-xl font-serif">White Card</p>
@@ -659,7 +660,7 @@ export default function App() {
                             <p className="text-gray-400 text-xs mt-8">{whiteDeck.length} cards left</p>
                           </CardContent>
                         </Card>
-                      ) : (
+                      ) : !currentWhite && whiteDeck.length === 0 ? (
                         <Card className="w-full h-full bg-gray-100 border-2 border-gray-300 flex items-center justify-center">
                           <CardContent className="p-8 text-center">
                             <p className="text-gray-500 text-lg font-serif mb-4">No Cards Left</p>
@@ -669,8 +670,16 @@ export default function App() {
                             </Button>
                           </CardContent>
                         </Card>
-                      )}
+                      ) : currentWhite ? (
+                        <Card className="w-full h-full bg-white border-2 border-gray-300 flex items-center justify-center hover:shadow-xl transition-shadow">
+                          <CardContent className="p-8 text-center">
+                            <p className="text-gray-900 text-xl font-serif">White Card</p>
+                            <p className="text-gray-500 text-sm mt-4">Tap to flip</p>
+                          </CardContent>
+                        </Card>
+                      ) : null}
                     </div>
+                    {/* Face up side */}
                     {currentWhite && (
                       <div className="absolute inset-0 backface-hidden rotate-y-180">
                         <Card className="w-full h-full bg-white border-2 border-gray-300 flex items-center justify-center">
