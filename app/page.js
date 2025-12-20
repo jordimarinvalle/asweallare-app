@@ -120,7 +120,7 @@ function CardPile({
     <div className="flex flex-col items-center gap-4">
       <div 
         onClick={handleClick}
-        className="cursor-pointer"
+        className={disabled ? "" : "cursor-pointer"}
         style={{ 
           width: '252px', 
           height: '352px',
