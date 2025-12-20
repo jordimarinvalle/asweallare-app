@@ -310,7 +310,18 @@ export default function App() {
     const response = await fetch('/api/admin/cards')
     const data = await response.json()
     if (data.cards) {
-      setAdminCards(data.cards)
+      // Normalize card data from database
+      const normalizedCards = data.cards.map(card => ({
+        id: card.id,
+        color: card.color,
+        title: card.title,
+        hint: card.hint,
+        language: card.language,
+        isDemo: card.isdemo,
+        isActive: card.isactive,
+        createdAt: card.createdat
+      }))
+      setAdminCards(normalizedCards)
     }
   }
   
