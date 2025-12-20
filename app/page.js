@@ -1121,10 +1121,18 @@ export default function App() {
             
             <div className="flex items-center gap-4">
               {!user ? (
-                <Button onClick={() => setAuthOpen(true)} variant="outline">Sign In</Button>
+                <>
+                  <Button onClick={() => setView('store')} variant="ghost">
+                    <ShoppingBag className="w-4 h-4 mr-2" />Store
+                  </Button>
+                  <Button onClick={() => setAuthOpen(true)} variant="outline">Sign In</Button>
+                </>
               ) : (
                 <>
                   <Button onClick={() => { setView('game'); setGameStarted(false) }} variant={view === 'game' ? 'default' : 'ghost'}>Play</Button>
+                  <Button onClick={() => setView('store')} variant={view === 'store' ? 'default' : 'ghost'}>
+                    <ShoppingBag className="w-4 h-4 mr-2" />Store
+                  </Button>
                   <Button onClick={() => setView('draws')} variant={view === 'draws' ? 'default' : 'ghost'}>My Draws</Button>
                   <Button onClick={() => setView('admin')} variant={view === 'admin' ? 'default' : 'ghost'}>Admin</Button>
                   <Button onClick={handleSignOut} variant="ghost" size="sm"><LogOut className="w-4 h-4" /></Button>
