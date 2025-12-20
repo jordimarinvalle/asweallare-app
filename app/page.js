@@ -231,7 +231,7 @@ function CardPile({
 }
 
 // ============================================================================
-// GAME STATUS TEXT - Displays above cards, text-based (not a button)
+// GAME STATUS TEXT - Displays above cards
 // ============================================================================
 function GameStatusText({ 
   timerState, 
@@ -257,49 +257,57 @@ function GameStatusText({
     case 'countdown':
       return (
         <div className="text-center mb-8">
-          <p className="text-amber-600 text-4xl font-mono font-bold animate-pulse">
+          <p className="text-amber-600 text-4xl font-mono font-bold animate-pulse mb-4">
             {seconds}s
           </p>
-          <p className="text-amber-600/70 text-sm mt-1">
-            Get ready to share...
-          </p>
+          <button
+            onClick={onTimerClick}
+            className="px-6 py-3 bg-white border-2 border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+          >
+            Click here to start
+          </button>
         </div>
       )
     
     case 'waiting':
       return (
-        <p 
-          onClick={onTimerClick}
-          className="text-green-600 text-center text-lg mb-8 cursor-pointer hover:text-green-700 transition-colors"
-        >
-          <span className="underline decoration-2 underline-offset-4">Click here to start</span>
-        </p>
+        <div className="text-center mb-8">
+          <button
+            onClick={onTimerClick}
+            className="px-6 py-3 bg-white border-2 border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+          >
+            Click here to start
+          </button>
+        </div>
       )
     
     case 'countup':
       return (
-        <div 
-          onClick={onTimerClick}
-          className="text-center mb-8 cursor-pointer group"
-        >
-          <p className="text-red-600 text-4xl font-mono font-bold">
+        <div className="text-center mb-8">
+          <p className="text-gray-700 text-4xl font-mono font-bold mb-4">
             {formatTime(seconds)}
           </p>
-          <p className="text-gray-500 text-sm mt-1 group-hover:text-red-600 transition-colors">
-            <span className="underline decoration-1 underline-offset-2">Click here when you're done</span>
-          </p>
+          <button
+            onClick={onTimerClick}
+            className="px-6 py-3 bg-white border-2 border-gray-400 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+          >
+            Click here when you are done
+          </button>
         </div>
       )
     
     case 'finished':
       return (
         <div className="text-center mb-8">
-          <p className="text-gray-600 text-2xl font-mono">
+          <p className="text-gray-500 text-2xl font-mono mb-4">
             {formatTime(seconds)}
           </p>
-          <p className="text-gray-400 text-sm mt-1">
-            Turn complete
-          </p>
+          <button
+            disabled
+            className="px-6 py-3 bg-black text-white rounded-lg font-medium cursor-default"
+          >
+            Sharing is done
+          </button>
         </div>
       )
     
