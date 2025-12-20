@@ -671,7 +671,9 @@ export default function App() {
                           <div className="relative z-10 text-center p-8">
                             <p className="text-white text-xl font-serif">Black Card</p>
                             <p className="text-gray-400 text-sm mt-4">{currentBlack ? 'Tap to flip' : 'Tap to draw'}</p>
-                            {!currentBlack && <p className="text-gray-500 text-xs mt-8">{blackDeck.length} cards left</p>}
+                            <p className="text-gray-500 text-xs mt-8" style={{ minHeight: '1rem' }}>
+                              {!currentBlack && blackDeck.length > 0 ? `${blackDeck.length} cards left` : '\u00A0'}
+                            </p>
                           </div>
                         </div>
                       </div>
