@@ -325,8 +325,8 @@ export default function App() {
     // Clear current cards and reset for next player
     setCurrentBlack(null)
     setCurrentWhite(null)
-    setBlackFlipped(false) // Reset to face-down
-    setWhiteFlipped(false) // Reset to face-down
+    setBlackFlipState(0) // Reset to face-down
+    setWhiteFlipState(0) // Reset to face-down
     setTimerRunning(false)
     setTimerSeconds(0)
     setBellPlayed({ one: false, two: false, three: false })
