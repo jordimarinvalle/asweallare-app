@@ -617,9 +617,14 @@ export default function App() {
                 </div>
                 
                 {currentBlack && blackFlipped && (
-                  <Button onClick={discardBlackCard} size="sm" variant="outline">
-                    Discard
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={flipBackBlackCard} size="sm" variant="outline">
+                      Flip Back
+                    </Button>
+                    <Button onClick={discardBlackCard} size="sm" variant="outline" className="text-red-600">
+                      Discard
+                    </Button>
+                  </div>
                 )}
               </div>
               
