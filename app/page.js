@@ -964,9 +964,6 @@ export default function App() {
   
   const supabase = createClient()
   
-  // Check if both cards are flipped (for timer auto-start)
-  const bothCardsFlipped = currentBlack && currentWhite && blackFlipped && whiteFlipped
-  
   // Check orientation
   useEffect(() => {
     const checkOrientation = () => {
