@@ -8,12 +8,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/hooks/use-toast'
-import { Bell, Save, Clock, LogOut, Plus, Edit, Trash2, CreditCard, Info, RotateCw, Smartphone, Lock, Check, Package, Play, ShoppingBag, Sparkles, Crown, Receipt, XCircle, Image, Upload, Menu, X, AlertTriangle } from 'lucide-react'
+import { Clock, LogOut, Plus, Edit, Trash2, CreditCard, RotateCw, Smartphone, Lock, Check, Package, Play, ShoppingBag, Sparkles, Crown, Receipt, XCircle, Image, Menu, AlertTriangle, SkipForward } from 'lucide-react'
 
 // ============================================================================
 // CARD PILE COMPONENT - Isolated state for reliable single-click draws
@@ -24,10 +23,10 @@ function CardPile({
   setDeck,
   allCards,
   currentCard,
-  setCurrentCard
+  setCurrentCard,
+  isFlipped,
+  setIsFlipped
 }) {
-  const [isFlipped, setIsFlipped] = useState(false)
-  
   // Generate random rotations for stack effect (like messy pile)
   const getRandomRotation = () => {
     const choices = [-3, -2, -1, 0, 1, 2, 3]
@@ -70,21 +69,16 @@ function CardPile({
   // Handle click on the pile/card area
   const handleClick = () => {
     if (!currentCard && deck.length > 0) {
+      // Draw a card from the deck
       const [card, ...remaining] = deck
       setCurrentCard(card)
       setDeck(remaining)
       setIsFlipped(true)
     } else if (currentCard) {
+      // Toggle flip
       setIsFlipped(prev => !prev)
     }
   }
-  
-  // Reset flip state when current card changes to null (Next Player)
-  useEffect(() => {
-    if (!currentCard) {
-      setIsFlipped(false)
-    }
-  }, [currentCard])
   
   // Handle reshuffle click
   const handleReshuffle = (e) => {
@@ -237,19 +231,25 @@ function CardPile({
 }
 
 // ============================================================================
-// GAME TIMER COMPONENT - Handles bell sounds at 1, 2, 3 minutes
+// GAME TIMER COMPONENT - New flow with countdown then countup
 // ============================================================================
-function GameTimer({ isRunning, setIsRunning, seconds, setSeconds }) {
-  const [bellsPlayed, setBellsPlayed] = useState({ one: false, two: false, three: false })
+function GameTimer({ 
+  bothCardsFlipped, 
+  onTurnEnd 
+}) {
+  // Timer states: 'idle' | 'countdown' | 'countup' | 'finished'
+  const [timerState, setTimerState] = useState('idle')
+  const [seconds, setSeconds] = useState(15)
   const audioContextRef = useRef(null)
   
   const formatTime = (totalSeconds) => {
-    const mins = Math.floor(totalSeconds / 60)
-    const secs = totalSeconds % 60
+    const mins = Math.floor(Math.abs(totalSeconds) / 60)
+    const secs = Math.abs(totalSeconds) % 60
     if (mins === 0) return `${secs}s`
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
   
+  // Play bell/beep sound
   const playBell = useCallback((count) => {
     try {
       if (!audioContextRef.current) {
@@ -278,37 +278,157 @@ function GameTimer({ isRunning, setIsRunning, seconds, setSeconds }) {
     }
   }, [])
   
+  // Play warning sound (different tone for countdown end)
+  const playWarning = useCallback(() => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)()
+      }
+      const audioContext = audioContextRef.current
+      if (audioContext.state === 'suspended') audioContext.resume()
+      
+      // Play a lower, longer warning tone
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      oscillator.frequency.value = 600 // Lower frequency for warning
+      oscillator.type = 'sine'
+      const now = audioContext.currentTime
+      gainNode.gain.setValueAtTime(0.5, now)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 1.0)
+      oscillator.start(now)
+      oscillator.stop(now + 1.0)
+    } catch (error) {
+      console.error('Error playing warning:', error)
+    }
+  }, [])
+  
+  // Auto-start countdown when both cards are flipped
+  useEffect(() => {
+    if (bothCardsFlipped && timerState === 'idle') {
+      setTimerState('countdown')
+      setSeconds(15)
+    }
+  }, [bothCardsFlipped, timerState])
+  
+  // Reset when cards are reset
+  useEffect(() => {
+    if (!bothCardsFlipped) {
+      setTimerState('idle')
+      setSeconds(15)
+    }
+  }, [bothCardsFlipped])
+  
+  // Countdown timer effect
   useEffect(() => {
     let interval
-    if (isRunning) {
+    if (timerState === 'countdown') {
+      interval = setInterval(() => {
+        setSeconds(prev => {
+          if (prev <= 1) {
+            // Countdown finished - play warning and wait for user
+            playWarning()
+            setTimerState('waiting') // Wait for user to click
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+    return () => clearInterval(interval)
+  }, [timerState, playWarning])
+  
+  // Countup timer effect
+  useEffect(() => {
+    let interval
+    if (timerState === 'countup') {
       interval = setInterval(() => {
         setSeconds(prev => {
           const newValue = prev + 1
-          if (newValue === 60 && !bellsPlayed.one) { playBell(1); setBellsPlayed(p => ({ ...p, one: true })) }
-          if (newValue === 120 && !bellsPlayed.two) { playBell(2); setBellsPlayed(p => ({ ...p, two: true })) }
-          if (newValue === 180 && !bellsPlayed.three) { playBell(3); setBellsPlayed(p => ({ ...p, three: true })) }
+          // Bell sounds at specific times
+          if (newValue === 60) playBell(1)      // 1 minute: 1 beep
+          // 2 minutes: nothing
+          if (newValue === 180) playBell(3)     // 3 minutes: 3 beeps
           return newValue
         })
       }, 1000)
     }
     return () => clearInterval(interval)
-  }, [isRunning, bellsPlayed, playBell, setSeconds])
+  }, [timerState, playBell])
   
-  useEffect(() => {
-    if (seconds === 0) setBellsPlayed({ one: false, two: false, three: false })
-  }, [seconds])
+  // Handle timer button click
+  const handleTimerClick = () => {
+    if (timerState === 'waiting') {
+      // Start counting up
+      setTimerState('countup')
+      setSeconds(0)
+    } else if (timerState === 'countup') {
+      // End the turn
+      setTimerState('finished')
+    }
+  }
   
-  const startTimer = () => { setIsRunning(true); setSeconds(0); setBellsPlayed({ one: false, two: false, three: false }) }
-  const stopTimer = () => { setIsRunning(false) }
+  // Get button text and style based on state
+  const getButtonConfig = () => {
+    switch (timerState) {
+      case 'idle':
+        return {
+          text: 'Waiting for cards...',
+          disabled: true,
+          variant: 'outline',
+          className: 'border-gray-300 text-gray-400'
+        }
+      case 'countdown':
+        return {
+          text: `${seconds}s`,
+          disabled: true,
+          variant: 'outline',
+          className: 'border-amber-500 text-amber-600 bg-amber-50 animate-pulse'
+        }
+      case 'waiting':
+        return {
+          text: 'Start Sharing',
+          disabled: false,
+          variant: 'outline',
+          className: 'border-green-600 text-green-600 hover:bg-green-50'
+        }
+      case 'countup':
+        return {
+          text: formatTime(seconds),
+          disabled: false,
+          variant: 'outline',
+          className: 'border-red-600 text-red-600 hover:bg-red-50'
+        }
+      case 'finished':
+        return {
+          text: `Done: ${formatTime(seconds)}`,
+          disabled: true,
+          variant: 'outline',
+          className: 'border-gray-400 text-gray-600 bg-gray-50'
+        }
+      default:
+        return {
+          text: 'Timer',
+          disabled: true,
+          variant: 'outline',
+          className: ''
+        }
+    }
+  }
+  
+  const config = getButtonConfig()
   
   return (
     <Button 
-      onClick={isRunning ? stopTimer : startTimer} 
+      onClick={handleTimerClick} 
       size="lg" 
-      variant="outline" 
-      className="border-red-600 text-red-600 hover:bg-red-50 w-[180px] font-mono"
+      variant={config.variant}
+      disabled={config.disabled}
+      className={`w-[180px] font-mono ${config.className}`}
     >
-      {isRunning ? <><Clock className="w-5 h-5 mr-2" />{formatTime(seconds)}</> : <><Clock className="w-5 h-5 mr-2" />Start Sharing</>}
+      <Clock className="w-5 h-5 mr-2" />
+      {config.text}
     </Button>
   )
 }
@@ -728,17 +848,12 @@ export default function App() {
   const [whiteDeck, setWhiteDeck] = useState([])
   const [currentBlack, setCurrentBlack] = useState(null)
   const [currentWhite, setCurrentWhite] = useState(null)
-  
-  // Timer state
-  const [timerRunning, setTimerRunning] = useState(false)
-  const [timerSeconds, setTimerSeconds] = useState(0)
+  const [blackFlipped, setBlackFlipped] = useState(false)
+  const [whiteFlipped, setWhiteFlipped] = useState(false)
   
   // View state
   const [view, setView] = useState('game')
-  const [savedDraws, setSavedDraws] = useState([])
   const [purchases, setPurchases] = useState([])
-  const [paymentType, setPaymentType] = useState('onetime')
-  const [couponCode, setCouponCode] = useState('')
   
   // Admin
   const [adminCards, setAdminCards] = useState([])
@@ -757,6 +872,9 @@ export default function App() {
   const [uploadingImage, setUploadingImage] = useState(false)
   
   const supabase = createClient()
+  
+  // Check if both cards are flipped (for timer auto-start)
+  const bothCardsFlipped = currentBlack && currentWhite && blackFlipped && whiteFlipped
   
   // Check orientation
   useEffect(() => {
@@ -905,16 +1023,16 @@ export default function App() {
     setGameStarted(false)
     setCurrentBlack(null)
     setCurrentWhite(null)
-    setTimerRunning(false)
-    setTimerSeconds(0)
+    setBlackFlipped(false)
+    setWhiteFlipped(false)
   }
   
   // Next Player - reset for next turn
   const handleNextPlayer = () => {
     setCurrentBlack(null)
     setCurrentWhite(null)
-    setTimerRunning(false)
-    setTimerSeconds(0)
+    setBlackFlipped(false)
+    setWhiteFlipped(false)
   }
   
   // Purchase box
@@ -1019,44 +1137,6 @@ export default function App() {
     setGameStarted(false)
   }
   
-  const saveDraw = async () => {
-    if (!user) { setAuthOpen(true); return }
-    if (!currentBlack && !currentWhite) { 
-      toast.info('Please draw at least one card before saving')
-      return 
-    }
-    
-    await fetch('/api/draws/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        blackCardId: currentBlack?.id || null,
-        whiteCardId: currentWhite?.id || null,
-        blackCardTitle: currentBlack?.title || null,
-        whiteCardTitle: currentWhite?.title || null
-      })
-    })
-    toast.success('Draw saved!')
-  }
-  
-  const loadSavedDraws = async () => {
-    const response = await fetch('/api/draws')
-    const data = await response.json()
-    if (data.draws) {
-      const normalizedDraws = data.draws.map(draw => ({
-        id: draw.id,
-        userId: draw.userid,
-        userEmail: draw.useremail,
-        blackCardId: draw.blackcardid,
-        whiteCardId: draw.whitecardid,
-        blackCardTitle: draw.blackcardtitle,
-        whiteCardTitle: draw.whitecardtitle,
-        timestamp: draw.timestamp
-      }))
-      setSavedDraws(normalizedDraws)
-    }
-  }
-  
   // Load user purchases
   const loadPurchases = async () => {
     const response = await fetch('/api/purchases')
@@ -1107,7 +1187,6 @@ export default function App() {
     if (!file) return
     
     // Get box folder from selected box
-    const selectedBox = adminBoxes.find(b => b.id === cardForm.boxId)
     let boxFolder = 'uploads'
     
     if (cardForm.boxId === 'box_demo') boxFolder = 'white-box-demo'
@@ -1142,16 +1221,6 @@ export default function App() {
     } finally {
       setUploadingImage(false)
     }
-  }
-  
-  const handlePayment = async () => {
-    const response = await fetch('/api/payment/create-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paymentType, couponCode })
-    })
-    const data = await response.json()
-    if (data.url) window.location.href = data.url
   }
   
   const loadAdminCards = async () => {
@@ -1221,8 +1290,7 @@ export default function App() {
   }
   
   useEffect(() => {
-    if (view === 'draws') loadSavedDraws()
-    else if (view === 'purchases') loadPurchases()
+    if (view === 'purchases') loadPurchases()
     else if (view === 'admin') { loadAdminCards(); loadAdminBoxes() }
   }, [view])
   
@@ -1288,7 +1356,6 @@ export default function App() {
                   <Button onClick={() => setView('purchases')} variant={view === 'purchases' ? 'default' : 'ghost'}>
                     <Receipt className="w-4 h-4 mr-2" />Purchases
                   </Button>
-                  <Button onClick={() => setView('draws')} variant={view === 'draws' ? 'default' : 'ghost'}>My Draws</Button>
                   {isAdmin && (
                     <Button onClick={() => setView('admin')} variant={view === 'admin' ? 'default' : 'ghost'}>Admin</Button>
                   )}
@@ -1340,11 +1407,6 @@ export default function App() {
                         <SheetClose asChild>
                           <Button onClick={() => handleNavigation('purchases')} variant={view === 'purchases' ? 'default' : 'ghost'} className="justify-start">
                             <Receipt className="w-4 h-4 mr-2" />Purchases
-                          </Button>
-                        </SheetClose>
-                        <SheetClose asChild>
-                          <Button onClick={() => handleNavigation('draws')} variant={view === 'draws' ? 'default' : 'ghost'} className="justify-start">
-                            <Save className="w-4 h-4 mr-2" />My Draws
                           </Button>
                         </SheetClose>
                         {isAdmin && (
@@ -1413,6 +1475,8 @@ export default function App() {
                 allCards={allCards}
                 currentCard={currentBlack}
                 setCurrentCard={setCurrentBlack}
+                isFlipped={blackFlipped}
+                setIsFlipped={setBlackFlipped}
               />
               <CardPile 
                 color="white"
@@ -1421,54 +1485,27 @@ export default function App() {
                 allCards={allCards}
                 currentCard={currentWhite}
                 setCurrentCard={setCurrentWhite}
+                isFlipped={whiteFlipped}
+                setIsFlipped={setWhiteFlipped}
               />
             </div>
             
             {/* Controls */}
             <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <Button onClick={handleNextPlayer} size="lg" className="bg-gray-900 hover:bg-gray-800 text-white">
+              <GameTimer 
+                bothCardsFlipped={bothCardsFlipped}
+                onTurnEnd={handleNextPlayer}
+              />
+              <Button 
+                onClick={handleNextPlayer} 
+                size="lg" 
+                variant="outline"
+                className="border-gray-400 text-gray-700 hover:bg-gray-100"
+              >
+                <SkipForward className="w-5 h-5 mr-2" />
                 Next Player
               </Button>
-              <GameTimer 
-                isRunning={timerRunning}
-                setIsRunning={setTimerRunning}
-                seconds={timerSeconds}
-                setSeconds={setTimerSeconds}
-              />
-              <Button onClick={saveDraw} size="lg" variant="outline">
-                <Save className="w-5 h-5 mr-2" />
-                Save This Draw
-              </Button>
             </div>
-          </div>
-        )}
-        
-        {view === 'draws' && (
-          <div className="max-w-4xl mx-auto p-8">
-            <h2 className="text-3xl font-serif text-gray-900 mb-8">My Saved Draws</h2>
-            {savedDraws.length === 0 ? (
-              <p className="text-gray-600">No saved draws yet. Start playing and save your favorite moments!</p>
-            ) : (
-              <div className="space-y-6">
-                {savedDraws.map(draw => (
-                  <Card key={draw.id} className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="text-sm text-gray-500">{new Date(draw.timestamp).toLocaleString()}</div>
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-6">
-                      <div>
-                        <div className="text-xs text-gray-500 mb-2">Black Card</div>
-                        <div className="font-serif text-lg">{draw.blackCardTitle || '-'}</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500 mb-2">White Card</div>
-                        <div className="font-serif text-lg">{draw.whiteCardTitle || '-'}</div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
           </div>
         )}
         
@@ -1718,7 +1755,7 @@ export default function App() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-serif text-2xl">{authMode === 'signin' ? 'Welcome Back' : 'Create Account'}</DialogTitle>
-            <DialogDescription>{authMode === 'signin' ? 'Sign in to save your draws and unlock full access' : 'Create an account to start saving your conversation moments'}</DialogDescription>
+            <DialogDescription>{authMode === 'signin' ? 'Sign in to unlock full access' : 'Create an account to start your conversation journey'}</DialogDescription>
           </DialogHeader>
           
           <form onSubmit={handleAuth} className="space-y-4">
