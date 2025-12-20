@@ -481,23 +481,20 @@ function GamePlayView({
   // Both cards drawn but both showing backs = disable start button
   const bothShowingBacks = blackShowingBack && whiteShowingBack
   
-  // At least one card showing front = can interact with timer
-  const atLeastOneShowingFront = blackShowingFront || whiteShowingFront
-  
   // Use the timer hook
   const { timerState, seconds, handleTimerClick, resetTimer } = useGameTimer(bothCardsFlipped)
   
-  // Determine if we should hide cards (only when timer is active, not idle)
-  const timerActive = timerState !== 'idle'
+  // Only hide cards during countup or finished states (AFTER clicking start)
+  const sharingStarted = timerState === 'countup' || timerState === 'finished'
   
   // Should we show each card?
-  // - Always show if timer is idle (initial state)
-  // - If timer is active: hide cards showing backs IF the other card shows front
-  const showBlackCard = !timerActive || !blackShowingBack || !whiteShowingFront
-  const showWhiteCard = !timerActive || !whiteShowingBack || !blackShowingFront
+  // - Always show during idle, countdown, waiting
+  // - During countup/finished: hide cards showing backs IF the other card shows front
+  const showBlackCard = !sharingStarted || !blackShowingBack || !whiteShowingFront
+  const showWhiteCard = !sharingStarted || !whiteShowingBack || !blackShowingFront
   
-  // Should the start button be disabled?
-  const startButtonDisabled = timerActive && bothShowingBacks
+  // Should the start button be disabled? Only during countdown/waiting if both show backs
+  const startButtonDisabled = (timerState === 'countdown' || timerState === 'waiting') && bothShowingBacks
   
   // Handle next player - reset cards AND timer state
   const handleNextPlayerClick = () => {
