@@ -284,7 +284,7 @@ export default function App() {
   const startTimer = () => {
     setTimerRunning(true)
     setTimerSeconds(0)
-    setBellPlayed({ two: false, three: false })
+    setBellPlayed({ one: false, two: false, three: false })
   }
   
   const stopTimer = () => {
@@ -294,6 +294,10 @@ export default function App() {
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
+    
+    if (mins === 0) {
+      return `${secs}s`
+    }
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
   
