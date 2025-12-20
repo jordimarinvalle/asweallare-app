@@ -336,9 +336,9 @@ export async function POST(request) {
         title,
         hint: hint || '',
         language: language || 'en',
-        isDemo: isDemo || false,
-        isActive: isActive !== false,
-        createdAt: new Date().toISOString()
+        isdemo: isDemo || false,
+        isactive: isActive !== false,
+        createdat: new Date().toISOString()
       }
       
       const { data, error } = await supabase
