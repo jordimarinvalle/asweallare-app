@@ -13,10 +13,10 @@ from datetime import datetime
 BASE_URL = "http://localhost:3000"
 API_BASE = f"{BASE_URL}/api"
 
-# Test data
+# Test data - using more realistic email
 TEST_USER = {
-    "email": "test@example.com",
-    "password": "testpassword123"
+    "email": "testuser.apitest@gmail.com",
+    "password": "TestPassword123!"
 }
 
 TEST_CARD_DRAW = {
