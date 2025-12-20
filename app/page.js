@@ -1207,7 +1207,8 @@ export default function App() {
       language: cardForm.language,
       isDemo: cardForm.isDemo,
       isActive: cardForm.isActive,
-      boxId: cardForm.boxId || null
+      boxId: cardForm.boxId || null,
+      imagePath: cardForm.imagePath || null
     }
     
     if (editingCard) {
@@ -1225,7 +1226,7 @@ export default function App() {
     }
     
     setEditingCard(null)
-    setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '' })
+    setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '', imagePath: '' })
     loadAdminCards()
   }
   
