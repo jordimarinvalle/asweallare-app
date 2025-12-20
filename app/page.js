@@ -304,7 +304,7 @@ export default function App() {
   }
   
   const flipBackBlackCard = () => {
-    setBlackFlipped(false)
+    setBlackFlipState(prev => prev % 2 === 1 ? prev + 1 : prev) // Ensure even (face-down)
   }
   
   const flipBackWhiteCard = () => {
