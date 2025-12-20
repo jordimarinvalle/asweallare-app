@@ -1238,6 +1238,7 @@ export default function App() {
     e.preventDefault()
     setAuthError('')
     setAuthSuccess('')
+    setAuthLoading(true)
     
     try {
       // Handle password reset separately
@@ -1257,6 +1258,7 @@ export default function App() {
           setEmail('')
           setTimeout(() => { setAuthMode('signin'); setAuthSuccess('') }, 5000)
         }
+        setAuthLoading(false)
         return
       }
       
@@ -1283,13 +1285,34 @@ export default function App() {
           setPassword('')
           setTimeout(() => { setAuthMode('signin'); setAuthSuccess('') }, 3000)
         } else {
+          // Sign in successful - refresh user data and close dialog
           setAuthOpen(false)
           setEmail('')
           setPassword('')
+          
+          // Fetch fresh user data immediately
+          const userResponse = await fetch('/api/auth/user')
+          const userData = await userResponse.json()
+          if (userData.user) {
+            setUser(userData.user)
+          }
+          
+          // Refresh boxes with new user access
+          const boxResponse = await fetch('/api/boxes')
+          const boxData = await boxResponse.json()
+          if (boxData.boxes) {
+            setBoxes(boxData.boxes)
+            setHasAllAccess(boxData.hasAllAccess || false)
+            // Auto-select accessible boxes
+            const accessibleBoxIds = boxData.boxes.filter(b => b.hasAccess).map(b => b.id)
+            setSelectedBoxIds(accessibleBoxIds.length > 0 ? accessibleBoxIds : boxData.boxes.filter(b => b.is_demo && b.hasAccess).map(b => b.id))
+          }
         }
       }
     } catch (error) {
       setAuthError('Authentication failed. Please try again.')
+    } finally {
+      setAuthLoading(false)
     }
   }
   
