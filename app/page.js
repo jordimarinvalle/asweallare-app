@@ -508,6 +508,16 @@ function GamePlayView({
           setIsFlipped={setWhiteFlipped}
         />
       </div>
+      
+      {/* Reset button below cards */}
+      <div className="mt-8">
+        <button
+          onClick={handleNextPlayerClick}
+          className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-500 rounded-lg font-medium hover:border-gray-400 hover:text-gray-600 transition-colors"
+        >
+          Reset
+        </button>
+      </div>
     </div>
   )
 }
