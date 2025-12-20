@@ -106,18 +106,15 @@ CREATE INDEX IF NOT EXISTS idx_access_user_id ON user_access("userId");
 -- ============================================
 -- Uncomment and run if you want some demo cards to start with
 
--- INSERT INTO cards (id, color, title, hint, language, "isDemo", "isActive") VALUES
--- ('demo_black_1', 'black', 'What moment from today are you grateful for?', 'Think about the small things', 'en', true, true),
--- ('demo_black_2', 'black', 'What fear have you overcome recently?', NULL, 'en', true, true),
--- ('demo_black_3', 'black', 'Who do you miss right now?', NULL, 'en', true, true),
--- ('demo_white_1', 'white', 'Share a childhood memory that shaped you', NULL, 'en', true, true),
--- ('demo_white_2', 'white', 'What would you do if you had no fear?', NULL, 'en', true, true),
--- ('demo_white_3', 'white', 'Describe a perfect day for you', NULL, 'en', true, true);
+INSERT INTO cards (id, color, title, hint, language, "isDemo", "isActive") VALUES
+('demo_black_1', 'black', 'What moment from today are you grateful for?', 'Think about the small things', 'en', true, true),
+('demo_black_2', 'black', 'What fear have you overcome recently?', NULL, 'en', true, true),
+('demo_black_3', 'black', 'Who do you miss right now?', NULL, 'en', true, true),
+('demo_white_1', 'white', 'Share a childhood memory that shaped you', NULL, 'en', true, true),
+('demo_white_2', 'white', 'What would you do if you had no fear?', NULL, 'en', true, true),
+('demo_white_3', 'white', 'Describe a perfect day for you', NULL, 'en', true, true)
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================
 -- SETUP COMPLETE!
 -- ============================================
--- After running this SQL:
--- 1. Verify tables appear in Table Editor
--- 2. Your app should now work correctly
--- 3. You can revoke/regenerate the service role key if desired
