@@ -1,253 +1,226 @@
-# AS WE ALL ARE - Digital Conversation Game
+# AS WE ALL ARE - Conversation Card Game
 
-A premium, minimal digital conversation game designed for meaningful pass-the-phone moments.
+A mobile-first web app for meaningful conversations. Draw cards, share stories, and connect with others through thoughtful prompts.
 
-## 🎯 What's Built
+## 🎮 Features
 
-### ✅ Core Gameplay
-- Two card piles (Black & White)
-- Tap to draw face-down cards
-- Tap again to flip and reveal
-- Tap once more to discard
-- "Next Cards" button to redraw both
-- Timer with bells at 2 and 3 minutes
-- Mobile-first responsive design
+- **Card Drawing**: Draw black and white cards with a single tap
+- **Card Boxes**: Multiple themed collections (Demo, White, Black, Red)
+- **Timer**: Built-in sharing timer with bell sounds at 1, 2, and 3 minutes
+- **Save Draws**: Logged-in users can save memorable card combinations
+- **Store**: Purchase individual boxes or subscribe for all-access
+- **Admin Panel**: Manage cards and boxes
 
-### ✅ Authentication
-- Email/password sign up and login
-- Google OAuth integration
-- Anonymous play (demo cards only)
-- Session persistence
+## 🚀 Quick Start
 
-### ✅ Record Keeping
-- Save card pairs when logged in
-- View saved draws chronologically
-- Timestamp tracking
+### Prerequisites
 
-### ✅ Freemium Model
-- Free tier: Demo cards only
-- Paid tier: Full deck access
-- One-time unlock: $20
-- Subscription: $3 every 3 months
-- Stripe Checkout integration
-- Coupon code support
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
+- [Supabase](https://supabase.com) account (free tier works)
+- [Stripe](https://stripe.com) account (for payments)
 
-### ✅ Admin Panel
-- Add/edit/delete cards
-- Mark cards as demo or paid
-- Activate/deactivate cards
-- Multi-language support ready
+### 1. Clone and Setup Environment
 
-### ✅ Design
-- Premium minimal aesthetic
-- Black, White, Red (#D12128) color scheme
-- Serif titles (Libre Baskerville)
-- Sans-serif body (Inter)
-- Smooth card flip animations
-- Calm, human-centered UX
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd as-we-all-are
 
-## 🗄️ Database Schema
-
-### Tables
-1. **boxes** - Card collections/decks
-   - id, name, description, price, color, display_order, is_demo, is_active, created_at
-
-2. **cards** - Conversation cards
-   - id, color, title, hint, language, isdemo, isactive, box_id, createdat
-
-3. **saved_draws** - User's saved card pairs
-   - id, userid, useremail, blackcardid, whitecardid, blackcardtitle, whitecardtitle, timestamp
-
-4. **user_products** - Box purchases and subscriptions
-   - id, user_id, box_id, purchase_type, stripe_session_id, stripe_subscription_id, expires_at, is_active, created_at
-
-5. **subscription_plans** - Configurable pricing
-   - id, name, description, price, interval, stripe_price_id, is_active, created_at
-
-6. **user_access** - Legacy payment tracking (backward compatibility)
-   - id, userid, accesstype, paymenttype, stripesessionid, expiresat, createdat
-
-### Default Boxes
-- **Demo Box** (free) - Starter deck for all users
-- **White Box** ($15) - Light and reflective conversation starters
-- **Black Box** ($15) - Deep and meaningful questions
-- **Red Box** ($15) - Bold and daring topics
-
-### Setting Up Boxes
-1. Run the SQL in `/app/supabase-boxes-setup.sql` in your Supabase SQL Editor
-2. Assign cards to boxes: `UPDATE cards SET box_id = 'box_white' WHERE color = 'white';`
-
-## 🔑 Environment Variables
-
-Already configured in `.env`:
-```
-NEXT_PUBLIC_SUPABASE_URL=https://pwdwemakaozxmutwswqa.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_K-L2v83yXtTeHkSWtFX_ag_ZbjbDq8p
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_... (needs to be configured)
+# Copy environment template
+cp .env.example .env.local
 ```
 
-## 🚀 Live URL
+### 2. Configure Environment Variables
 
-**App URL:** https://agilecacti-unawarde.webapprun.net
+Edit `.env.local` with your credentials:
 
-## 📋 Setup Completed
+```env
+# Supabase (from https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
-✅ Supabase authentication configured
-✅ Database tables created with 6 demo cards
-✅ Stripe integration ready
-✅ Google OAuth enabled
-✅ Admin panel functional
+# Stripe (from https://dashboard.stripe.com/apikeys)
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 
-## 🎮 How to Use
+# App URL
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+```
 
-### For Players
-1. Open the app
-2. Tap Black and White card piles to draw
-3. Tap cards to flip and reveal
-4. Use "Start Sharing" to begin timed conversation
-5. Sign in to save your favorite card combinations
+### 3. Setup Database
 
-### For Admin
-1. Sign in with your account
-2. Click "Admin" in navigation
-3. Add cards with color, title, and optional hints
-4. Mark as demo for free users
-5. Deactivate cards without deleting them
+Run these SQL files in your Supabase SQL Editor (Dashboard → SQL Editor):
 
-## 💳 Stripe Payment Setup
+1. **Initial Setup**: `supabase-setup.sql`
+2. **Boxes System**: `supabase-boxes-setup.sql`
+3. **Card Images**: `supabase-images-setup.sql`
 
-### To Complete Payment Integration:
+### 4. Run with Docker
 
-1. **Create Products in Stripe Dashboard:**
-   - One-time product: $20
-   - Subscription product: $3 every 3 months
+```bash
+# Production mode
+docker-compose up -d
 
-2. **Set up Webhook:**
-   - Go to Stripe Dashboard → Developers → Webhooks
-   - Add endpoint: `https://agilecacti-unawarde.webapprun.net/api/payment/webhook`
-   - Listen for: `checkout.session.completed`
-   - Copy webhook secret and update `.env`: `STRIPE_WEBHOOK_SECRET=whsec_...`
-   - Restart server: `sudo supervisorctl restart nextjs`
+# View logs
+docker-compose logs -f
 
-3. **Create Coupons (Optional):**
-   - Go to Stripe Dashboard → Products → Coupons
-   - Create coupon codes
-   - Customers can enter code during checkout
+# Stop
+docker-compose down
+```
 
-## 🔐 Security Notes
+The app will be available at **http://localhost:3000**
 
-- Service Role Key was used only for database setup and has been removed
-- All sensitive keys are in `.env` (not committed to git)
-- Row Level Security enabled on all Supabase tables
-- Stripe payments use secure checkout sessions
+### 5. Development Mode (with hot reload)
 
-## 📱 Mobile Optimization
+```bash
+# Run in development mode
+docker-compose --profile dev up app-dev
 
-- Designed for pass-the-phone gameplay
-- Touch-friendly card interactions
-- Responsive layouts for all screen sizes
-- Works on desktop but optimized for mobile
-
-## 🎨 Design Philosophy
-
-**Premium but Human:**
-- No gamification vibes
-- Lots of white space
-- Clear typography hierarchy
-- Calm color palette
-- Smooth, intentional animations
-
-**Inspired by:**
-- Calm app
-- Headspace
-- Apple Fitness onboarding
-- But focused on human conversation, not wellness
-
-## 🛠️ Tech Stack
-
-- **Frontend:** Next.js 14 (App Router), React, Tailwind CSS, shadcn/ui
-- **Backend:** Next.js API Routes
-- **Database:** Supabase (PostgreSQL)
-- **Auth:** Supabase Auth
-- **Payments:** Stripe
-- **Deployment:** Docker/Kubernetes
+# Or without Docker
+yarn install
+yarn dev
+```
 
 ## 📁 Project Structure
 
 ```
-/app
 ├── app/
-│   ├── page.js              # Main game UI (with CardPile & GameTimer components)
-│   ├── layout.js            # Root layout with fonts
-│   ├── globals.css          # Premium styling
-│   ├── api/[[...path]]/route.js  # Backend API
-│   └── auth/callback/page.js     # OAuth callback
+│   ├── page.js                    # Main game UI
+│   ├── layout.js                  # Root layout
+│   ├── globals.css                # Styles
+│   ├── api/
+│   │   ├── [[...path]]/route.js   # Main API routes
+│   │   ├── payment/webhook/       # Stripe webhook
+│   │   └── admin/import-cards/    # Card import utility
+│   └── auth/callback/             # OAuth callback
 ├── components/
-│   ├── ui/                  # shadcn components
-│   └── game/                # Game-specific components
-│       ├── CardPile.jsx     # Card pile with draw/flip logic
-│       ├── GameTimer.jsx    # Timer with bell sounds
-│       └── index.js         # Exports
+│   └── ui/                        # shadcn components
 ├── lib/
-│   ├── supabase.js          # Browser Supabase client
-│   ├── supabase-server.js   # Server Supabase client
-│   └── stripe.js            # Stripe client
+│   ├── supabase.js                # Browser client
+│   ├── supabase-server.js         # Server client
+│   └── stripe.js                  # Stripe client
 ├── public/
-│   ├── sounds/              # Bell sound files (see README inside)
-│   │   ├── README.md        # Sound file documentation
-│   │   └── bell-*.mp3       # (optional) Custom bell sounds
-│   ├── black-card-back.png  # Black card back image
-│   └── white-card-back.png  # White card back image
-└── .env                     # Environment variables
+│   ├── cards/                     # Card images by box
+│   │   ├── white-box-demo/
+│   │   ├── white-box-108/
+│   │   ├── white-box-216/
+│   │   ├── black-box-108/
+│   │   └── red-box-108/
+│   ├── black-card-back.png        # Card back image
+│   └── white-card-back.png        # Card back image
+├── docker-compose.yml
+├── Dockerfile
+├── Dockerfile.dev
+└── .env.example
 ```
 
-## 🔔 Sound Files
+## 🗄️ Database Schema
 
-The timer uses Web Audio API to generate bell sounds programmatically. To use custom audio files:
+### Tables
 
-1. Add your MP3 files to `/public/sounds/`:
-   - `bell-1.mp3` - Single ding (1 minute mark)
-   - `bell-2.mp3` - Double ding (2 minute mark)
-   - `bell-3.mp3` - Triple ding (3 minute mark)
+| Table | Description |
+|-------|-------------|
+| `boxes` | Card collections (Demo, White, Black, Red) |
+| `cards` | Individual cards with title, hint, image_path |
+| `saved_draws` | User's saved card pairs |
+| `user_products` | Box purchases and subscriptions |
+| `subscription_plans` | Pricing configuration |
+| `user_access` | Legacy payment tracking |
 
-2. See `/public/sounds/README.md` for detailed specifications
+### Default Boxes
 
-## 🐛 Known Limitations
+| Box ID | Name | Cards | Price |
+|--------|------|-------|-------|
+| `box_demo` | Demo Box | 24 | Free |
+| `box_white` | White Box | 108 | $15 |
+| `box_white_xl` | White Box XL | 216 | $25 |
+| `box_black` | Black Box | 108 | $15 |
+| `box_red` | Red Box | 108 | $15 |
 
-1. **Webhook not configured yet** - Payment success won't grant access until webhook is set up
-2. **Admin access** - Currently any logged-in user can access admin panel (add auth check if needed)
-3. **Card shuffle** - Cards are randomly selected, not shuffled deck (can enhance if needed)
+## 🔧 API Endpoints
 
-## 🔄 Next Steps (Optional Enhancements)
+### Public
+- `GET /api/boxes` - List all boxes with access info
+- `GET /api/cards?box_ids=...` - Get cards for selected boxes
+- `GET /api/plans` - Get subscription plans
 
-1. **Payment webhook** - Complete Stripe webhook for automatic access granting
-2. **Admin role** - Add proper admin role checking
-3. **Card categories** - Group cards by themes
-4. **Multiplayer** - Share sessions between devices
-5. **Analytics** - Track popular cards and usage patterns
-6. **Progressive Web App** - Add PWA manifest for install prompt
-7. **Localization** - Multi-language support (database ready)
+### Authenticated
+- `POST /api/auth/signup` - Create account
+- `POST /api/auth/signin` - Sign in
+- `POST /api/auth/signout` - Sign out
+- `POST /api/auth/google` - Google OAuth
+- `GET /api/auth/user` - Get current user
+- `GET /api/draws` - Get saved draws
+- `POST /api/draws/save` - Save a draw
 
-## 💡 Tips for Founders
+### Payments
+- `POST /api/payment/purchase-box` - Buy a single box
+- `POST /api/payment/subscribe-all` - Subscribe to all boxes
+- `POST /api/payment/webhook` - Stripe webhook
 
-- Start with 20-30 quality cards for each color
-- Test the timer flow with real users
-- Consider adding "skip" functionality
-- Monitor which cards resonate most
-- Iterate on card content based on feedback
+### Admin
+- `GET/POST /api/admin/cards` - Manage cards
+- `GET/POST /api/admin/boxes` - Manage boxes
+- `GET/POST /api/admin/import-cards` - Import cards from images
 
-## 🎉 Ready to Launch!
+## 🎨 Adding Card Images
 
-Your MVP is complete and functional. All core features work:
-- ✅ Gameplay
-- ✅ Authentication  
-- ✅ Saving draws
-- ✅ Freemium model
-- ✅ Admin panel
+1. Place PNG images in the appropriate folder:
+   ```
+   public/cards/{box-folder}/{box-folder}-blacks/  # Black cards
+   public/cards/{box-folder}/{box-folder}-whites/  # White cards
+   ```
 
-Just complete the Stripe webhook setup and you're ready to go live!
+2. Run the import (dry run first):
+   ```bash
+   # Preview what will be imported
+   curl -X POST http://localhost:3000/api/admin/import-cards \
+     -H "Content-Type: application/json" \
+     -d '{"dryRun": true}'
+   
+   # Actually import
+   curl -X POST http://localhost:3000/api/admin/import-cards \
+     -H "Content-Type: application/json" \
+     -d '{"dryRun": false}'
+   ```
+
+## 💳 Stripe Webhook Setup
+
+### Local Development
+```bash
+# Install Stripe CLI
+brew install stripe/stripe-cli/stripe
+
+# Forward webhooks to local
+stripe listen --forward-to localhost:3000/api/payment/webhook
+```
+
+### Production
+1. Go to Stripe Dashboard → Webhooks
+2. Add endpoint: `https://your-domain.com/api/payment/webhook`
+3. Select events: `checkout.session.completed`, `invoice.payment_succeeded`, `customer.subscription.deleted`
+4. Copy the webhook secret to your environment
+
+## 🔒 Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key |
+| `STRIPE_SECRET_KEY` | Stripe secret key |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook secret |
+| `NEXT_PUBLIC_BASE_URL` | App base URL |
+
+## 📱 Mobile Experience
+
+The app is designed mobile-first:
+- Landscape mode enforced during gameplay
+- Touch-optimized card interactions
+- Single-tap to draw and reveal cards
 
 ---
 
