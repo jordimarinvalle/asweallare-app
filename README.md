@@ -49,14 +49,33 @@ A premium, minimal digital conversation game designed for meaningful pass-the-ph
 ## 🗄️ Database Schema
 
 ### Tables
-1. **cards** - Conversation cards
-   - id, color, title, hint, language, isdemo, isactive, createdat
+1. **boxes** - Card collections/decks
+   - id, name, description, price, color, display_order, is_demo, is_active, created_at
 
-2. **saved_draws** - User's saved card pairs
+2. **cards** - Conversation cards
+   - id, color, title, hint, language, isdemo, isactive, box_id, createdat
+
+3. **saved_draws** - User's saved card pairs
    - id, userid, useremail, blackcardid, whitecardid, blackcardtitle, whitecardtitle, timestamp
 
-3. **user_access** - Payment/subscription tracking
+4. **user_products** - Box purchases and subscriptions
+   - id, user_id, box_id, purchase_type, stripe_session_id, stripe_subscription_id, expires_at, is_active, created_at
+
+5. **subscription_plans** - Configurable pricing
+   - id, name, description, price, interval, stripe_price_id, is_active, created_at
+
+6. **user_access** - Legacy payment tracking (backward compatibility)
    - id, userid, accesstype, paymenttype, stripesessionid, expiresat, createdat
+
+### Default Boxes
+- **Demo Box** (free) - Starter deck for all users
+- **White Box** ($15) - Light and reflective conversation starters
+- **Black Box** ($15) - Deep and meaningful questions
+- **Red Box** ($15) - Bold and daring topics
+
+### Setting Up Boxes
+1. Run the SQL in `/app/supabase-boxes-setup.sql` in your Supabase SQL Editor
+2. Assign cards to boxes: `UPDATE cards SET box_id = 'box_white' WHERE color = 'white';`
 
 ## 🔑 Environment Variables
 
