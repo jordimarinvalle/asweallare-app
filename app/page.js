@@ -238,18 +238,24 @@ export default function App() {
   
   const handleBlackClick = () => {
     if (!currentBlack) {
+      // Draw card - it will appear face down
       drawBlackCard()
     } else if (!blackFlipped) {
+      // Flip the card face up
       setBlackFlipped(true)
     }
+    // If already flipped, do nothing (use flip back or discard buttons)
   }
   
   const handleWhiteClick = () => {
     if (!currentWhite) {
+      // Draw card - it will appear face down
       drawWhiteCard()
     } else if (!whiteFlipped) {
+      // Flip the card face up
       setWhiteFlipped(true)
     }
+    // If already flipped, do nothing (use flip back or discard buttons)
   }
   
   const flipBackBlackCard = () => {
