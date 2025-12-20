@@ -1286,10 +1286,36 @@ export default function App() {
   }
   
   const handleSignOut = async () => {
+    // Sign out on server
     await fetch('/api/auth/signout', { method: 'POST' })
+    
+    // Also sign out on client to clear local session
+    await supabase.auth.signOut()
+    
+    // Clear ALL user-related state
     setUser(null)
     setView('game')
     setGameStarted(false)
+    setHasAllAccess(false)
+    setSelectedBoxIds([])
+    setPurchases([])
+    setAllCards([])
+    setBlackDeck([])
+    setWhiteDeck([])
+    setCurrentBlack(null)
+    setCurrentWhite(null)
+    setBlackFlipped(false)
+    setWhiteFlipped(false)
+    
+    // Reload boxes to get fresh data without user access
+    const response = await fetch('/api/boxes')
+    const data = await response.json()
+    if (data.boxes) {
+      setBoxes(data.boxes)
+      // Auto-select only demo boxes for non-authenticated user
+      const demoBoxIds = data.boxes.filter(b => b.is_demo && b.hasAccess).map(b => b.id)
+      setSelectedBoxIds(demoBoxIds)
+    }
   }
   
   // Load user purchases
