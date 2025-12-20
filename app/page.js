@@ -278,6 +278,7 @@ export default function App() {
       setBlackDeck(remaining)
       setDrawnBlackCards([...drawnBlackCards, card])
       setBlackFlipped(false)
+      setRenderKey(prev => prev + 1) // Force re-render
     } else if (currentBlack) {
       // Toggle flip
       console.log('Toggling flip from', blackFlipped, 'to', !blackFlipped)
@@ -299,6 +300,7 @@ export default function App() {
       setWhiteDeck(remaining)
       setDrawnWhiteCards([...drawnWhiteCards, card])
       setWhiteFlipped(false)
+      setRenderKey(prev => prev + 1) // Force re-render
     } else if (currentWhite) {
       // Toggle flip
       console.log('Toggling flip from', whiteFlipped, 'to', !whiteFlipped)
