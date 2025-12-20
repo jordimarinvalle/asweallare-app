@@ -273,32 +273,30 @@ export default function App() {
   
   const handleBlackClick = () => {
     if (!currentBlack && blackDeck.length > 0) {
-      // Draw card - increment flip state to force change
+      // Draw card
       const [card, ...remaining] = blackDeck
       setBlackDeck(remaining)
       setDrawnBlackCards([...drawnBlackCards, card])
       setCurrentBlack(card)
-      // Increment flip state (starts at 0=face-down, then increments)
-      setBlackFlipState(prev => prev + 1)
+      setBlackFlipState(0) // Start at 0 (face-down)
       setRenderKey(prev => prev + 1)
     } else if (currentBlack) {
-      // Toggle flip by incrementing state
+      // Toggle flip by incrementing
       setBlackFlipState(prev => prev + 1)
     }
   }
   
   const handleWhiteClick = () => {
     if (!currentWhite && whiteDeck.length > 0) {
-      // Draw card - increment flip state to force change
+      // Draw card
       const [card, ...remaining] = whiteDeck
       setWhiteDeck(remaining)
       setDrawnWhiteCards([...drawnWhiteCards, card])
       setCurrentWhite(card)
-      // Increment flip state (starts at 0=face-down, then increments)
-      setWhiteFlipState(prev => prev + 1)
+      setWhiteFlipState(0) // Start at 0 (face-down)
       setRenderKey(prev => prev + 1)
     } else if (currentWhite) {
-      // Toggle flip by incrementing state
+      // Toggle flip by incrementing
       setWhiteFlipState(prev => prev + 1)
     }
   }
