@@ -239,7 +239,8 @@ function GameStatusText({
   timerState, 
   seconds, 
   onTimerClick,
-  onReset
+  onReset,
+  disabled = false
 }) {
   const formatTime = (totalSeconds) => {
     const mins = Math.floor(Math.abs(totalSeconds) / 60)
@@ -264,9 +265,14 @@ function GameStatusText({
         <div className="text-center mb-8">
           <button
             onClick={onTimerClick}
-            className="min-w-[320px] px-6 py-3 bg-white border border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+            disabled={disabled}
+            className={`min-w-[320px] px-6 py-3 bg-white border rounded-lg font-medium transition-colors ${
+              disabled 
+                ? 'border-gray-300 text-gray-400 cursor-not-allowed' 
+                : 'border-green-600 text-green-600 hover:bg-green-50'
+            }`}
           >
-            Click here to start ({seconds}s)
+            {disabled ? `Flip a card to start (${seconds}s)` : `Click here to start (${seconds}s)`}
           </button>
         </div>
       )
@@ -276,9 +282,14 @@ function GameStatusText({
         <div className="text-center mb-8">
           <button
             onClick={onTimerClick}
-            className="min-w-[320px] px-6 py-3 bg-white border border-green-600 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+            disabled={disabled}
+            className={`min-w-[320px] px-6 py-3 bg-white border rounded-lg font-medium transition-colors ${
+              disabled 
+                ? 'border-gray-300 text-gray-400 cursor-not-allowed' 
+                : 'border-green-600 text-green-600 hover:bg-green-50'
+            }`}
           >
-            Time is over. Click here to start.
+            {disabled ? 'Flip a card to start' : 'Time is over. Click here to start.'}
           </button>
         </div>
       )
