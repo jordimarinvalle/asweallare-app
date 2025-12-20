@@ -269,24 +269,18 @@ export default function App() {
     console.log('blackFlipped:', blackFlipped)
     console.log('blackDeck.length:', blackDeck.length)
     
-    if (!currentBlack) {
+    if (!currentBlack && blackDeck.length > 0) {
       // Draw card
-      if (blackDeck.length > 0) {
-        const [card, ...remaining] = blackDeck
-        console.log('Drawing card:', card)
-        setCurrentBlack(card)
-        setBlackDeck(remaining)
-        setDrawnBlackCards([...drawnBlackCards, card])
-        setBlackFlipped(false)
-        
-        // Animation
-        setCardDrawAnimation(prev => ({ ...prev, black: true }))
-        setTimeout(() => setCardDrawAnimation(prev => ({ ...prev, black: false })), 400)
-      }
-    } else if (!blackFlipped) {
-      // Flip card
-      console.log('Flipping card')
-      setBlackFlipped(true)
+      const [card, ...remaining] = blackDeck
+      console.log('Drawing card:', card)
+      setCurrentBlack(card)
+      setBlackDeck(remaining)
+      setDrawnBlackCards([...drawnBlackCards, card])
+      setBlackFlipped(false)
+    } else if (currentBlack) {
+      // Toggle flip
+      console.log('Toggling flip from', blackFlipped, 'to', !blackFlipped)
+      setBlackFlipped(!blackFlipped)
     }
   }
   
@@ -296,24 +290,18 @@ export default function App() {
     console.log('whiteFlipped:', whiteFlipped)
     console.log('whiteDeck.length:', whiteDeck.length)
     
-    if (!currentWhite) {
+    if (!currentWhite && whiteDeck.length > 0) {
       // Draw card
-      if (whiteDeck.length > 0) {
-        const [card, ...remaining] = whiteDeck
-        console.log('Drawing card:', card)
-        setCurrentWhite(card)
-        setWhiteDeck(remaining)
-        setDrawnWhiteCards([...drawnWhiteCards, card])
-        setWhiteFlipped(false)
-        
-        // Animation
-        setCardDrawAnimation(prev => ({ ...prev, white: true }))
-        setTimeout(() => setCardDrawAnimation(prev => ({ ...prev, white: false })), 400)
-      }
-    } else if (!whiteFlipped) {
-      // Flip card
-      console.log('Flipping card')
-      setWhiteFlipped(true)
+      const [card, ...remaining] = whiteDeck
+      console.log('Drawing card:', card)
+      setCurrentWhite(card)
+      setWhiteDeck(remaining)
+      setDrawnWhiteCards([...drawnWhiteCards, card])
+      setWhiteFlipped(false)
+    } else if (currentWhite) {
+      // Toggle flip
+      console.log('Toggling flip from', whiteFlipped, 'to', !whiteFlipped)
+      setWhiteFlipped(!whiteFlipped)
     }
   }
   
