@@ -119,9 +119,21 @@ export default function App() {
     const data = await response.json()
     
     if (data.cards) {
-      setCards(data.cards)
-      setBlackCards(data.cards.filter(c => c.color === 'black'))
-      setWhiteCards(data.cards.filter(c => c.color === 'white'))
+      // Normalize card data from database (lowercase) to camelCase for frontend
+      const normalizedCards = data.cards.map(card => ({
+        id: card.id,
+        color: card.color,
+        title: card.title,
+        hint: card.hint,
+        language: card.language,
+        isDemo: card.isdemo,
+        isActive: card.isactive,
+        createdAt: card.createdat
+      }))
+      
+      setCards(normalizedCards)
+      setBlackCards(normalizedCards.filter(c => c.color === 'black'))
+      setWhiteCards(normalizedCards.filter(c => c.color === 'white'))
     }
   }
   
