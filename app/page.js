@@ -428,10 +428,17 @@ function useGameTimer(bothCardsFlipped) {
     }
   }
   
+  // Reset timer to initial state
+  const resetTimer = () => {
+    setTimerState('idle')
+    setSeconds(15)
+  }
+  
   return {
     timerState,
     seconds,
-    handleTimerClick
+    handleTimerClick,
+    resetTimer
   }
 }
 
@@ -453,11 +460,12 @@ function GamePlayView({
   const bothCardsFlipped = currentBlack && currentWhite && blackFlipped && whiteFlipped
   
   // Use the timer hook
-  const { timerState, seconds, handleTimerClick } = useGameTimer(bothCardsFlipped)
+  const { timerState, seconds, handleTimerClick, resetTimer } = useGameTimer(bothCardsFlipped)
   
-  // Handle next player - also reset timer state
+  // Handle next player - reset cards AND timer state
   const handleNextPlayerClick = () => {
     onNextPlayer()
+    resetTimer()
   }
   
   return (
