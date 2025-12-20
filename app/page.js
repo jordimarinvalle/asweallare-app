@@ -1269,7 +1269,7 @@ export default function App() {
           </div>
         )}
         
-        {view === 'admin' && (
+        {view === 'admin' && isAdmin && (
           <div className="max-w-6xl mx-auto p-8">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-serif text-gray-900">Card Management</h2>
@@ -1327,8 +1327,28 @@ export default function App() {
               </div>
             </Card>
             
+            {/* Filter by Box */}
+            <div className="mb-6 flex items-center gap-4">
+              <Label className="whitespace-nowrap">Filter by Box:</Label>
+              <select 
+                value={adminBoxFilter} 
+                onChange={(e) => setAdminBoxFilter(e.target.value)} 
+                className="p-2 border border-gray-300 rounded-md min-w-[200px]"
+              >
+                <option value="">All Boxes</option>
+                {adminBoxes.map(box => (
+                  <option key={box.id} value={box.id}>{box.name}</option>
+                ))}
+              </select>
+              <span className="text-sm text-gray-500">
+                Showing {adminBoxFilter ? adminCards.filter(c => c.boxId === adminBoxFilter).length : adminCards.length} cards
+              </span>
+            </div>
+            
             <div className="space-y-4">
-              {adminCards.map(card => (
+              {adminCards
+                .filter(card => !adminBoxFilter || card.boxId === adminBoxFilter)
+                .map(card => (
                 <Card key={card.id} className="p-4">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -1337,6 +1357,7 @@ export default function App() {
                         {card.boxName && <span className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">{card.boxName}</span>}
                         {card.isDemo && <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">Demo</span>}
                         {!card.isActive && <span className="px-2 py-1 text-xs rounded bg-red-100 text-red-800">Inactive</span>}
+                        {card.imagePath && <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-800">Has Image</span>}
                       </div>
                       <div className="font-serif text-lg mb-1">{card.title}</div>
                       {card.hint && <div className="text-sm text-gray-600 italic">{card.hint}</div>}
@@ -1349,6 +1370,15 @@ export default function App() {
                 </Card>
               ))}
             </div>
+          </div>
+        )}
+        
+        {view === 'admin' && !isAdmin && (
+          <div className="max-w-md mx-auto p-8 text-center">
+            <Lock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h2 className="text-2xl font-serif text-gray-900 mb-2">Access Denied</h2>
+            <p className="text-gray-600">You don't have permission to access the admin panel.</p>
+            <Button onClick={() => setView('game')} className="mt-6">Go to Game</Button>
           </div>
         )}
       </div>
