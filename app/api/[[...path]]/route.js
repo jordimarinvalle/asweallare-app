@@ -189,6 +189,27 @@ export async function GET(request) {
       return handleCORS(NextResponse.json({ plans: plans || [] }))
     }
 
+    // USER PURCHASES - Get user's purchase history
+    if (path === 'purchases') {
+      const { user, error: authError } = await getAuthenticatedUser()
+      
+      if (authError || !user) {
+        return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
+      }
+      
+      const { data: purchases, error } = await supabase
+        .from('user_products')
+        .select('*, boxes(name, color, price)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ purchases: purchases || [] }))
+    }
+
     // SAVED DRAWS ROUTES
     if (path === 'draws') {
       const { user, error: authError } = await getAuthenticatedUser()
