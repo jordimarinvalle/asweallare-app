@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
-import { Bell, Save, Clock, User, LogOut, Plus, Edit, Trash2, CreditCard, Info } from 'lucide-react'
+import { Bell, Save, Clock, LogOut, Plus, Edit, Trash2, CreditCard, Info, RotateCw, Smartphone } from 'lucide-react'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -20,21 +20,27 @@ export default function App() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
+  const [isLandscape, setIsLandscape] = useState(true)
   
-  // Game state
+  // Game state with deck management
   const [cards, setCards] = useState([])
-  const [blackCards, setBlackCards] = useState([])
-  const [whiteCards, setWhiteCards] = useState([])
+  const [blackDeck, setBlackDeck] = useState([])
+  const [whiteDeck, setWhiteDeck] = useState([])
+  const [drawnBlackCards, setDrawnBlackCards] = useState([])
+  const [drawnWhiteCards, setDrawnWhiteCards] = useState([])
   const [currentBlack, setCurrentBlack] = useState(null)
   const [currentWhite, setCurrentWhite] = useState(null)
   const [blackFlipped, setBlackFlipped] = useState(false)
   const [whiteFlipped, setWhiteFlipped] = useState(false)
+  const [cardDrawAnimation, setCardDrawAnimation] = useState({ black: false, white: false })
+  
+  // Timer
   const [timerRunning, setTimerRunning] = useState(false)
   const [timerSeconds, setTimerSeconds] = useState(0)
   const [bellPlayed, setBellPlayed] = useState({ two: false, three: false })
   
   // Other screens
-  const [view, setView] = useState('game') // game, draws, payment, admin
+  const [view, setView] = useState('game')
   const [savedDraws, setSavedDraws] = useState([])
   const [paymentType, setPaymentType] = useState('onetime')
   const [couponCode, setCouponCode] = useState('')
@@ -53,6 +59,22 @@ export default function App() {
   
   const supabase = createClient()
   const audioRef = useRef(null)
+  
+  // Check orientation
+  useEffect(() => {
+    const checkOrientation = () => {
+      setIsLandscape(window.innerWidth > window.innerHeight)
+    }
+    
+    checkOrientation()
+    window.addEventListener('resize', checkOrientation)
+    window.addEventListener('orientationchange', checkOrientation)
+    
+    return () => {
+      window.removeEventListener('resize', checkOrientation)
+      window.removeEventListener('orientationchange', checkOrientation)
+    }
+  }, [])
   
   // Auth check
   useEffect(() => {
@@ -81,10 +103,61 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
   
-  // Load cards
+  // Load cards and initialize decks
+  const loadCards = async () => {
+    const response = await fetch('/api/cards')
+    const data = await response.json()
+    
+    if (data.cards) {
+      const normalizedCards = data.cards.map(card => ({
+        id: card.id,
+        color: card.color,
+        title: card.title,
+        hint: card.hint,
+        language: card.language,
+        isDemo: card.isdemo,
+        isActive: card.isactive,
+        createdAt: card.createdat
+      }))
+      
+      setCards(normalizedCards)
+      const blacks = normalizedCards.filter(c => c.color === 'black')
+      const whites = normalizedCards.filter(c => c.color === 'white')
+      setBlackDeck(shuffleDeck([...blacks]))
+      setWhiteDeck(shuffleDeck([...whites]))
+    }
+  }
+  
   useEffect(() => {
     loadCards()
   }, [user])
+  
+  // Shuffle deck
+  const shuffleDeck = (deck) => {
+    const shuffled = [...deck]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
+  }
+  
+  // Reshuffle deck
+  const reshuffleBlackDeck = () => {
+    const allBlackCards = cards.filter(c => c.color === 'black')
+    setBlackDeck(shuffleDeck([...allBlackCards]))
+    setDrawnBlackCards([])
+    setCurrentBlack(null)
+    setBlackFlipped(false)
+  }
+  
+  const reshuffleWhiteDeck = () => {
+    const allWhiteCards = cards.filter(c => c.color === 'white')
+    setWhiteDeck(shuffleDeck([...allWhiteCards]))
+    setDrawnWhiteCards([])
+    setCurrentWhite(null)
+    setWhiteFlipped(false)
+  }
   
   // Timer
   useEffect(() => {
@@ -94,13 +167,11 @@ export default function App() {
         setTimerSeconds(prev => {
           const newValue = prev + 1
           
-          // Bell at 2 minutes (120 seconds)
           if (newValue === 120 && !bellPlayed.two) {
             playBell()
             setBellPlayed(prev => ({ ...prev, two: true }))
           }
           
-          // Bell at 3 minutes (180 seconds)
           if (newValue === 180 && !bellPlayed.three) {
             playBell()
             setBellPlayed(prev => ({ ...prev, three: true }))
@@ -114,29 +185,6 @@ export default function App() {
     return () => clearInterval(interval)
   }, [timerRunning, bellPlayed])
   
-  const loadCards = async () => {
-    const response = await fetch('/api/cards')
-    const data = await response.json()
-    
-    if (data.cards) {
-      // Normalize card data from database (lowercase) to camelCase for frontend
-      const normalizedCards = data.cards.map(card => ({
-        id: card.id,
-        color: card.color,
-        title: card.title,
-        hint: card.hint,
-        language: card.language,
-        isDemo: card.isdemo,
-        isActive: card.isactive,
-        createdAt: card.createdat
-      }))
-      
-      setCards(normalizedCards)
-      setBlackCards(normalizedCards.filter(c => c.color === 'black'))
-      setWhiteCards(normalizedCards.filter(c => c.color === 'white'))
-    }
-  }
-  
   const playBell = () => {
     if (audioRef.current) {
       audioRef.current.play()
@@ -144,17 +192,31 @@ export default function App() {
   }
   
   const drawBlackCard = () => {
-    if (blackCards.length === 0) return
-    const randomCard = blackCards[Math.floor(Math.random() * blackCards.length)]
-    setCurrentBlack(randomCard)
+    if (blackDeck.length === 0) return
+    
+    const [card, ...remaining] = blackDeck
+    setCurrentBlack(card)
+    setBlackDeck(remaining)
+    setDrawnBlackCards([...drawnBlackCards, card])
     setBlackFlipped(false)
+    
+    // Trigger animation
+    setCardDrawAnimation(prev => ({ ...prev, black: true }))
+    setTimeout(() => setCardDrawAnimation(prev => ({ ...prev, black: false })), 400)
   }
   
   const drawWhiteCard = () => {
-    if (whiteCards.length === 0) return
-    const randomCard = whiteCards[Math.floor(Math.random() * whiteCards.length)]
-    setCurrentWhite(randomCard)
+    if (whiteDeck.length === 0) return
+    
+    const [card, ...remaining] = whiteDeck
+    setCurrentWhite(card)
+    setWhiteDeck(remaining)
+    setDrawnWhiteCards([...drawnWhiteCards, card])
     setWhiteFlipped(false)
+    
+    // Trigger animation
+    setCardDrawAnimation(prev => ({ ...prev, white: true }))
+    setTimeout(() => setCardDrawAnimation(prev => ({ ...prev, white: false })), 400)
   }
   
   const handleBlackClick = () => {
@@ -162,9 +224,6 @@ export default function App() {
       drawBlackCard()
     } else if (!blackFlipped) {
       setBlackFlipped(true)
-    } else {
-      setCurrentBlack(null)
-      setBlackFlipped(false)
     }
   }
   
@@ -173,15 +232,28 @@ export default function App() {
       drawWhiteCard()
     } else if (!whiteFlipped) {
       setWhiteFlipped(true)
-    } else {
-      setCurrentWhite(null)
-      setWhiteFlipped(false)
     }
   }
   
-  const handleNextCards = () => {
-    drawBlackCard()
-    drawWhiteCard()
+  const discardBlackCard = () => {
+    setCurrentBlack(null)
+    setBlackFlipped(false)
+  }
+  
+  const discardWhiteCard = () => {
+    setCurrentWhite(null)
+    setWhiteFlipped(false)
+  }
+  
+  const handleNextPlayer = () => {
+    // Clear current cards and reset for next player
+    setCurrentBlack(null)
+    setCurrentWhite(null)
+    setBlackFlipped(false)
+    setWhiteFlipped(false)
+    setTimerRunning(false)
+    setTimerSeconds(0)
+    setBellPlayed({ two: false, three: false })
   }
   
   const startTimer = () => {
@@ -219,7 +291,6 @@ export default function App() {
         setAuthOpen(false)
         setEmail('')
         setPassword('')
-        // User state will update via auth state change listener
       }
     } catch (error) {
       setAuthError('Authentication failed')
@@ -278,7 +349,6 @@ export default function App() {
     const response = await fetch('/api/draws')
     const data = await response.json()
     if (data.draws) {
-      // Normalize draw data from database
       const normalizedDraws = data.draws.map(draw => ({
         id: draw.id,
         userId: draw.userid,
@@ -310,7 +380,6 @@ export default function App() {
     const response = await fetch('/api/admin/cards')
     const data = await response.json()
     if (data.cards) {
-      // Normalize card data from database
       const normalizedCards = data.cards.map(card => ({
         id: card.id,
         color: card.color,
@@ -350,6 +419,7 @@ export default function App() {
       isActive: true
     })
     loadAdminCards()
+    loadCards()
   }
   
   const handleDeleteCard = async (cardId) => {
@@ -358,6 +428,7 @@ export default function App() {
         method: 'DELETE'
       })
       loadAdminCards()
+      loadCards()
     }
   }
   
@@ -377,16 +448,34 @@ export default function App() {
     )
   }
   
+  // Landscape orientation check
+  if (!isLandscape && view === 'game') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white p-8">
+        <div className="text-center max-w-md">
+          <Smartphone className="w-24 h-24 mx-auto mb-6 text-red-600 animate-pulse" />
+          <h2 className="text-3xl font-serif text-gray-900 mb-4">Rotate Your Device</h2>
+          <p className="text-lg text-gray-600 mb-6">
+            AS WE ALL ARE is best experienced in landscape mode. Please rotate your phone horizontally.
+          </p>
+          <div className="flex items-center justify-center gap-2 text-gray-500">
+            <RotateCw className="w-5 h-5" />
+            <span>Turn your device sideways</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  
   return (
     <div className="min-h-screen bg-white">
-      {/* Bell sound */}
       <audio ref={audioRef} src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjKH0fPTgjMGHm7A7+OZTRQNUZPG7L9rIAY+kuDz0okxBRxx0e/cm0UIKXi/8Nh2LAYuhM/z2o41CBlquvbt5JhPFQ1Vm+nyt1sdBTOM0vPQfC0FJ3fF8N+RQQoUX7Tp7KlWFApHoOHyvmwiBjKI0vPTgjMGH27A7+OZTRQNUZ/G7MBrIAZAkvDz0okxBRxx0e/cm0UIKXi/8Nh2LAYuhM/z2o41CBl" preload="auto" />
       
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-serif text-gray-900">AS WE ALL ARE</h1>
+            <h1 className="font-brand text-gray-900">AS WE ALL ARE</h1>
             
             <div className="flex items-center gap-4">
               {!user ? (
@@ -425,7 +514,6 @@ export default function App() {
       <div className="pt-16">
         {view === 'game' && (
           <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 sm:p-8">
-            {/* Demo notice */}
             {(!user || !user.hasPaidAccess) && (
               <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg max-w-md text-center">
                 <Info className="w-5 h-5 text-red-600 inline-block mr-2" />
@@ -436,76 +524,112 @@ export default function App() {
             )}
             
             {/* Card piles */}
-            <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 mb-12">
-              {/* Black card */}
-              <div
-                onClick={handleBlackClick}
-                className="cursor-pointer perspective-1000"
-              >
-                <div className={`w-64 h-96 transition-transform duration-500 transform-style-3d ${blackFlipped ? 'rotate-y-180' : ''}`}>
-                  <div className="absolute inset-0 backface-hidden">
-                    <Card className="w-full h-full bg-black border-2 border-gray-800 flex items-center justify-center hover:shadow-xl transition-shadow">
-                      <CardContent className="p-8 text-center">
-                        <p className="text-white text-xl font-serif">Black Card</p>
-                        <p className="text-gray-400 text-sm mt-4">Tap to draw</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  <div className="absolute inset-0 backface-hidden rotate-y-180">
-                    <Card className="w-full h-full bg-black border-2 border-gray-800 flex items-center justify-center">
-                      <CardContent className="p-8 text-center">
-                        {currentBlack && (
-                          <>
+            <div className="flex flex-row gap-8 sm:gap-12 mb-12">
+              {/* Black card pile */}
+              <div className="flex flex-col items-center gap-4">
+                <div
+                  onClick={handleBlackClick}
+                  className={`cursor-pointer perspective-1000 ${cardDrawAnimation.black ? 'card-draw-animation' : ''}`}
+                >
+                  <div className={`w-64 h-96 transition-transform duration-500 transform-style-3d ${blackFlipped ? 'rotate-y-180' : ''}`}>
+                    <div className="absolute inset-0 backface-hidden">
+                      {blackDeck.length > 0 ? (
+                        <Card className="w-full h-full bg-black border-2 border-gray-800 flex items-center justify-center hover:shadow-xl transition-shadow card-stack text-white">
+                          <CardContent className="p-8 text-center">
+                            <p className="text-white text-xl font-serif">Black Card</p>
+                            <p className="text-gray-400 text-sm mt-4">Tap to draw</p>
+                            <p className="text-gray-500 text-xs mt-8">{blackDeck.length} cards left</p>
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        <Card className="w-full h-full bg-gray-100 border-2 border-gray-300 flex items-center justify-center">
+                          <CardContent className="p-8 text-center">
+                            <p className="text-gray-500 text-lg font-serif mb-4">No Cards Left</p>
+                            <Button onClick={reshuffleBlackDeck} size="sm" variant="outline">
+                              <RotateCw className="w-4 h-4 mr-2" />
+                              Reshuffle Deck
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                    {currentBlack && (
+                      <div className="absolute inset-0 backface-hidden rotate-y-180">
+                        <Card className="w-full h-full bg-black border-2 border-gray-800 flex items-center justify-center">
+                          <CardContent className="p-8 text-center">
                             <h2 className="text-white text-2xl font-serif mb-4">{currentBlack.title}</h2>
                             {currentBlack.hint && (
                               <p className="text-gray-400 text-sm italic">{currentBlack.hint}</p>
                             )}
-                            <p className="text-gray-500 text-xs mt-6">Tap again to discard</p>
-                          </>
-                        )}
-                      </CardContent>
-                    </Card>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
                   </div>
                 </div>
+                
+                {currentBlack && blackFlipped && (
+                  <Button onClick={discardBlackCard} size="sm" variant="outline">
+                    Discard
+                  </Button>
+                )}
               </div>
               
-              {/* White card */}
-              <div
-                onClick={handleWhiteClick}
-                className="cursor-pointer perspective-1000"
-              >
-                <div className={`w-64 h-96 transition-transform duration-500 transform-style-3d ${whiteFlipped ? 'rotate-y-180' : ''}`}>
-                  <div className="absolute inset-0 backface-hidden">
-                    <Card className="w-full h-full bg-white border-2 border-gray-300 flex items-center justify-center hover:shadow-xl transition-shadow">
-                      <CardContent className="p-8 text-center">
-                        <p className="text-gray-900 text-xl font-serif">White Card</p>
-                        <p className="text-gray-500 text-sm mt-4">Tap to draw</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  <div className="absolute inset-0 backface-hidden rotate-y-180">
-                    <Card className="w-full h-full bg-white border-2 border-gray-300 flex items-center justify-center">
-                      <CardContent className="p-8 text-center">
-                        {currentWhite && (
-                          <>
+              {/* White card pile */}
+              <div className="flex flex-col items-center gap-4">
+                <div
+                  onClick={handleWhiteClick}
+                  className={`cursor-pointer perspective-1000 ${cardDrawAnimation.white ? 'card-draw-animation' : ''}`}
+                >
+                  <div className={`w-64 h-96 transition-transform duration-500 transform-style-3d ${whiteFlipped ? 'rotate-y-180' : ''}`}>
+                    <div className="absolute inset-0 backface-hidden">
+                      {whiteDeck.length > 0 ? (
+                        <Card className="w-full h-full bg-white border-2 border-gray-300 flex items-center justify-center hover:shadow-xl transition-shadow card-stack text-gray-800">
+                          <CardContent className="p-8 text-center">
+                            <p className="text-gray-900 text-xl font-serif">White Card</p>
+                            <p className="text-gray-500 text-sm mt-4">Tap to draw</p>
+                            <p className="text-gray-400 text-xs mt-8">{whiteDeck.length} cards left</p>
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        <Card className="w-full h-full bg-gray-100 border-2 border-gray-300 flex items-center justify-center">
+                          <CardContent className="p-8 text-center">
+                            <p className="text-gray-500 text-lg font-serif mb-4">No Cards Left</p>
+                            <Button onClick={reshuffleWhiteDeck} size="sm" variant="outline">
+                              <RotateCw className="w-4 h-4 mr-2" />
+                              Reshuffle Deck
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                    {currentWhite && (
+                      <div className="absolute inset-0 backface-hidden rotate-y-180">
+                        <Card className="w-full h-full bg-white border-2 border-gray-300 flex items-center justify-center">
+                          <CardContent className="p-8 text-center">
                             <h2 className="text-gray-900 text-2xl font-serif mb-4">{currentWhite.title}</h2>
                             {currentWhite.hint && (
                               <p className="text-gray-600 text-sm italic">{currentWhite.hint}</p>
                             )}
-                            <p className="text-gray-400 text-xs mt-6">Tap again to discard</p>
-                          </>
-                        )}
-                      </CardContent>
-                    </Card>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
                   </div>
                 </div>
+                
+                {currentWhite && whiteFlipped && (
+                  <Button onClick={discardWhiteCard} size="sm" variant="outline">
+                    Discard
+                  </Button>
+                )}
               </div>
             </div>
             
             {/* Controls */}
             <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <Button onClick={handleNextCards} size="lg" className="bg-gray-900 hover:bg-gray-800 text-white">
-                Next Cards
+              <Button onClick={handleNextPlayer} size="lg" className="bg-gray-900 hover:bg-gray-800 text-white">
+                Next Player
               </Button>
               
               {!timerRunning ? (
@@ -655,7 +779,6 @@ export default function App() {
               </Button>
             </div>
             
-            {/* Card form */}
             <Card className="p-6 mb-8">
               <h3 className="text-xl font-serif mb-4">{editingCard ? 'Edit Card' : 'New Card'}</h3>
               <div className="grid sm:grid-cols-2 gap-4">
@@ -742,7 +865,6 @@ export default function App() {
               </div>
             </Card>
             
-            {/* Cards list */}
             <div className="space-y-4">
               {adminCards.map(card => (
                 <Card key={card.id} className="p-4">
