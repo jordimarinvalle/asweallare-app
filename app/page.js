@@ -166,7 +166,7 @@ export default function App() {
     setWhiteDeck(shuffleDeck([...allWhiteCards]))
     setDrawnWhiteCards([])
     setCurrentWhite(null)
-    setWhiteFlipped(false)
+    setWhiteFlipped(prev => !prev) // Toggle to force state change
   }
   
   // Timer
