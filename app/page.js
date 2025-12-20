@@ -693,6 +693,7 @@ export default function App() {
               {/* White card pile */}
               <div className="flex flex-col items-center gap-4">
                 <div 
+                  key={renderKey + 1000}
                   onClick={handleWhiteClick} 
                   className="cursor-pointer perspective-1000"
                   style={{ width: '252px', height: '352px' }}
@@ -750,17 +751,6 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-                
-                {currentWhite && whiteFlipped && (
-                  <div className="flex gap-2">
-                    <Button onClick={flipBackWhiteCard} size="sm" variant="outline">
-                      Flip Back
-                    </Button>
-                    <Button onClick={discardWhiteCard} size="sm" variant="outline" className="text-red-600">
-                      Discard
-                    </Button>
-                  </div>
-                )}
               </div>
             </div>
             
