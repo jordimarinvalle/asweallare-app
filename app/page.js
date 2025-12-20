@@ -244,7 +244,7 @@ export default function App() {
     setCurrentBlack(card)
     setBlackDeck(remaining)
     setDrawnBlackCards([...drawnBlackCards, card])
-    setBlackFlipped(false)
+    setBlackFlipState(0) // Start face-down
     
     // Trigger animation
     setCardDrawAnimation(prev => ({ ...prev, black: true }))
