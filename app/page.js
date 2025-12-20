@@ -779,8 +779,10 @@ export default function App() {
     language: 'en',
     isDemo: false,
     isActive: true,
-    boxId: ''
+    boxId: '',
+    imagePath: ''
   })
+  const [uploadingImage, setUploadingImage] = useState(false)
   
   const supabase = createClient()
   
