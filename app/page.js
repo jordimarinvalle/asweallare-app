@@ -155,7 +155,7 @@ export default function App() {
     setBlackDeck(shuffleDeck([...allBlackCards]))
     setDrawnBlackCards([])
     setCurrentBlack(null)
-    setBlackFlipped(false) // Reset to face-down
+    setBlackFlipState(0) // Reset to face-down
     setRenderKey(prev => prev + 1)
   }
   
