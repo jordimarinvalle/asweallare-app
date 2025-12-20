@@ -641,54 +641,60 @@ export default function App() {
                 <div 
                   onClick={handleBlackClick} 
                   className="cursor-pointer perspective-1000"
+                  style={{ width: '252px', height: '352px' }}
                 >
-                  {blackDeck.length === 0 && !currentBlack ? (
-                    /* Empty deck */
-                    <Card className="w-64 h-96 bg-gray-100 border-2 border-gray-300 flex items-center justify-center">
-                      <CardContent className="p-8 text-center">
-                        <p className="text-gray-500 text-lg font-serif mb-4">No Cards Left</p>
-                        <Button onClick={(e) => { e.stopPropagation(); reshuffleBlackDeck(); }} size="sm" variant="outline">
-                          <RotateCw className="w-4 h-4 mr-2" />
-                          Reshuffle Deck
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ) : !currentBlack ? (
-                    /* Pile */
-                    <div className="w-64 h-96 bg-black border-2 border-gray-800 rounded-lg flex items-center justify-center hover:shadow-xl transition-shadow card-stack relative overflow-hidden">
-                      <img src="/black-card-back.png" alt="Card back" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
-                      <div className="relative z-10 text-center p-8">
-                        <p className="text-white text-xl font-serif">Black Card</p>
-                        <p className="text-gray-400 text-sm mt-4">Tap to draw</p>
-                        <p className="text-gray-500 text-xs mt-8">{blackDeck.length} cards left</p>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Drawn card with flip */
-                    <div className={`w-64 h-96 transition-transform duration-500 transform-style-3d ${blackFlipped ? 'rotate-y-180' : ''}`}>
-                      {/* Face down */}
-                      <div className="absolute inset-0 backface-hidden">
-                        <div className="w-64 h-96 bg-black border-2 border-gray-800 rounded-lg flex items-center justify-center hover:shadow-xl transition-shadow relative overflow-hidden">
-                          <img src="/black-card-back.png" alt="Card back" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
-                          <div className="relative z-10 text-center p-8">
-                            <p className="text-white text-xl font-serif">Black Card</p>
-                            <p className="text-gray-400 text-sm mt-4">Tap to flip</p>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Face up */}
-                      <div className="absolute inset-0 backface-hidden rotate-y-180">
-                        <div className="w-64 h-96 bg-black border-2 border-gray-800 rounded-lg flex items-center justify-center">
+                  <div 
+                    className="transition-transform duration-500 transform-style-3d"
+                    style={{ 
+                      width: '252px', 
+                      height: '352px',
+                      transform: blackFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                    }}
+                  >
+                    {/* Back side */}
+                    <div className="absolute inset-0 backface-hidden" style={{ width: '252px', height: '352px' }}>
+                      <div className="w-full h-full bg-black border-2 border-gray-800 rounded-lg flex items-center justify-center hover:shadow-xl transition-shadow relative overflow-hidden">
+                        {!currentBlack && blackDeck.length === 0 ? (
                           <div className="p-8 text-center">
-                            <h2 className="text-white text-2xl font-serif mb-4">{currentBlack.title}</h2>
-                            {currentBlack.hint && (
-                              <p className="text-gray-400 text-sm italic">{currentBlack.hint}</p>
-                            )}
+                            <p className="text-gray-500 text-lg font-serif mb-4">No Cards Left</p>
+                            <Button onClick={(e) => { e.stopPropagation(); reshuffleBlackDeck(); }} size="sm" variant="outline">
+                              <RotateCw className="w-4 h-4 mr-2" />
+                              Reshuffle
+                            </Button>
                           </div>
+                        ) : (
+                          <>
+                            <img src="/black-card-back.png" alt="Card back" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
+                            <div className="relative z-10 text-center p-8">
+                              <p className="text-white text-xl font-serif">
+                                {!currentBlack ? 'Black Card' : 'Black Card'}
+                              </p>
+                              <p className="text-gray-400 text-sm mt-4">
+                                {!currentBlack ? 'Tap to draw' : 'Tap to flip'}
+                              </p>
+                              {!currentBlack && blackDeck.length > 0 && (
+                                <p className="text-gray-500 text-xs mt-8">{blackDeck.length} cards left</p>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Front side */}
+                    <div className="absolute inset-0 backface-hidden rotate-y-180" style={{ width: '252px', height: '352px' }}>
+                      <div className="w-full h-full bg-black border-2 border-gray-800 rounded-lg flex items-center justify-center p-8">
+                        <div className="text-center">
+                          <h2 className="text-white text-2xl font-serif mb-4">
+                            {currentBlack ? currentBlack.title : ''}
+                          </h2>
+                          {currentBlack?.hint && (
+                            <p className="text-gray-400 text-sm italic">{currentBlack.hint}</p>
+                          )}
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
                 
                 {currentBlack && blackFlipped && (
