@@ -702,8 +702,10 @@ export default function App() {
   
   // Box selection state
   const [boxes, setBoxes] = useState([])
+  const [plans, setPlans] = useState([])
   const [selectedBoxIds, setSelectedBoxIds] = useState([])
   const [gameStarted, setGameStarted] = useState(false)
+  const [hasAllAccess, setHasAllAccess] = useState(false)
   
   // Game state - separated for black and white cards
   const [allCards, setAllCards] = useState([])
