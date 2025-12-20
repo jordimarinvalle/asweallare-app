@@ -281,14 +281,16 @@ export default function App() {
     console.log('blackDeck.length:', blackDeck.length)
     
     if (!currentBlack && blackDeck.length > 0) {
-      // Draw card - set to face-down (false), change key to force re-render
+      // Draw card - set to TRUE to force state change, then flip back immediately
       const [card, ...remaining] = blackDeck
       console.log('Drawing card:', card)
       setCurrentBlack(card)
       setBlackDeck(remaining)
       setDrawnBlackCards([...drawnBlackCards, card])
-      setBlackFlipped(false) // Always start face-down
-      setRenderKey(prev => prev + 1) // Key change forces re-render
+      setBlackFlipped(true) // Set to TRUE first
+      setRenderKey(prev => prev + 1)
+      // Then immediately flip to false to show face-down
+      setTimeout(() => setBlackFlipped(false), 0)
     } else if (currentBlack) {
       // Toggle flip
       console.log('Toggling flip from', blackFlipped, 'to', !blackFlipped)
@@ -303,14 +305,16 @@ export default function App() {
     console.log('whiteDeck.length:', whiteDeck.length)
     
     if (!currentWhite && whiteDeck.length > 0) {
-      // Draw card - set to face-down (false), change key to force re-render
+      // Draw card - set to TRUE to force state change, then flip back immediately
       const [card, ...remaining] = whiteDeck
       console.log('Drawing card:', card)
       setCurrentWhite(card)
       setWhiteDeck(remaining)
       setDrawnWhiteCards([...drawnWhiteCards, card])
-      setWhiteFlipped(false) // Always start face-down
-      setRenderKey(prev => prev + 1) // Key change forces re-render
+      setWhiteFlipped(true) // Set to TRUE first
+      setRenderKey(prev => prev + 1)
+      // Then immediately flip to false to show face-down
+      setTimeout(() => setWhiteFlipped(false), 0)
     } else if (currentWhite) {
       // Toggle flip
       console.log('Toggling flip from', whiteFlipped, 'to', !whiteFlipped)
