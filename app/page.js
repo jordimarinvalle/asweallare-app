@@ -6,11 +6,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
-import { Bell, Save, Clock, LogOut, Plus, Edit, Trash2, CreditCard, Info, RotateCw, Smartphone, Lock, Check, Package, Play, ShoppingBag, Sparkles, Crown, Receipt, XCircle, Image, Upload } from 'lucide-react'
+import { toast } from '@/hooks/use-toast'
+import { Bell, Save, Clock, LogOut, Plus, Edit, Trash2, CreditCard, Info, RotateCw, Smartphone, Lock, Check, Package, Play, ShoppingBag, Sparkles, Crown, Receipt, XCircle, Image, Upload, Menu, X, AlertTriangle } from 'lucide-react'
 
 // ============================================================================
 // CARD PILE COMPONENT - Isolated state for reliable single-click draws
@@ -405,43 +408,6 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
           </div>
         )}
         
-        {/* Locked Boxes Preview */}
-        {lockedBoxes.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-                More Boxes Available
-              </h3>
-              <Button variant="link" className="text-red-600 p-0 h-auto" onClick={onGoToStore}>
-                View Store →
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {lockedBoxes.slice(0, 4).map(box => (
-                <div
-                  key={box.id}
-                  onClick={onGoToStore}
-                  className="relative rounded-xl p-4 border-2 border-gray-200 bg-gray-50 opacity-80 cursor-pointer hover:opacity-100 transition-opacity"
-                >
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
-                    <Lock className="w-3 h-3 text-white" />
-                  </div>
-                  
-                  <div 
-                    className="w-12 h-12 rounded-lg mb-3 border border-gray-200 flex items-center justify-center"
-                    style={{ backgroundColor: box.color === '#FFFFFF' ? '#F9FAFB' : box.color }}
-                  >
-                    <Package className={`w-6 h-6 ${box.color === '#000000' || box.color === '#D12128' ? 'text-white' : 'text-gray-600'}`} />
-                  </div>
-                  
-                  <h4 className="font-medium text-gray-700">{box.name}</h4>
-                  <p className="text-xs text-gray-500 mt-1">${box.price}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
         {/* Start Playing Button */}
         <div className="flex flex-col items-center gap-4 mt-8">
           <Button 
@@ -463,10 +429,11 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
             <p className="text-sm text-gray-500">Select at least one box to start</p>
           )}
           
+          {/* Simplified "More Boxes Available" - Compact button instead of large section */}
           {lockedBoxes.length > 0 && (
-            <Button variant="outline" onClick={onGoToStore} className="mt-2">
+            <Button variant="outline" onClick={onGoToStore} className="mt-4">
               <ShoppingBag className="w-4 h-4 mr-2" />
-              Get More Boxes
+              {lockedBoxes.length} more box{lockedBoxes.length > 1 ? 'es' : ''} available in Store
             </Button>
           )}
         </div>
@@ -735,6 +702,11 @@ export default function App() {
   const [authError, setAuthError] = useState('')
   const [authSuccess, setAuthSuccess] = useState('')
   const [isLandscape, setIsLandscape] = useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  
+  // Cancel subscription dialog state
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [purchaseToCancel, setPurchaseToCancel] = useState(null)
   
   // Admin email restriction
   const ADMIN_EMAIL = 'mocasin@gmail.com'
@@ -834,9 +806,9 @@ export default function App() {
       const paymentStatus = params.get('payment')
       
       if (paymentStatus === 'success') {
-        // Show success message
+        // Show success toast
         setTimeout(() => {
-          alert('Payment successful! Your new boxes are now available.')
+          toast.success('Payment successful! Your new boxes are now available.')
         }, 500)
         
         // Clean up URL
@@ -1049,19 +1021,22 @@ export default function App() {
   
   const saveDraw = async () => {
     if (!user) { setAuthOpen(true); return }
-    if (!currentBlack || !currentWhite) { alert('Please draw both cards before saving'); return }
+    if (!currentBlack && !currentWhite) { 
+      toast.info('Please draw at least one card before saving')
+      return 
+    }
     
     await fetch('/api/draws/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        blackCardId: currentBlack.id,
-        whiteCardId: currentWhite.id,
-        blackCardTitle: currentBlack.title,
-        whiteCardTitle: currentWhite.title
+        blackCardId: currentBlack?.id || null,
+        whiteCardId: currentWhite?.id || null,
+        blackCardTitle: currentBlack?.title || null,
+        whiteCardTitle: currentWhite?.title || null
       })
     })
-    alert('Draw saved!')
+    toast.success('Draw saved!')
   }
   
   const loadSavedDraws = async () => {
@@ -1091,21 +1066,28 @@ export default function App() {
     }
   }
   
-  // Cancel subscription
-  const handleCancelSubscription = async (purchaseId) => {
-    if (!confirm('Are you sure you want to cancel this subscription? You will lose access at the end of the current period.')) {
-      return
-    }
+  // Open cancel subscription dialog
+  const openCancelDialog = (purchase) => {
+    setPurchaseToCancel(purchase)
+    setCancelDialogOpen(true)
+  }
+  
+  // Cancel subscription (actual action)
+  const handleCancelSubscription = async () => {
+    if (!purchaseToCancel) return
     
     const response = await fetch('/api/payment/cancel-subscription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ purchaseId })
+      body: JSON.stringify({ purchaseId: purchaseToCancel.id })
     })
     
     const data = await response.json()
+    setCancelDialogOpen(false)
+    setPurchaseToCancel(null)
+    
     if (data.success) {
-      alert('Subscription cancelled successfully')
+      toast.success('Subscription cancelled successfully')
       loadPurchases()
       // Refresh boxes to update access
       const boxResponse = await fetch('/api/boxes')
@@ -1115,7 +1097,7 @@ export default function App() {
         setHasAllAccess(boxData.hasAllAccess || false)
       }
     } else {
-      alert(data.error || 'Failed to cancel subscription')
+      toast.error(data.error || 'Failed to cancel subscription')
     }
   }
   
@@ -1151,12 +1133,12 @@ export default function App() {
       
       if (data.success) {
         setCardForm(prev => ({ ...prev, imagePath: data.imagePath }))
-        alert('Image uploaded successfully!')
+        toast.success('Image uploaded successfully!')
       } else {
-        alert(data.error || 'Failed to upload image')
+        toast.error(data.error || 'Failed to upload image')
       }
     } catch (error) {
-      alert('Error uploading image: ' + error.message)
+      toast.error('Error uploading image: ' + error.message)
     } finally {
       setUploadingImage(false)
     }
@@ -1217,12 +1199,14 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
+      toast.success('Card updated successfully!')
     } else {
       await fetch('/api/admin/cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
+      toast.success('Card created successfully!')
     }
     
     setEditingCard(null)
@@ -1231,10 +1215,9 @@ export default function App() {
   }
   
   const handleDeleteCard = async (cardId) => {
-    if (confirm('Are you sure you want to delete this card?')) {
-      await fetch(`/api/admin/cards/${cardId}`, { method: 'DELETE' })
-      loadAdminCards()
-    }
+    await fetch(`/api/admin/cards/${cardId}`, { method: 'DELETE' })
+    toast.success('Card deleted')
+    loadAdminCards()
   }
   
   useEffect(() => {
@@ -1242,6 +1225,13 @@ export default function App() {
     else if (view === 'purchases') loadPurchases()
     else if (view === 'admin') { loadAdminCards(); loadAdminBoxes() }
   }, [view])
+  
+  // Navigation handler for mobile menu
+  const handleNavigation = (newView) => {
+    setView(newView)
+    setGameStarted(false)
+    setMobileMenuOpen(false)
+  }
   
   if (loading) {
     return (
@@ -1280,7 +1270,8 @@ export default function App() {
               AS WE ALL ARE
             </h1>
             
-            <div className="flex items-center gap-4">
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-4">
               {!user ? (
                 <>
                   <Button onClick={() => setView('store')} variant="ghost">
@@ -1302,9 +1293,78 @@ export default function App() {
                     <Button onClick={() => setView('admin')} variant={view === 'admin' ? 'default' : 'ghost'}>Admin</Button>
                   )}
                   <Button onClick={handleSignOut} variant="ghost" size="sm"><LogOut className="w-4 h-4" /></Button>
-                  <div className="text-sm text-gray-600">{user.email}</div>
+                  <div className="text-sm text-gray-600 max-w-[150px] truncate">{user.email}</div>
                 </>
               )}
+            </div>
+            
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Menu className="w-6 h-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[280px]">
+                  <SheetHeader>
+                    <SheetTitle className="font-brand text-left">Menu</SheetTitle>
+                  </SheetHeader>
+                  <div className="flex flex-col gap-2 mt-6">
+                    {!user ? (
+                      <>
+                        <SheetClose asChild>
+                          <Button onClick={() => handleNavigation('store')} variant="ghost" className="justify-start">
+                            <ShoppingBag className="w-4 h-4 mr-2" />Store
+                          </Button>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Button onClick={() => { setAuthOpen(true); setMobileMenuOpen(false) }} variant="outline" className="justify-start">
+                            Sign In
+                          </Button>
+                        </SheetClose>
+                      </>
+                    ) : (
+                      <>
+                        <div className="px-4 py-2 text-sm text-gray-600 border-b mb-2 truncate">{user.email}</div>
+                        <SheetClose asChild>
+                          <Button onClick={() => handleNavigation('game')} variant={view === 'game' ? 'default' : 'ghost'} className="justify-start">
+                            <Play className="w-4 h-4 mr-2" />Play
+                          </Button>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Button onClick={() => handleNavigation('store')} variant={view === 'store' ? 'default' : 'ghost'} className="justify-start">
+                            <ShoppingBag className="w-4 h-4 mr-2" />Store
+                          </Button>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Button onClick={() => handleNavigation('purchases')} variant={view === 'purchases' ? 'default' : 'ghost'} className="justify-start">
+                            <Receipt className="w-4 h-4 mr-2" />Purchases
+                          </Button>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Button onClick={() => handleNavigation('draws')} variant={view === 'draws' ? 'default' : 'ghost'} className="justify-start">
+                            <Save className="w-4 h-4 mr-2" />My Draws
+                          </Button>
+                        </SheetClose>
+                        {isAdmin && (
+                          <SheetClose asChild>
+                            <Button onClick={() => handleNavigation('admin')} variant={view === 'admin' ? 'default' : 'ghost'} className="justify-start">
+                              Admin
+                            </Button>
+                          </SheetClose>
+                        )}
+                        <Separator className="my-2" />
+                        <SheetClose asChild>
+                          <Button onClick={() => { handleSignOut(); setMobileMenuOpen(false) }} variant="ghost" className="justify-start text-red-600">
+                            <LogOut className="w-4 h-4 mr-2" />Sign Out
+                          </Button>
+                        </SheetClose>
+                      </>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>
@@ -1398,11 +1458,11 @@ export default function App() {
                     <div className="grid sm:grid-cols-2 gap-6">
                       <div>
                         <div className="text-xs text-gray-500 mb-2">Black Card</div>
-                        <div className="font-serif text-lg">{draw.blackCardTitle}</div>
+                        <div className="font-serif text-lg">{draw.blackCardTitle || '-'}</div>
                       </div>
                       <div>
                         <div className="text-xs text-gray-500 mb-2">White Card</div>
-                        <div className="font-serif text-lg">{draw.whiteCardTitle}</div>
+                        <div className="font-serif text-lg">{draw.whiteCardTitle || '-'}</div>
                       </div>
                     </div>
                   </Card>
@@ -1474,7 +1534,7 @@ export default function App() {
                             variant="outline" 
                             size="sm"
                             className="text-red-600 border-red-200 hover:bg-red-50"
-                            onClick={() => handleCancelSubscription(purchase.id)}
+                            onClick={() => openCancelDialog(purchase)}
                           >
                             <XCircle className="w-4 h-4 mr-1" />
                             Cancel
@@ -1696,6 +1756,38 @@ export default function App() {
           </form>
         </DialogContent>
       </Dialog>
+      
+      {/* Cancel Subscription Confirmation Dialog */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Cancel Subscription?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left space-y-3">
+              <p>
+                <strong>Warning:</strong> Canceling your subscription will immediately revoke your access to all premium boxes, even if you have remaining time on your subscription.
+              </p>
+              <p>
+                Once canceled, you will need to purchase a new subscription to regain access.
+              </p>
+              <p className="text-red-600 font-medium">
+                This action cannot be undone.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCancelSubscription}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Yes, Cancel Now
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
