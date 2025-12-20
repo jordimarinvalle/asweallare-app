@@ -510,23 +510,14 @@ function GamePlayView({
         />
       </div>
       
-      {/* Next Player text - styled as text, highlighted when turn is finished */}
-      <div className="mt-4">
-        {timerState === 'finished' ? (
-          <button
-            onClick={handleNextPlayerClick}
-            className="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
-          >
-            Finish and next player goes
-          </button>
-        ) : (
-          <p 
-            onClick={handleNextPlayerClick}
-            className="text-gray-400 cursor-pointer hover:text-gray-600 transition-colors"
-          >
-            Finish and next player goes
-          </p>
-        )}
+      {/* Reset button - always visible below cards */}
+      <div className="mt-8">
+        <button
+          onClick={handleNextPlayerClick}
+          className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-500 rounded-lg font-medium hover:border-gray-400 hover:text-gray-600 transition-colors"
+        >
+          Reset
+        </button>
       </div>
     </div>
   )
