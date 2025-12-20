@@ -845,6 +845,7 @@ export default function App() {
         isDemo: card.isdemo,
         isActive: card.isactive,
         boxId: card.box_id,
+        imagePath: card.image_path,
         createdAt: card.createdat
       }))
       
