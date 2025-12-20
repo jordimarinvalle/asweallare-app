@@ -115,7 +115,7 @@ export async function GET(request) {
       const { data: draws, error } = await supabase
         .from('saved_draws')
         .select('*')
-        .eq('userId', user.id)
+        .eq('userid', user.id)
         .order('timestamp', { ascending: false })
       
       if (error) {
@@ -136,7 +136,7 @@ export async function GET(request) {
       const { data: cards, error } = await supabase
         .from('cards')
         .select('*')
-        .order('createdAt', { ascending: false })
+        .order('createdat', { ascending: false })
       
       if (error) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
