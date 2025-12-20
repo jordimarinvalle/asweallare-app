@@ -509,7 +509,7 @@ class APITester:
         signin_success = self.test_auth_signin()
         
         if signin_success:
-            # Test authenticated endpoints
+            # Test authenticated endpoints with real session
             self.test_get_auth_user()
             self.test_get_cards_authenticated()
             self.test_save_draw()
@@ -517,7 +517,13 @@ class APITester:
             self.test_get_admin_cards()
             self.test_create_admin_card()
         else:
-            print("⚠️  Skipping authenticated tests due to signin failure")
+            # Test authenticated endpoints without session to verify they handle unauthorized requests properly
+            print("⚠️  Testing authenticated endpoints without session to verify authorization handling")
+            self.test_get_auth_user_unauthorized()
+            self.test_save_draw_unauthorized()
+            self.test_get_draws_unauthorized()
+            self.test_get_admin_cards_unauthorized()
+            self.test_create_admin_card_unauthorized()
         
         # Summary
         print("=" * 80)
@@ -538,6 +544,167 @@ class APITester:
                 print(f"  ❌ {result['test']}: {result['message']}")
         
         return self.test_results
+    
+    def test_get_auth_user_unauthorized(self):
+        """Test GET /api/auth/user without authentication - should return null user"""
+        try:
+            response = requests.get(f"{API_BASE}/auth/user")
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('user') is None:
+                    self.log_result(
+                        "GET /api/auth/user (unauthorized)", 
+                        True, 
+                        "Correctly returned null user for unauthorized request",
+                        data
+                    )
+                else:
+                    self.log_result(
+                        "GET /api/auth/user (unauthorized)", 
+                        False, 
+                        "Should return null user for unauthorized request",
+                        data
+                    )
+            else:
+                self.log_result(
+                    "GET /api/auth/user (unauthorized)", 
+                    False, 
+                    f"HTTP {response.status_code}: {response.text}",
+                    None
+                )
+                
+        except Exception as e:
+            self.log_result(
+                "GET /api/auth/user (unauthorized)", 
+                False, 
+                f"Exception: {str(e)}",
+                None
+            )
+    
+    def test_save_draw_unauthorized(self):
+        """Test POST /api/draws/save without authentication - should return 401"""
+        try:
+            response = requests.post(
+                f"{API_BASE}/draws/save",
+                json=TEST_CARD_DRAW,
+                headers={"Content-Type": "application/json"}
+            )
+            
+            if response.status_code == 401:
+                self.log_result(
+                    "POST /api/draws/save (unauthorized)", 
+                    True, 
+                    "Correctly returned 401 Unauthorized for unauthenticated request",
+                    None
+                )
+            else:
+                error_data = response.json() if response.headers.get('content-type', '').startswith('application/json') else {"error": response.text}
+                self.log_result(
+                    "POST /api/draws/save (unauthorized)", 
+                    False, 
+                    f"Expected 401, got HTTP {response.status_code}: {error_data.get('error', response.text)}",
+                    error_data
+                )
+                
+        except Exception as e:
+            self.log_result(
+                "POST /api/draws/save (unauthorized)", 
+                False, 
+                f"Exception: {str(e)}",
+                None
+            )
+    
+    def test_get_draws_unauthorized(self):
+        """Test GET /api/draws without authentication - should return 401"""
+        try:
+            response = requests.get(f"{API_BASE}/draws")
+            
+            if response.status_code == 401:
+                self.log_result(
+                    "GET /api/draws (unauthorized)", 
+                    True, 
+                    "Correctly returned 401 Unauthorized for unauthenticated request",
+                    None
+                )
+            else:
+                error_data = response.json() if response.headers.get('content-type', '').startswith('application/json') else {"error": response.text}
+                self.log_result(
+                    "GET /api/draws (unauthorized)", 
+                    False, 
+                    f"Expected 401, got HTTP {response.status_code}: {error_data.get('error', response.text)}",
+                    error_data
+                )
+                
+        except Exception as e:
+            self.log_result(
+                "GET /api/draws (unauthorized)", 
+                False, 
+                f"Exception: {str(e)}",
+                None
+            )
+    
+    def test_get_admin_cards_unauthorized(self):
+        """Test GET /api/admin/cards without authentication - should return 401"""
+        try:
+            response = requests.get(f"{API_BASE}/admin/cards")
+            
+            if response.status_code == 401:
+                self.log_result(
+                    "GET /api/admin/cards (unauthorized)", 
+                    True, 
+                    "Correctly returned 401 Unauthorized for unauthenticated request",
+                    None
+                )
+            else:
+                error_data = response.json() if response.headers.get('content-type', '').startswith('application/json') else {"error": response.text}
+                self.log_result(
+                    "GET /api/admin/cards (unauthorized)", 
+                    False, 
+                    f"Expected 401, got HTTP {response.status_code}: {error_data.get('error', response.text)}",
+                    error_data
+                )
+                
+        except Exception as e:
+            self.log_result(
+                "GET /api/admin/cards (unauthorized)", 
+                False, 
+                f"Exception: {str(e)}",
+                None
+            )
+    
+    def test_create_admin_card_unauthorized(self):
+        """Test POST /api/admin/cards without authentication - should return 401"""
+        try:
+            response = requests.post(
+                f"{API_BASE}/admin/cards",
+                json=TEST_NEW_CARD,
+                headers={"Content-Type": "application/json"}
+            )
+            
+            if response.status_code == 401:
+                self.log_result(
+                    "POST /api/admin/cards (unauthorized)", 
+                    True, 
+                    "Correctly returned 401 Unauthorized for unauthenticated request",
+                    None
+                )
+            else:
+                error_data = response.json() if response.headers.get('content-type', '').startswith('application/json') else {"error": response.text}
+                self.log_result(
+                    "POST /api/admin/cards (unauthorized)", 
+                    False, 
+                    f"Expected 401, got HTTP {response.status_code}: {error_data.get('error', response.text)}",
+                    error_data
+                )
+                
+        except Exception as e:
+            self.log_result(
+                "POST /api/admin/cards (unauthorized)", 
+                False, 
+                f"Exception: {str(e)}",
+                None
+            )
 
 if __name__ == "__main__":
     tester = APITester()
