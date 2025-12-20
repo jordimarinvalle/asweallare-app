@@ -275,49 +275,31 @@ export default function App() {
   }
   
   const handleBlackClick = () => {
-    console.log('=== BLACK CLICK ===')
-    console.log('currentBlack:', currentBlack)
-    console.log('blackFlipped:', blackFlipped)
-    console.log('blackDeck.length:', blackDeck.length)
-    
     if (!currentBlack && blackDeck.length > 0) {
-      // Draw card - set to TRUE to force state change, then flip back immediately
+      // Draw card
       const [card, ...remaining] = blackDeck
-      console.log('Drawing card:', card)
-      setCurrentBlack(card)
       setBlackDeck(remaining)
       setDrawnBlackCards([...drawnBlackCards, card])
-      setBlackFlipped(true) // Set to TRUE first
       setRenderKey(prev => prev + 1)
-      // Then immediately flip to false to show face-down
-      setTimeout(() => setBlackFlipped(false), 0)
+      setCurrentBlack(card)
+      setBlackFlipped(false)
     } else if (currentBlack) {
       // Toggle flip
-      console.log('Toggling flip from', blackFlipped, 'to', !blackFlipped)
       setBlackFlipped(!blackFlipped)
     }
   }
   
   const handleWhiteClick = () => {
-    console.log('=== WHITE CLICK ===')
-    console.log('currentWhite:', currentWhite)
-    console.log('whiteFlipped:', whiteFlipped)
-    console.log('whiteDeck.length:', whiteDeck.length)
-    
     if (!currentWhite && whiteDeck.length > 0) {
-      // Draw card - set to TRUE to force state change, then flip back immediately
+      // Draw card
       const [card, ...remaining] = whiteDeck
-      console.log('Drawing card:', card)
-      setCurrentWhite(card)
       setWhiteDeck(remaining)
       setDrawnWhiteCards([...drawnWhiteCards, card])
-      setWhiteFlipped(true) // Set to TRUE first
       setRenderKey(prev => prev + 1)
-      // Then immediately flip to false to show face-down
-      setTimeout(() => setWhiteFlipped(false), 0)
+      setCurrentWhite(card)
+      setWhiteFlipped(false)
     } else if (currentWhite) {
       // Toggle flip
-      console.log('Toggling flip from', whiteFlipped, 'to', !whiteFlipped)
       setWhiteFlipped(!whiteFlipped)
     }
   }
