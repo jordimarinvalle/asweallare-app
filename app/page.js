@@ -301,7 +301,7 @@ function GameTimer({ isRunning, setIsRunning, seconds, setSeconds }) {
 // ============================================================================
 // BOX SELECTION COMPONENT
 // ============================================================================
-function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartPlaying, onPurchaseBox, user }) {
+function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartPlaying, onGoToStore, user }) {
   const toggleBox = (boxId) => {
     const box = boxes.find(b => b.id === boxId)
     if (!box?.hasAccess) return // Can't select locked boxes
@@ -369,24 +369,28 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
           </div>
         )}
         
-        {/* Locked Boxes */}
+        {/* Locked Boxes Preview */}
         {lockedBoxes.length > 0 && (
           <div className="mb-8">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">
-              Available to Purchase
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                More Boxes Available
+              </h3>
+              <Button variant="link" className="text-red-600 p-0 h-auto" onClick={onGoToStore}>
+                View Store →
+              </Button>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {lockedBoxes.map(box => (
+              {lockedBoxes.slice(0, 4).map(box => (
                 <div
                   key={box.id}
-                  className="relative rounded-xl p-4 border-2 border-gray-200 bg-gray-50 opacity-80"
+                  onClick={onGoToStore}
+                  className="relative rounded-xl p-4 border-2 border-gray-200 bg-gray-50 opacity-80 cursor-pointer hover:opacity-100 transition-opacity"
                 >
-                  {/* Lock indicator */}
                   <div className="absolute -top-2 -right-2 w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
                     <Lock className="w-3 h-3 text-white" />
                   </div>
                   
-                  {/* Box color indicator */}
                   <div 
                     className="w-12 h-12 rounded-lg mb-3 border border-gray-200 flex items-center justify-center"
                     style={{ backgroundColor: box.color === '#FFFFFF' ? '#F9FAFB' : box.color }}
@@ -395,16 +399,7 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
                   </div>
                   
                   <h4 className="font-medium text-gray-700">{box.name}</h4>
-                  <p className="text-xs text-gray-500 mt-1">{box.description}</p>
-                  
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="mt-3 w-full text-xs"
-                    onClick={() => onPurchaseBox(box)}
-                  >
-                    ${box.price} - Unlock
-                  </Button>
+                  <p className="text-xs text-gray-500 mt-1">${box.price}</p>
                 </div>
               ))}
             </div>
@@ -431,7 +426,261 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
           {!canStart && (
             <p className="text-sm text-gray-500">Select at least one box to start</p>
           )}
+          
+          {lockedBoxes.length > 0 && (
+            <Button variant="outline" onClick={onGoToStore} className="mt-2">
+              <ShoppingBag className="w-4 h-4 mr-2" />
+              Get More Boxes
+            </Button>
+          )}
         </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// STORE COMPONENT - Purchase boxes and subscriptions
+// ============================================================================
+function StoreScreen({ boxes, plans, onPurchaseBox, onSubscribe, onBack, user, hasAllAccess }) {
+  const [selectedTab, setSelectedTab] = useState('boxes')
+  const lockedBoxes = boxes.filter(b => !b.hasAccess && !b.is_demo)
+  const ownedBoxes = boxes.filter(b => b.hasAccess && !b.is_demo)
+  
+  return (
+    <div className="min-h-[calc(100vh-4rem)] p-4 sm:p-8">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <Button variant="ghost" size="sm" onClick={onBack} className="mb-2">
+              ← Back to Game
+            </Button>
+            <h2 className="text-3xl font-serif text-gray-900">Store</h2>
+            <p className="text-gray-600">Unlock new card collections</p>
+          </div>
+          
+          {hasAllAccess && (
+            <div className="flex items-center gap-2 bg-gradient-to-r from-amber-100 to-yellow-100 px-4 py-2 rounded-full border border-amber-200">
+              <Crown className="w-5 h-5 text-amber-600" />
+              <span className="text-amber-800 font-medium">All Access Member</span>
+            </div>
+          )}
+        </div>
+        
+        {/* Tabs */}
+        <div className="flex gap-4 mb-8 border-b border-gray-200">
+          <button
+            onClick={() => setSelectedTab('boxes')}
+            className={`pb-3 px-1 font-medium transition-colors ${
+              selectedTab === 'boxes' 
+                ? 'text-red-600 border-b-2 border-red-600' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Individual Boxes
+          </button>
+          <button
+            onClick={() => setSelectedTab('subscription')}
+            className={`pb-3 px-1 font-medium transition-colors ${
+              selectedTab === 'subscription' 
+                ? 'text-red-600 border-b-2 border-red-600' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            All Access Subscription
+          </button>
+        </div>
+        
+        {/* Individual Boxes Tab */}
+        {selectedTab === 'boxes' && (
+          <div>
+            {/* Available Boxes */}
+            {lockedBoxes.length > 0 && (
+              <div className="mb-10">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Available to Purchase</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {lockedBoxes.map(box => (
+                    <Card key={box.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                      {/* Box header with color */}
+                      <div 
+                        className="h-24 flex items-center justify-center"
+                        style={{ backgroundColor: box.color === '#FFFFFF' ? '#F3F4F6' : box.color }}
+                      >
+                        <Package className={`w-12 h-12 ${box.color === '#000000' || box.color === '#D12128' ? 'text-white' : 'text-gray-600'}`} />
+                      </div>
+                      
+                      <CardContent className="p-5">
+                        <h4 className="text-xl font-serif text-gray-900 mb-2">{box.name}</h4>
+                        <p className="text-gray-600 text-sm mb-4">{box.description}</p>
+                        
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-2xl font-bold text-gray-900">${box.price}</span>
+                            <span className="text-gray-500 text-sm ml-1">one-time</span>
+                          </div>
+                          <Button 
+                            onClick={() => onPurchaseBox(box)}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                          >
+                            <CreditCard className="w-4 h-4 mr-2" />
+                            Buy Now
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Owned Boxes */}
+            {ownedBoxes.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Your Collection</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {ownedBoxes.map(box => (
+                    <Card key={box.id} className="overflow-hidden bg-green-50 border-green-200">
+                      <div 
+                        className="h-24 flex items-center justify-center relative"
+                        style={{ backgroundColor: box.color === '#FFFFFF' ? '#F3F4F6' : box.color }}
+                      >
+                        <Package className={`w-12 h-12 ${box.color === '#000000' || box.color === '#D12128' ? 'text-white' : 'text-gray-600'}`} />
+                        <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                          <Check className="w-3 h-3" /> Owned
+                        </div>
+                      </div>
+                      
+                      <CardContent className="p-5">
+                        <h4 className="text-xl font-serif text-gray-900 mb-2">{box.name}</h4>
+                        <p className="text-gray-600 text-sm">{box.description}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {lockedBoxes.length === 0 && ownedBoxes.length === 0 && (
+              <div className="text-center py-12">
+                <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No boxes available at the moment</p>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* Subscription Tab */}
+        {selectedTab === 'subscription' && (
+          <div>
+            {hasAllAccess ? (
+              <div className="text-center py-12">
+                <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Crown className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-serif text-gray-900 mb-2">You have All Access!</h3>
+                <p className="text-gray-600 mb-6">Enjoy unlimited access to all current and future boxes.</p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {boxes.filter(b => !b.is_demo).map(box => (
+                    <span 
+                      key={box.id}
+                      className="px-3 py-1 rounded-full text-sm border"
+                      style={{ 
+                        backgroundColor: box.color === '#FFFFFF' ? '#F9FAFB' : `${box.color}15`,
+                        borderColor: box.color === '#FFFFFF' ? '#E5E7EB' : box.color,
+                        color: box.color === '#FFFFFF' ? '#374151' : box.color
+                      }}
+                    >
+                      {box.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div>
+                {/* All Access Hero */}
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 mb-8 text-white">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Sparkles className="w-6 h-6 text-amber-400" />
+                        <span className="text-amber-400 font-medium">Best Value</span>
+                      </div>
+                      <h3 className="text-3xl font-serif mb-3">All Access Pass</h3>
+                      <p className="text-gray-300 mb-6 max-w-md">
+                        Get unlimited access to all {boxes.filter(b => !b.is_demo).length} card boxes, 
+                        plus any new boxes we release in the future.
+                      </p>
+                      
+                      <ul className="space-y-2 mb-6">
+                        <li className="flex items-center gap-2">
+                          <Check className="w-5 h-5 text-green-400" />
+                          <span>Access to all {boxes.filter(b => !b.is_demo).length} premium boxes</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-5 h-5 text-green-400" />
+                          <span>New boxes added automatically</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-5 h-5 text-green-400" />
+                          <span>Cancel anytime</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div className="hidden sm:block">
+                      <Crown className="w-24 h-24 text-amber-400 opacity-50" />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Subscription Plans */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {plans.map((plan, index) => (
+                    <Card 
+                      key={plan.id} 
+                      className={`overflow-hidden ${index === 0 ? 'border-red-500 border-2' : ''}`}
+                    >
+                      {index === 0 && (
+                        <div className="bg-red-500 text-white text-center py-1 text-sm font-medium">
+                          Most Popular
+                        </div>
+                      )}
+                      <CardContent className="p-6">
+                        <h4 className="text-xl font-medium text-gray-900 mb-1">{plan.name}</h4>
+                        <p className="text-gray-500 text-sm mb-4">{plan.description}</p>
+                        
+                        <div className="mb-6">
+                          <span className="text-4xl font-bold text-gray-900">${plan.price}</span>
+                          <span className="text-gray-500">/{plan.interval === 'quarter' ? '3 months' : plan.interval}</span>
+                          
+                          {plan.interval === 'quarter' && (
+                            <p className="text-green-600 text-sm mt-1">
+                              Save 20% vs monthly
+                            </p>
+                          )}
+                        </div>
+                        
+                        <Button 
+                          onClick={() => onSubscribe(plan)}
+                          className={`w-full ${index === 0 ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-900 hover:bg-gray-800'} text-white`}
+                        >
+                          Subscribe Now
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                
+                {plans.length === 0 && (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500">Subscription plans coming soon!</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
