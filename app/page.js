@@ -975,6 +975,7 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [authMode, setAuthMode] = useState('signin')
   const [authOpen, setAuthOpen] = useState(false)
+  const [authLoading, setAuthLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
