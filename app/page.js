@@ -156,7 +156,8 @@ function CardPile({
               />
               {/* "Tap to draw" overlay on pile */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className={`${isBlack ? 'text-white' : 'text-gray-700'} text-sm font-sans opacity-80 bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm`}>
+                <span className="flex items-center gap-2 text-white text-sm font-medium bg-gray-900/60 px-5 py-2.5 rounded-full backdrop-blur-sm">
+                  <RefreshCcw className="w-4 h-4" />
                   Tap to draw
                 </span>
               </div>
