@@ -195,14 +195,31 @@ export default function App() {
   }, [timerRunning, bellPlayed])
   
   const playBell = (count) => {
-    if (audioRef.current) {
-      // Play bell 'count' times with delay
+    // Create bell sound using Web Audio API since we don't have an audio file yet
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      
       for (let i = 0; i < count; i++) {
         setTimeout(() => {
-          audioRef.current.currentTime = 0
-          audioRef.current.play()
-        }, i * 400) // 400ms between each ding
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          // Boxing bell sound - higher frequency with decay
+          oscillator.frequency.value = 1200;
+          oscillator.type = 'sine';
+          
+          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.5);
+        }, i * 500) // 500ms between each ding
       }
+    } catch (error) {
+      console.error('Error playing bell:', error)
     }
   }
   
