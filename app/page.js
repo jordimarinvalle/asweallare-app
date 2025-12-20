@@ -523,7 +523,7 @@ export default function App() {
   
   return (
     <div className="min-h-screen bg-white">
-      <audio ref={audioRef} src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjKH0fPTgjMGHm7A7+OZTRQNUZPG7L9rIAY+kuDz0okxBRxx0e/cm0UIKXi/8Nh2LAYuhM/z2o41CBlquvbt5JhPFQ1Vm+nyt1sdBTOM0vPQfC0FJ3fF8N+RQQoUX7Tp7KlWFApHoOHyvmwiBjKI0vPTgjMGH27A7+OZTRQNUZ/G7MBrIAZAkvDz0okxBRxx0e/cm0UIKXi/8Nh2LAYuhM/z2o41CBl" preload="auto" />
+      <audio ref={audioRef} src="/sounds/bell-option-1.mp3" preload="auto" />
       
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
