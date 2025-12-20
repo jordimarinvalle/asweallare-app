@@ -689,24 +689,12 @@ export default function App() {
               <div className="flex flex-col items-center gap-4">
                 <div 
                   onClick={handleWhiteClick} 
-                  className="cursor-pointer relative"
+                  className="cursor-pointer perspective-1000"
                   style={{ width: '252px', height: '352px' }}
                 >
-                  {/* Pile - show when no current card */}
-                  {!currentWhite && whiteDeck.length > 0 && (
-                    <div className="absolute inset-0 w-full h-full bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center hover:shadow-xl transition-shadow card-stack overflow-hidden">
-                      <img src="/white-card-back.png" alt="Card back" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
-                      <div className="relative z-10 text-center p-8">
-                        <p className="text-gray-900 text-xl font-serif">White Card</p>
-                        <p className="text-gray-500 text-sm mt-4">Tap to draw</p>
-                        <p className="text-gray-400 text-xs mt-8">{whiteDeck.length} cards left</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Empty state */}
-                  {!currentWhite && whiteDeck.length === 0 && (
-                    <div className="absolute inset-0 w-full h-full bg-gray-100 border-2 border-gray-300 rounded-lg flex items-center justify-center">
+                  {whiteDeck.length === 0 && !currentWhite ? (
+                    /* Empty */
+                    <div className="w-full h-full bg-gray-100 border-2 border-gray-300 rounded-lg flex items-center justify-center">
                       <div className="p-8 text-center">
                         <p className="text-gray-500 text-lg font-serif mb-4">No Cards Left</p>
                         <Button onClick={(e) => { e.stopPropagation(); reshuffleWhiteDeck(); }} size="sm" variant="outline">
@@ -715,27 +703,43 @@ export default function App() {
                         </Button>
                       </div>
                     </div>
-                  )}
-                  
-                  {/* Card back - show when card drawn but not flipped */}
-                  {currentWhite && !whiteFlipped && (
-                    <div className="absolute inset-0 w-full h-full bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center hover:shadow-xl transition-shadow overflow-hidden">
-                      <img src="/white-card-back.png" alt="Card back" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
-                      <div className="relative z-10 text-center p-8">
-                        <p className="text-gray-900 text-xl font-serif">White Card</p>
-                        <p className="text-gray-500 text-sm mt-4">Tap to flip</p>
+                  ) : (
+                    /* Card or Pile */
+                    <div 
+                      className="w-full h-full transition-transform duration-500"
+                      style={{ 
+                        transformStyle: 'preserve-3d',
+                        transform: whiteFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                      }}
+                    >
+                      {/* Back */}
+                      <div 
+                        className="absolute inset-0 w-full h-full"
+                        style={{ backfaceVisibility: 'hidden' }}
+                      >
+                        <div className="w-full h-full bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center hover:shadow-xl overflow-hidden">
+                          <img src="/white-card-back.png" alt="Card back" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
+                          <div className="relative z-10 text-center p-8">
+                            <p className="text-gray-900 text-xl font-serif">White Card</p>
+                            <p className="text-gray-500 text-sm mt-4">{currentWhite ? 'Tap to flip' : 'Tap to draw'}</p>
+                            {!currentWhite && <p className="text-gray-400 text-xs mt-8">{whiteDeck.length} cards left</p>}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  
-                  {/* Card front - show when flipped */}
-                  {currentWhite && whiteFlipped && (
-                    <div className="absolute inset-0 w-full h-full bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center p-8">
-                      <div className="text-center">
-                        <h2 className="text-gray-900 text-2xl font-serif mb-4">{currentWhite.title}</h2>
-                        {currentWhite.hint && (
-                          <p className="text-gray-600 text-sm italic">{currentWhite.hint}</p>
-                        )}
+                      {/* Front */}
+                      <div 
+                        className="absolute inset-0 w-full h-full"
+                        style={{ 
+                          backfaceVisibility: 'hidden',
+                          transform: 'rotateY(180deg)'
+                        }}
+                      >
+                        <div className="w-full h-full bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center p-8">
+                          <div className="text-center">
+                            <h2 className="text-gray-900 text-2xl font-serif mb-4">{currentWhite?.title || ''}</h2>
+                            {currentWhite?.hint && <p className="text-gray-600 text-sm italic">{currentWhite.hint}</p>}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
