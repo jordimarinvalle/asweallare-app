@@ -702,7 +702,7 @@ export default function App() {
               {/* White card pile */}
               <div className="flex flex-col items-center gap-4">
                 <div 
-                  key={renderKey + 1000}
+                  key={`white-${renderKey}-${forceUpdate}-${currentWhite?.id || 'none'}`}
                   onClick={handleWhiteClick} 
                   className="cursor-pointer perspective-1000"
                   style={{ width: '252px', height: '352px' }}
