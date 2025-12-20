@@ -764,6 +764,7 @@ export default function App() {
   // View state
   const [view, setView] = useState('game')
   const [savedDraws, setSavedDraws] = useState([])
+  const [purchases, setPurchases] = useState([])
   const [paymentType, setPaymentType] = useState('onetime')
   const [couponCode, setCouponCode] = useState('')
   
