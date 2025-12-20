@@ -800,6 +800,37 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
   
+  // Handle payment success - check URL params and refresh data
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const paymentStatus = params.get('payment')
+      
+      if (paymentStatus === 'success') {
+        // Show success message
+        setTimeout(() => {
+          alert('Payment successful! Your new boxes are now available.')
+        }, 500)
+        
+        // Clean up URL
+        window.history.replaceState({}, '', window.location.pathname)
+        
+        // Refresh boxes data after a short delay (webhook needs time)
+        setTimeout(async () => {
+          const response = await fetch('/api/boxes')
+          const data = await response.json()
+          if (data.boxes) {
+            setBoxes(data.boxes)
+            setHasAllAccess(data.hasAllAccess || false)
+            // Auto-select all accessible boxes
+            const accessibleBoxIds = data.boxes.filter(b => b.hasAccess).map(b => b.id)
+            setSelectedBoxIds(accessibleBoxIds)
+          }
+        }, 2000)
+      }
+    }
+  }, [])
+  
   // Load boxes and plans
   useEffect(() => {
     const loadBoxes = async () => {
