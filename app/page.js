@@ -273,21 +273,17 @@ export default function App() {
   
   const handleBlackClick = () => {
     if (!currentBlack && blackDeck.length > 0) {
-      // Draw card - use timestamp to force state change
+      // Draw card - increment flip state to force change
       const [card, ...remaining] = blackDeck
       setBlackDeck(remaining)
       setDrawnBlackCards([...drawnBlackCards, card])
       setCurrentBlack(card)
-      // Force state change with timestamp
-      const newKey = Date.now()
-      setRenderKey(newKey)
-      // Set flipped to timestamp % 2 to alternate between 0 and 1 (truthy/falsy pattern)
-      setBlackFlipped(newKey % 2 === 0)
-      // Then immediately set to false for display
-      setTimeout(() => setBlackFlipped(false), 10)
+      // Increment flip state (starts at 0=face-down, then increments)
+      setBlackFlipState(prev => prev + 1)
+      setRenderKey(prev => prev + 1)
     } else if (currentBlack) {
-      // Toggle flip
-      setBlackFlipped(!blackFlipped)
+      // Toggle flip by incrementing state
+      setBlackFlipState(prev => prev + 1)
     }
   }
   
