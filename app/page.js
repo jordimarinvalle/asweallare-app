@@ -231,23 +231,90 @@ function CardPile({
 }
 
 // ============================================================================
-// GAME TIMER COMPONENT - New flow with countdown then countup
+// GAME STATUS TEXT - Displays above cards, text-based (not a button)
 // ============================================================================
-function GameTimer({ 
-  bothCardsFlipped, 
-  onTurnEnd 
+function GameStatusText({ 
+  timerState, 
+  seconds, 
+  onTimerClick 
 }) {
-  // Timer states: 'idle' | 'countdown' | 'countup' | 'finished'
-  const [timerState, setTimerState] = useState('idle')
-  const [seconds, setSeconds] = useState(15)
-  const audioContextRef = useRef(null)
-  
   const formatTime = (totalSeconds) => {
     const mins = Math.floor(Math.abs(totalSeconds) / 60)
     const secs = Math.abs(totalSeconds) % 60
     if (mins === 0) return `${secs}s`
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
+  
+  // Render based on timer state
+  switch (timerState) {
+    case 'idle':
+      return (
+        <p className="text-gray-500 text-center text-lg mb-8">
+          Click on the cards to flip them and start your turn
+        </p>
+      )
+    
+    case 'countdown':
+      return (
+        <div className="text-center mb-8">
+          <p className="text-amber-600 text-4xl font-mono font-bold animate-pulse">
+            {seconds}s
+          </p>
+          <p className="text-amber-600/70 text-sm mt-1">
+            Get ready to share...
+          </p>
+        </div>
+      )
+    
+    case 'waiting':
+      return (
+        <p 
+          onClick={onTimerClick}
+          className="text-green-600 text-center text-lg mb-8 cursor-pointer hover:text-green-700 transition-colors"
+        >
+          <span className="underline decoration-2 underline-offset-4">Click here to start</span>
+        </p>
+      )
+    
+    case 'countup':
+      return (
+        <div 
+          onClick={onTimerClick}
+          className="text-center mb-8 cursor-pointer group"
+        >
+          <p className="text-red-600 text-4xl font-mono font-bold">
+            {formatTime(seconds)}
+          </p>
+          <p className="text-gray-500 text-sm mt-1 group-hover:text-red-600 transition-colors">
+            <span className="underline decoration-1 underline-offset-2">Click here when you're done</span>
+          </p>
+        </div>
+      )
+    
+    case 'finished':
+      return (
+        <div className="text-center mb-8">
+          <p className="text-gray-600 text-2xl font-mono">
+            {formatTime(seconds)}
+          </p>
+          <p className="text-gray-400 text-sm mt-1">
+            Turn complete
+          </p>
+        </div>
+      )
+    
+    default:
+      return null
+  }
+}
+
+// ============================================================================
+// GAME TIMER HOOK - Manages timer state and sounds
+// ============================================================================
+function useGameTimer(bothCardsFlipped) {
+  const [timerState, setTimerState] = useState('idle')
+  const [seconds, setSeconds] = useState(15)
+  const audioContextRef = useRef(null)
   
   // Play bell/beep sound
   const playBell = useCallback((count) => {
@@ -287,12 +354,11 @@ function GameTimer({
       const audioContext = audioContextRef.current
       if (audioContext.state === 'suspended') audioContext.resume()
       
-      // Play a lower, longer warning tone
       const oscillator = audioContext.createOscillator()
       const gainNode = audioContext.createGain()
       oscillator.connect(gainNode)
       gainNode.connect(audioContext.destination)
-      oscillator.frequency.value = 600 // Lower frequency for warning
+      oscillator.frequency.value = 600
       oscillator.type = 'sine'
       const now = audioContext.currentTime
       gainNode.gain.setValueAtTime(0.5, now)
@@ -327,9 +393,8 @@ function GameTimer({
       interval = setInterval(() => {
         setSeconds(prev => {
           if (prev <= 1) {
-            // Countdown finished - play warning and wait for user
             playWarning()
-            setTimerState('waiting') // Wait for user to click
+            setTimerState('waiting')
             return 0
           }
           return prev - 1
@@ -346,10 +411,8 @@ function GameTimer({
       interval = setInterval(() => {
         setSeconds(prev => {
           const newValue = prev + 1
-          // Bell sounds at specific times
-          if (newValue === 60) playBell(1)      // 1 minute: 1 beep
-          // 2 minutes: nothing
-          if (newValue === 180) playBell(3)     // 3 minutes: 3 beeps
+          if (newValue === 60) playBell(1)
+          if (newValue === 180) playBell(3)
           return newValue
         })
       }, 1000)
@@ -357,80 +420,21 @@ function GameTimer({
     return () => clearInterval(interval)
   }, [timerState, playBell])
   
-  // Handle timer button click
+  // Handle timer click
   const handleTimerClick = () => {
     if (timerState === 'waiting') {
-      // Start counting up
       setTimerState('countup')
       setSeconds(0)
     } else if (timerState === 'countup') {
-      // End the turn
       setTimerState('finished')
     }
   }
   
-  // Get button text and style based on state
-  const getButtonConfig = () => {
-    switch (timerState) {
-      case 'idle':
-        return {
-          text: 'Waiting for cards...',
-          disabled: true,
-          variant: 'outline',
-          className: 'border-gray-300 text-gray-400'
-        }
-      case 'countdown':
-        return {
-          text: `${seconds}s`,
-          disabled: true,
-          variant: 'outline',
-          className: 'border-amber-500 text-amber-600 bg-amber-50 animate-pulse'
-        }
-      case 'waiting':
-        return {
-          text: 'Start Sharing',
-          disabled: false,
-          variant: 'outline',
-          className: 'border-green-600 text-green-600 hover:bg-green-50'
-        }
-      case 'countup':
-        return {
-          text: formatTime(seconds),
-          disabled: false,
-          variant: 'outline',
-          className: 'border-red-600 text-red-600 hover:bg-red-50'
-        }
-      case 'finished':
-        return {
-          text: `Done: ${formatTime(seconds)}`,
-          disabled: true,
-          variant: 'outline',
-          className: 'border-gray-400 text-gray-600 bg-gray-50'
-        }
-      default:
-        return {
-          text: 'Timer',
-          disabled: true,
-          variant: 'outline',
-          className: ''
-        }
-    }
+  return {
+    timerState,
+    seconds,
+    handleTimerClick
   }
-  
-  const config = getButtonConfig()
-  
-  return (
-    <Button 
-      onClick={handleTimerClick} 
-      size="lg" 
-      variant={config.variant}
-      disabled={config.disabled}
-      className={`w-[180px] font-mono ${config.className}`}
-    >
-      <Clock className="w-5 h-5 mr-2" />
-      {config.text}
-    </Button>
-  )
 }
 
 // ============================================================================
