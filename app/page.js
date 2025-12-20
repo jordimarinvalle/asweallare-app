@@ -318,7 +318,7 @@ export default function App() {
   
   const discardWhiteCard = () => {
     setCurrentWhite(null)
-    setWhiteFlipped(false)
+    setWhiteFlipState(0) // Reset to face-down
   }
   
   const handleNextPlayer = () => {
