@@ -640,7 +640,10 @@ export default function App() {
               <div className="flex flex-col items-center gap-4">
                 {/* Show pile if no current card */}
                 {!currentBlack && blackDeck.length > 0 && (
-                  <div onClick={handleBlackClick} className={`cursor-pointer ${cardDrawAnimation.black ? 'card-draw-animation' : ''}`}>
+                  <div 
+                    onClick={handleBlackClick} 
+                    className={`cursor-pointer ${cardDrawAnimation.black ? 'card-draw-animation' : ''}`}
+                  >
                     <Card className="w-64 h-96 bg-black border-2 border-gray-800 flex items-center justify-center hover:shadow-xl transition-shadow card-stack text-white">
                       <CardContent className="p-8 text-center">
                         <p className="text-white text-xl font-serif">Black Card</p>
@@ -664,9 +667,13 @@ export default function App() {
                   </Card>
                 )}
                 
-                {/* Show drawn card with flip */}
+                {/* Show drawn card with flip - KEY PROP FORCES RE-RENDER */}
                 {currentBlack && (
-                  <div onClick={handleBlackClick} className="cursor-pointer perspective-1000">
+                  <div 
+                    key={currentBlack.id}
+                    onClick={handleBlackClick} 
+                    className="cursor-pointer perspective-1000"
+                  >
                     <div className={`w-64 h-96 transition-transform duration-500 transform-style-3d ${blackFlipped ? 'rotate-y-180' : ''}`}>
                       {/* Face down */}
                       <div className="absolute inset-0 backface-hidden">
