@@ -189,12 +189,15 @@ function CardPile({
                   alt="Card back" 
                   className="absolute inset-0 w-full h-full object-cover rounded-lg" 
                 />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="flex items-center gap-2 text-white text-sm font-medium px-5 py-2.5 rounded-full" style={{ backgroundColor: '#D12128' }}>
-                    <RefreshCcw className="w-4 h-4" />
-                    Tap
-                  </span>
-                </div>
+                {/* "Tap" overlay - only show if not disabled */}
+                {!disabled && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="flex items-center gap-2 text-white text-sm font-medium px-5 py-2.5 rounded-full" style={{ backgroundColor: '#D12128' }}>
+                      <RefreshCcw className="w-4 h-4" />
+                      Tap
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             
