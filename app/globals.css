@@ -113,16 +113,25 @@
     animation: draw-card 0.4s ease-out;
   }
   
-  /* Phone rotate animation */
+  /* Phone rotate animation - pauses at rotated position */
   @keyframes phone-rotate {
     0% {
       transform: rotate(0deg);
     }
-    100% {
+    25% {
       transform: rotate(-90deg);
+    }
+    50% {
+      transform: rotate(-90deg);
+    }
+    75% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(0deg);
     }
   }
   .animate-phone-rotate {
-    animation: phone-rotate 1.5s ease-in-out infinite alternate;
+    animation: phone-rotate 4s ease-in-out infinite;
   }
 }
