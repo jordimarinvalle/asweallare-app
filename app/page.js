@@ -164,7 +164,7 @@ export default function App() {
     setWhiteDeck(shuffleDeck([...allWhiteCards]))
     setDrawnWhiteCards([])
     setCurrentWhite(null)
-    setWhiteFlipped(false) // Reset to face-down
+    setWhiteFlipState(0) // Reset to face-down
     setRenderKey(prev => prev + 1)
   }
   
