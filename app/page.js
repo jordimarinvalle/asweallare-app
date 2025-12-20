@@ -132,6 +132,26 @@ function CardPile({
         {!currentCard ? (
           // Show the pile (clickable to draw) - with "Tap to draw" text
           <div className="relative w-full h-full">
+            {/* Stack cards behind - with random rotations for messy look */}
+            <div 
+              className={`absolute w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg -z-30 opacity-30`}
+              style={{ 
+                transform: `rotate(${stackRotations[2]}deg) translate(4px, 4px)`,
+              }}
+            ></div>
+            <div 
+              className={`absolute w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg -z-20 opacity-50`}
+              style={{ 
+                transform: `rotate(${stackRotations[1]}deg) translate(2px, 2px)`,
+              }}
+            ></div>
+            <div 
+              className={`absolute w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg -z-10 opacity-70`}
+              style={{ 
+                transform: `rotate(${stackRotations[0]}deg) translate(1px, 1px)`,
+              }}
+            ></div>
+            {/* Top card */}
             <div 
               className={`w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg flex items-center justify-center hover:shadow-xl transition-shadow overflow-hidden relative`}
             >
@@ -147,9 +167,6 @@ function CardPile({
                 </span>
               </div>
             </div>
-            {/* Stack effect - offset cards behind */}
-            <div className={`absolute top-1 left-1 w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg -z-10 opacity-70`}></div>
-            <div className={`absolute top-2 left-2 w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg -z-20 opacity-40`}></div>
           </div>
         ) : (
           // Show the drawn card with flip animation
