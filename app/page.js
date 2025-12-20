@@ -639,7 +639,7 @@ export default function App() {
               {/* Black card pile */}
               <div className="flex flex-col items-center gap-4">
                 <div 
-                  key={renderKey}
+                  key={`black-${renderKey}-${forceUpdate}-${currentBlack?.id || 'none'}`}
                   onClick={handleBlackClick} 
                   className="cursor-pointer perspective-1000"
                   style={{ width: '252px', height: '352px' }}
