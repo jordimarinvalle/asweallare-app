@@ -154,11 +154,11 @@ function CardPile({
                 alt="Card pile" 
                 className="absolute inset-0 w-full h-full object-cover rounded-lg" 
               />
-              {/* "Tap to draw" overlay on pile */}
+              {/* "Tap" overlay on pile */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="flex items-center gap-2 text-white text-sm font-medium bg-gray-900/60 px-5 py-2.5 rounded-full backdrop-blur-sm">
+                <span className="flex items-center gap-2 text-white text-sm font-medium px-5 py-2.5 rounded-full" style={{ backgroundColor: '#D12128' }}>
                   <RefreshCcw className="w-4 h-4" />
-                  Tap to draw
+                  Tap
                 </span>
               </div>
             </div>
