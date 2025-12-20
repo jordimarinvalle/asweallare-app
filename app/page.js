@@ -722,7 +722,7 @@ export default function App() {
                     {/* Back side */}
                     <div className="absolute inset-0 backface-hidden" style={{ width: '252px', height: '352px' }}>
                       <div className="w-full h-full bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center hover:shadow-xl transition-shadow relative overflow-hidden">
-                        {!currentWhite && whiteDeck.length === 0 ? (
+                        {whiteDeck.length === 0 && !currentWhite ? (
                           <div className="p-8 text-center">
                             <p className="text-gray-500 text-lg font-serif mb-4">No Cards Left</p>
                             <Button onClick={(e) => { e.stopPropagation(); reshuffleWhiteDeck(); }} size="sm" variant="outline">
@@ -734,13 +734,11 @@ export default function App() {
                           <>
                             <img src="/white-card-back.png" alt="Card back" className="absolute inset-0 w-full h-full object-cover rounded-lg" />
                             <div className="relative z-10 text-center p-8">
-                              <p className="text-gray-900 text-xl font-serif">
-                                {!currentWhite ? 'White Card' : 'White Card'}
-                              </p>
+                              <p className="text-gray-900 text-xl font-serif">White Card</p>
                               <p className="text-gray-500 text-sm mt-4">
-                                {!currentWhite ? 'Tap to draw' : 'Tap to flip'}
+                                {currentWhite ? 'Tap to flip' : 'Tap to draw'}
                               </p>
-                              {!currentWhite && whiteDeck.length > 0 && (
+                              {!currentWhite && (
                                 <p className="text-gray-400 text-xs mt-8">{whiteDeck.length} cards left</p>
                               )}
                             </div>
