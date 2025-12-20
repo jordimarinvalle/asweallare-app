@@ -1495,7 +1495,7 @@ export default function App() {
               <h2 className="text-3xl font-serif text-gray-900">Card Management</h2>
               <Button onClick={() => {
                 setEditingCard(null)
-                setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '' })
+                setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '', imagePath: '' })
               }} className="bg-red-600 hover:bg-red-700 text-white">
                 <Plus className="w-4 h-4 mr-2" />Add Card
               </Button>
@@ -1528,6 +1528,41 @@ export default function App() {
                   <Label>Hint (Optional)</Label>
                   <Input value={cardForm.hint} onChange={(e) => setCardForm({ ...cardForm, hint: e.target.value })} placeholder="Optional hint text" className="mt-2" />
                 </div>
+                
+                {/* Image Upload Section */}
+                <div className="sm:col-span-2">
+                  <Label>Card Image</Label>
+                  <div className="mt-2 flex items-start gap-4">
+                    {cardForm.imagePath && (
+                      <div className="w-24 h-32 border rounded overflow-hidden flex-shrink-0">
+                        <img 
+                          src={`/cards/${cardForm.imagePath}`} 
+                          alt="Card preview" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Input 
+                          type="file" 
+                          accept="image/png,image/jpeg,image/jpg"
+                          onChange={handleImageUpload}
+                          disabled={uploadingImage || !cardForm.boxId}
+                          className="flex-1"
+                        />
+                        {uploadingImage && <span className="text-sm text-gray-500">Uploading...</span>}
+                      </div>
+                      {!cardForm.boxId && (
+                        <p className="text-xs text-amber-600 mt-1">Select a box first to enable image upload</p>
+                      )}
+                      {cardForm.imagePath && (
+                        <p className="text-xs text-gray-500 mt-1">Path: {cardForm.imagePath}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="flex items-center justify-between">
                   <Label htmlFor="isDemo">Demo Card</Label>
                   <Switch id="isDemo" checked={cardForm.isDemo} onCheckedChange={(checked) => setCardForm({ ...cardForm, isDemo: checked })} />
@@ -1542,7 +1577,7 @@ export default function App() {
                   {editingCard ? 'Update Card' : 'Create Card'}
                 </Button>
                 {editingCard && (
-                  <Button onClick={() => { setEditingCard(null); setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '' }) }} variant="outline">Cancel</Button>
+                  <Button onClick={() => { setEditingCard(null); setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '', imagePath: '' }) }} variant="outline">Cancel</Button>
                 )}
               </div>
             </Card>
