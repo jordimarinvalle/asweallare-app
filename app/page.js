@@ -35,6 +35,14 @@ export default function App() {
   const [whiteFlipped, setWhiteFlipped] = useState(false)
   const [cardDrawAnimation, setCardDrawAnimation] = useState({ black: false, white: false })
   const [renderKey, setRenderKey] = useState(0) // Force re-render
+  const [forceUpdate, setForceUpdate] = useState(0)
+  
+  // Force re-render when cards change
+  useEffect(() => {
+    if (currentBlack || currentWhite) {
+      setForceUpdate(prev => prev + 1)
+    }
+  }, [currentBlack, currentWhite])
   
   // Timer
   const [timerRunning, setTimerRunning] = useState(false)
