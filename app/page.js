@@ -886,6 +886,30 @@ export default function App() {
     }
   }
   
+  // Subscribe to all access
+  const handleSubscribe = async (plan) => {
+    if (!user) {
+      setAuthOpen(true)
+      return
+    }
+    
+    const response = await fetch('/api/payment/subscribe-all', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ planId: plan.id })
+    })
+    
+    const data = await response.json()
+    if (data.url) {
+      window.location.href = data.url
+    }
+  }
+  
+  // Go to store
+  const handleGoToStore = () => {
+    setView('store')
+  }
+  
   const handleAuth = async (e) => {
     e.preventDefault()
     setAuthError('')
