@@ -30,7 +30,7 @@ async function checkUserAccess(userId) {
   const { data: access, error } = await supabase
     .from('user_access')
     .select('*')
-    .eq('userId', userId)
+    .eq('userid', userId)
     .single()
   
   if (error || !access) {
@@ -38,8 +38,8 @@ async function checkUserAccess(userId) {
   }
   
   // Check if subscription is still valid
-  if (access.paymentType === 'subscription' && access.expiresAt) {
-    const expiryDate = new Date(access.expiresAt)
+  if (access.paymenttype === 'subscription' && access.expiresat) {
+    const expiryDate = new Date(access.expiresat)
     if (expiryDate < new Date()) {
       return { hasPaidAccess: false }
     }
