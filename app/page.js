@@ -99,7 +99,7 @@ function CardPile({
         }}
       >
         {!currentCard ? (
-          // Show the pile (clickable to draw)
+          // Show the pile (clickable to draw) - with "Tap to draw" text
           <div className="relative w-full h-full">
             <div 
               className={`w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg flex items-center justify-center hover:shadow-xl transition-shadow overflow-hidden relative`}
@@ -109,6 +109,12 @@ function CardPile({
                 alt="Card pile" 
                 className="absolute inset-0 w-full h-full object-cover rounded-lg" 
               />
+              {/* "Tap to draw" overlay on pile */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className={`${isBlack ? 'text-white' : 'text-gray-700'} text-sm font-sans opacity-80 bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm`}>
+                  Tap to draw
+                </span>
+              </div>
             </div>
             {/* Stack effect - offset cards behind */}
             <div className={`absolute top-1 left-1 w-full h-full ${bgColor} border-2 ${borderColor} rounded-lg -z-10 opacity-70`}></div>
