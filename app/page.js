@@ -712,6 +712,13 @@ export default function App() {
   const [authSuccess, setAuthSuccess] = useState('')
   const [isLandscape, setIsLandscape] = useState(true)
   
+  // Admin email restriction
+  const ADMIN_EMAIL = 'mocasin@gmail.com'
+  const isAdmin = user?.email === ADMIN_EMAIL
+  
+  // Admin filter state
+  const [adminBoxFilter, setAdminBoxFilter] = useState('')
+  
   // Box selection state
   const [boxes, setBoxes] = useState([])
   const [plans, setPlans] = useState([])
