@@ -700,14 +700,12 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
         
         {/* Experience Guide Button */}
         <div className="flex justify-center mb-6">
-          <Button 
-            variant="outline" 
-            onClick={onOpenBooklet}
-            className="gap-2 text-gray-700 border-gray-300 hover:bg-gray-50"
-          >
-            <BookOpen className="w-4 h-4" />
-            The Experience Guide
-          </Button>
+          <GuideSelector
+            onSelectComplete={onOpenCompleteGuide}
+            onSelectQuick={onOpenQuickGuide}
+            variant="outline"
+            className="text-gray-700 border-gray-300 hover:bg-gray-50"
+          />
         </div>
         
         {/* Accessible Boxes */}
