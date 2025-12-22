@@ -294,17 +294,17 @@ function GameStatusText({
             <button
               onClick={onTimerClick}
               disabled={disabled}
-              className={`min-w-[320px] px-6 py-3 bg-white rounded-lg transition-all ${
+              key={pulseKey}
+              className={`min-w-[320px] px-6 py-3 bg-white rounded-lg ${
                 disabled 
                   ? 'border border-gray-300 text-gray-400 cursor-not-allowed font-medium' 
-                  : 'hover:bg-red-50'
+                  : 'hover:bg-red-50 countdown-pulse'
               }`}
               style={disabled ? {} : { 
                 borderColor: '#D12128', 
                 color: '#D12128',
-                borderWidth: isPulsing ? '2px' : '1px',
-                borderStyle: 'solid',
-                fontWeight: isPulsing ? '700' : '500'
+                borderWidth: '1px',
+                borderStyle: 'solid'
               }}
             >
               {disabled ? `Flip a card to start (${seconds}s)` : `Click here to start (${seconds}s)`}
