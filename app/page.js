@@ -639,7 +639,7 @@ function GamePlayView({
 // ============================================================================
 // BOX SELECTION COMPONENT
 // ============================================================================
-function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartPlaying, onGoToStore, user }) {
+function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartPlaying, onGoToStore, user, onOpenBooklet }) {
   const toggleBox = (boxId) => {
     const box = boxes.find(b => b.id === boxId)
     if (!box?.hasAccess) return // Can't select locked boxes
@@ -685,6 +685,18 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
         <div className="text-center mb-8">
           <h2 className="text-3xl font-serif text-gray-900 mb-2">Choose Your Boxes</h2>
           <p className="text-gray-600">Select which card collections you want to play with</p>
+        </div>
+        
+        {/* Experience Guide Button */}
+        <div className="flex justify-center mb-6">
+          <Button 
+            variant="outline" 
+            onClick={onOpenBooklet}
+            className="gap-2 text-gray-700 border-gray-300 hover:bg-gray-50"
+          >
+            <BookOpen className="w-4 h-4" />
+            The Experience Guide
+          </Button>
         </div>
         
         {/* Accessible Boxes */}
