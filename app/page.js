@@ -2204,6 +2204,12 @@ export default function App() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      {/* Booklet Viewer Modal */}
+      <BookletViewer 
+        isOpen={bookletOpen} 
+        onClose={() => setBookletOpen(false)} 
+      />
     </div>
   )
 }
