@@ -374,14 +374,26 @@ function GameStatusText({
       )
     
     case 'finished':
+      // Format time nicely for the finished message
+      const finishedMins = Math.floor(seconds / 60)
+      const finishedSecs = seconds % 60
+      let timeDisplay = ""
+      if (finishedMins > 0 && finishedSecs > 0) {
+        timeDisplay = `${finishedMins} min ${finishedSecs} sec`
+      } else if (finishedMins > 0) {
+        timeDisplay = `${finishedMins} min`
+      } else {
+        timeDisplay = `${finishedSecs} sec`
+      }
+      
       return (
         <div className="text-center mb-8">
           <div className="relative inline-flex items-center">
             <button
               onClick={onReset}
-              className="min-w-[380px] px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              className="max-w-[500px] px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors text-left"
             >
-              {formatTime(seconds)} - Sharing is done, click here to reset.
+              Sharing complete (⏱️ {timeDisplay}) — now it's time for the circle to respond. Click here to reset for the next turn.
             </button>
             <ResetButton className="absolute -right-12" />
           </div>
