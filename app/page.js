@@ -650,7 +650,7 @@ function GamePlayView({
 // ============================================================================
 // BOX SELECTION COMPONENT
 // ============================================================================
-function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartPlaying, onGoToStore, user, onOpenBooklet }) {
+function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartPlaying, onGoToStore, user, onOpenCompleteGuide, onOpenQuickGuide }) {
   const toggleBox = (boxId) => {
     const box = boxes.find(b => b.id === boxId)
     if (!box?.hasAccess) return // Can't select locked boxes
