@@ -96,7 +96,9 @@ yarn dev
 │   │   └── admin/import-cards/    # Card import utility
 │   └── auth/callback/             # OAuth callback
 ├── components/
-│   └── ui/                        # shadcn components
+│   ├── ui/                        # shadcn components
+│   └── game/
+│       └── BookletViewer.jsx      # Reusable booklet viewer modal
 ├── lib/
 │   ├── supabase.js                # Browser client
 │   ├── supabase-server.js         # Server client
