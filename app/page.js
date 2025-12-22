@@ -251,6 +251,21 @@ function GameStatusText({
   onReset,
   disabled = false
 }) {
+  const [isPulsing, setIsPulsing] = useState(false)
+  const prevSecondsRef = useRef(seconds)
+  
+  // Pulse effect when seconds change during countdown
+  useEffect(() => {
+    if (timerState === 'countdown' && seconds !== prevSecondsRef.current) {
+      setIsPulsing(true)
+      const timeout = setTimeout(() => {
+        setIsPulsing(false)
+      }, 20)
+      prevSecondsRef.current = seconds
+      return () => clearTimeout(timeout)
+    }
+  }, [seconds, timerState])
+  
   const formatTime = (totalSeconds) => {
     const mins = Math.floor(Math.abs(totalSeconds) / 60)
     const secs = Math.abs(totalSeconds) % 60
@@ -291,12 +306,18 @@ function GameStatusText({
             <button
               onClick={onTimerClick}
               disabled={disabled}
-              className={`min-w-[320px] px-6 py-3 bg-white border rounded-lg font-medium transition-colors ${
+              className={`min-w-[320px] px-6 py-3 bg-white rounded-lg transition-all ${
                 disabled 
-                  ? 'border-gray-300 text-gray-400 cursor-not-allowed' 
+                  ? 'border border-gray-300 text-gray-400 cursor-not-allowed font-medium' 
                   : 'hover:bg-red-50'
               }`}
-              style={disabled ? {} : { borderColor: '#D12128', color: '#D12128' }}
+              style={disabled ? {} : { 
+                borderColor: '#D12128', 
+                color: '#D12128',
+                borderWidth: isPulsing ? '2px' : '1px',
+                borderStyle: 'solid',
+                fontWeight: isPulsing ? '700' : '500'
+              }}
             >
               {disabled ? `Flip a card to start (${seconds}s)` : `Click here to start (${seconds}s)`}
             </button>
@@ -312,12 +333,17 @@ function GameStatusText({
             <button
               onClick={onTimerClick}
               disabled={disabled}
-              className={`min-w-[320px] px-6 py-3 bg-white border rounded-lg font-medium transition-colors ${
+              className={`min-w-[320px] px-6 py-3 rounded-lg font-medium transition-colors ${
                 disabled 
-                  ? 'border-gray-300 text-gray-400 cursor-not-allowed' 
-                  : 'hover:bg-red-50'
+                  ? 'bg-white border border-gray-300 text-gray-400 cursor-not-allowed' 
+                  : 'text-white hover:opacity-90'
               }`}
-              style={disabled ? {} : { borderColor: '#D12128', color: '#D12128' }}
+              style={disabled ? {} : { 
+                backgroundColor: '#D12128', 
+                borderColor: '#D12128',
+                borderWidth: '2px',
+                borderStyle: 'solid'
+              }}
             >
               {disabled ? 'Flip a card to start' : 'Time is over. Click here to start.'}
             </button>
