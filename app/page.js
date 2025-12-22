@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator'
 import { toast } from '@/hooks/use-toast'
 import { LogOut, Plus, Edit, Trash2, CreditCard, RotateCw, Smartphone, Lock, Check, Package, Play, ShoppingBag, Sparkles, Crown, Receipt, XCircle, Image, Menu, AlertTriangle, RefreshCcw, BookOpen } from 'lucide-react'
 import { BookletViewer, BookletButton } from '@/components/game/BookletViewer'
+import { RotateDeviceScreen } from '@/components/game/RotateDeviceScreen'
 
 // ============================================================================
 // CARD PILE COMPONENT - Isolated state for reliable single-click draws
