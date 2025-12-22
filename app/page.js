@@ -343,16 +343,16 @@ function GameStatusText({
     case 'countup':
       // Determine message and style based on elapsed time
       const minutes = Math.floor(seconds / 60)
-      let countupMessage = 'Click here when you are done.'
+      let countupMessage = "Click here when you are done."
       let isThreeMinutes = false
       
       if (minutes >= 3) {
-        countupMessage = 'Click here when you are done. 3 minutes — take all the time you need.'
+        countupMessage = "Click here when you are done. 3 minutes — wrapping up? No rush, but stay mindful."
         isThreeMinutes = true
       } else if (minutes >= 2) {
-        countupMessage = 'Click here when you are done. 2 minutes — you're in the flow.'
+        countupMessage = "Click here when you are done. 2 minutes — you're in the flow."
       } else if (minutes >= 1) {
-        countupMessage = 'Click here when you are done. 1 minute — keep sharing.'
+        countupMessage = "Click here when you are done. 1 minute — keep sharing."
       }
       
       return (
