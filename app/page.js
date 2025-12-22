@@ -1796,6 +1796,7 @@ export default function App() {
             onStartPlaying={handleStartPlaying}
             onGoToStore={handleGoToStore}
             user={user}
+            onOpenBooklet={() => setBookletOpen(true)}
           />
         )}
         
