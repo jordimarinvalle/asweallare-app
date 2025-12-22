@@ -108,6 +108,7 @@ yarn dev
 │   │   ├── white-box-216/
 │   │   ├── black-box-108/
 │   │   └── red-box-108/
+│   ├── booklet/                   # Experience guide images (Artboard 1.png, etc.)
 │   ├── black-card-back.png        # Card back image
 │   └── white-card-back.png        # Card back image
 ├── docker-compose.yml
