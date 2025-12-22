@@ -1080,6 +1080,8 @@ export default function App() {
   
   // Booklet viewer state
   const [bookletOpen, setBookletOpen] = useState(false)
+  const [bookletImages, setBookletImages] = useState(BOOKLET_IMAGES)
+  const [bookletTitle, setBookletTitle] = useState("Unscripted Conversations Guide")
   
   // View state
   const [view, setView] = useState('game')
