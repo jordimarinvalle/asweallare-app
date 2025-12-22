@@ -252,19 +252,18 @@ function GameStatusText({
   disabled = false
 }) {
   const [isPulsing, setIsPulsing] = useState(false)
-  const prevSecondsRef = useRef(seconds)
   
-  // Pulse effect when seconds change during countdown
+  // Pulse effect every second during countdown
   useEffect(() => {
-    if (timerState === 'countdown' && seconds !== prevSecondsRef.current) {
+    if (timerState === 'countdown' && !disabled) {
+      // Trigger pulse immediately when seconds change
       setIsPulsing(true)
       const timeout = setTimeout(() => {
         setIsPulsing(false)
-      }, 20)
-      prevSecondsRef.current = seconds
+      }, 150) // 150ms for visibility (20ms is too fast to see)
       return () => clearTimeout(timeout)
     }
-  }, [seconds, timerState])
+  }, [seconds, timerState, disabled])
   
   const formatTime = (totalSeconds) => {
     const mins = Math.floor(Math.abs(totalSeconds) / 60)
