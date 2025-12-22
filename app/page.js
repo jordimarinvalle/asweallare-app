@@ -1740,7 +1740,16 @@ export default function App() {
             onStartPlaying={handleStartPlaying}
             onGoToStore={handleGoToStore}
             user={user}
-            onOpenBooklet={() => setBookletOpen(true)}
+            onOpenCompleteGuide={() => {
+              setBookletImages(BOOKLET_IMAGES)
+              setBookletTitle("Unscripted Conversations Guide")
+              setBookletOpen(true)
+            }}
+            onOpenQuickGuide={() => {
+              setBookletImages(BOOKLET_30SECS)
+              setBookletTitle("Quick Guide — 30 Second Read")
+              setBookletOpen(true)
+            }}
           />
         )}
         
@@ -1773,7 +1782,16 @@ export default function App() {
             setWhiteFlipped={setWhiteFlipped}
             onBackToBoxes={handleBackToBoxes}
             onNextPlayer={handleNextPlayer}
-            onOpenBooklet={() => setBookletOpen(true)}
+            onOpenCompleteGuide={() => {
+              setBookletImages(BOOKLET_IMAGES)
+              setBookletTitle("Unscripted Conversations Guide")
+              setBookletOpen(true)
+            }}
+            onOpenQuickGuide={() => {
+              setBookletImages(BOOKLET_30SECS)
+              setBookletTitle("Quick Guide — 30 Second Read")
+              setBookletOpen(true)
+            }}
           />
         )}
         
