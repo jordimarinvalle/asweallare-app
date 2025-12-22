@@ -282,7 +282,7 @@ function GameStatusText({
         <div className="text-center mb-8">
           <div className="relative inline-flex items-center">
             <span className="inline-block px-6 py-3 bg-white border border-white text-gray-500 rounded-lg font-medium">
-              Click on the cards to flip them and start your turn
+              Tap on the cards to flip them and start your turn
             </span>
             <ResetButton className="absolute -right-12" />
           </div>
@@ -309,7 +309,7 @@ function GameStatusText({
                 borderStyle: 'solid'
               }}
             >
-              {disabled ? `Flip a card to start (${seconds}s)` : `Click here to start (${seconds}s)`}
+              {disabled ? `Flip a card first (${seconds}s)` : `Ready? Tap to begin sharing (${seconds}s)`}
             </button>
             <ResetButton className="absolute -right-12" />
           </div>
@@ -335,7 +335,7 @@ function GameStatusText({
                 borderStyle: 'solid'
               }}
             >
-              {disabled ? 'Flip a card to start' : 'Time is over. Click here to start.'}
+              {disabled ? 'Flip a card first' : 'Ready when you are — tap to start sharing'}
             </button>
             <ResetButton className="absolute -right-12" />
           </div>
@@ -345,16 +345,16 @@ function GameStatusText({
     case 'countup':
       // Determine message and style based on elapsed time
       const minutes = Math.floor(seconds / 60)
-      let countupMessage = "Click here when you are done."
+      let countupMessage = "Tap here when you're done sharing"
       let isThreeMinutes = false
       
       if (minutes >= 3) {
-        countupMessage = "Click here when you are done. 3 minutes — wrapping up? No rush, but stay mindful."
+        countupMessage = "Tap when done. 3 minutes — wrapping up? No rush, but stay mindful."
         isThreeMinutes = true
       } else if (minutes >= 2) {
-        countupMessage = "Click here when you are done. 2 minutes — you're in the flow."
+        countupMessage = "Tap when done. 2 minutes — you're in the flow."
       } else if (minutes >= 1) {
-        countupMessage = "Click here when you are done. 1 minute — keep sharing."
+        countupMessage = "Tap when done. 1 minute — keep sharing."
       }
       
       return (
