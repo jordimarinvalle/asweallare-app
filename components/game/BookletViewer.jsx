@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { ChevronLeft, ChevronRight, X, BookOpen } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, BookOpen, Clock, BookMarked } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { RotateDeviceScreen } from './RotateDeviceScreen'
 
-// Default booklet images - sorted numerically by artboard number
-const DEFAULT_BOOKLET_IMAGES = [
+// Complete guide booklet images (21 pages)
+const BOOKLET_COMPLETE_IMAGES = [
   '/booklet/Artboard 1.png',
   '/booklet/Artboard 3.png',
   '/booklet/Artboard 4.png',
@@ -30,18 +31,26 @@ const DEFAULT_BOOKLET_IMAGES = [
   '/booklet/Artboard 24.png',
 ]
 
+// Quick 30-second guide booklet images (4 pages)
+const BOOKLET_30SECS_IMAGES = [
+  '/booklet-30secs/Artboard 1.png',
+  '/booklet-30secs/Artboard 2.png',
+  '/booklet-30secs/Artboard 3.png',
+  '/booklet-30secs/Artboard 4.png',
+]
+
 /**
  * BookletViewer - A reusable modal component to display booklet pages as images
  * 
  * @param {boolean} isOpen - Whether the modal is open
  * @param {function} onClose - Function to call when closing the modal
- * @param {string[]} images - Optional array of image paths (defaults to booklet images)
+ * @param {string[]} images - Optional array of image paths (defaults to complete booklet images)
  * @param {string} title - Optional title for the booklet
  */
 export function BookletViewer({ 
   isOpen, 
   onClose, 
-  images = DEFAULT_BOOKLET_IMAGES,
+  images = BOOKLET_COMPLETE_IMAGES,
   title = "Unscripted Conversations Guide"
 }) {
   const [currentPage, setCurrentPage] = useState(0)
@@ -235,30 +244,108 @@ export function BookletViewer({
 }
 
 /**
- * BookletButton - A button component to open the booklet viewer
+ * GuideSelector - A popover component to select between complete and quick guide
  * 
- * @param {function} onClick - Function to call when button is clicked
- * @param {string} variant - Button variant ('default' | 'outline' | 'ghost')
- * @param {string} size - Button size ('sm' | 'default' | 'lg')
- * @param {string} className - Additional CSS classes
+ * @param {function} onSelectComplete - Called when user selects complete guide
+ * @param {function} onSelectQuick - Called when user selects quick guide
+ * @param {string} variant - Button variant for the trigger
+ * @param {string} size - Button size for the trigger
+ * @param {string} buttonLabel - Label for the trigger button
+ * @param {string} className - Additional CSS classes for the trigger button
  */
-export function BookletButton({ 
-  onClick, 
-  variant = 'outline', 
+export function GuideSelector({ 
+  onSelectComplete, 
+  onSelectQuick,
+  variant = 'outline',
   size = 'default',
-  className = '' 
+  buttonLabel = 'The Experience Guide',
+  className = ''
 }) {
+  const [open, setOpen] = useState(false)
+  
+  const handleSelectComplete = () => {
+    setOpen(false)
+    onSelectComplete()
+  }
+  
+  const handleSelectQuick = () => {
+    setOpen(false)
+    onSelectQuick()
+  }
+  
   return (
-    <Button 
-      onClick={onClick} 
-      variant={variant} 
-      size={size}
-      className={`gap-2 ${className}`}
-    >
-      <BookOpen className="w-4 h-4" />
-      <span>The Experience Guide</span>
-    </Button>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button 
+          variant={variant} 
+          size={size}
+          className={`gap-2 ${className}`}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span>{buttonLabel}</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 p-0" align="center">
+        <div className="p-3 border-b border-gray-100">
+          <p className="text-sm font-medium text-gray-900">Choose your guide</p>
+          <p className="text-xs text-gray-500 mt-0.5">How much time do you have?</p>
+        </div>
+        <div className="p-2 space-y-1">
+          {/* Quick Guide Option */}
+          <button
+            onClick={handleSelectQuick}
+            className="w-full flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
+          >
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+              <Clock className="w-5 h-5 text-green-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-gray-900 text-sm">Quick Guide</p>
+              <p className="text-xs text-gray-500 mt-0.5">A 30-second read — the essentials</p>
+            </div>
+          </button>
+          
+          {/* Complete Guide Option */}
+          <button
+            onClick={handleSelectComplete}
+            className="w-full flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
+          >
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <BookMarked className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-gray-900 text-sm">Complete Guide</p>
+              <p className="text-xs text-gray-500 mt-0.5">The full experience — take your time</p>
+            </div>
+          </button>
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }
+
+/**
+ * GuideSelectorCompact - A compact version for the game play screen
+ */
+export function GuideSelectorCompact({ 
+  onSelectComplete, 
+  onSelectQuick,
+  className = ''
+}) {
+  return (
+    <GuideSelector
+      onSelectComplete={onSelectComplete}
+      onSelectQuick={onSelectQuick}
+      variant="ghost"
+      size="sm"
+      buttonLabel="Guide"
+      className={`text-gray-600 ${className}`}
+    />
+  )
+}
+
+// Export booklet image arrays for external use
+export const BOOKLET_IMAGES = BOOKLET_COMPLETE_IMAGES
+export const BOOKLET_30SECS = BOOKLET_30SECS_IMAGES
 
 export default BookletViewer
