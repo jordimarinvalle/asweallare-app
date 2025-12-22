@@ -341,14 +341,32 @@ function GameStatusText({
       )
     
     case 'countup':
+      // Determine message and style based on elapsed time
+      const minutes = Math.floor(seconds / 60)
+      let countupMessage = 'Click here when you are done.'
+      let isThreeMinutes = false
+      
+      if (minutes >= 3) {
+        countupMessage = 'Click here when you are done. 3 minutes — take all the time you need.'
+        isThreeMinutes = true
+      } else if (minutes >= 2) {
+        countupMessage = 'Click here when you are done. 2 minutes — you're in the flow.'
+      } else if (minutes >= 1) {
+        countupMessage = 'Click here when you are done. 1 minute — keep sharing.'
+      }
+      
       return (
         <div className="text-center mb-8">
           <div className="relative inline-flex items-center">
             <button
               onClick={onTimerClick}
-              className="min-w-[380px] px-6 py-3 bg-white border border-gray-400 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              className={`min-w-[380px] px-6 py-3 border rounded-lg font-medium transition-colors ${
+                isThreeMinutes 
+                  ? 'bg-black text-white border-black hover:bg-gray-800' 
+                  : 'bg-white text-gray-700 border-gray-400 hover:bg-gray-50'
+              }`}
             >
-              Click here when you are done.
+              {countupMessage}
             </button>
             <ResetButton className="absolute -right-12" />
           </div>
