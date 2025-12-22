@@ -2160,7 +2160,9 @@ export default function App() {
       {/* Booklet Viewer Modal */}
       <BookletViewer 
         isOpen={bookletOpen} 
-        onClose={() => setBookletOpen(false)} 
+        onClose={() => setBookletOpen(false)}
+        images={bookletImages}
+        title={bookletTitle}
       />
     </div>
   )
