@@ -110,7 +110,8 @@ yarn dev
 │   │   ├── white-box-216/
 │   │   ├── black-box-108/
 │   │   └── red-box-108/
-│   ├── booklet/                   # Experience guide images (Artboard 1.png, etc.)
+│   ├── booklet/                   # Complete experience guide (21 pages)
+│   ├── booklet-30secs/            # Quick 30-second guide (4 pages)
 │   ├── black-card-back.png        # Card back image
 │   └── white-card-back.png        # Card back image
 ├── docker-compose.yml
@@ -118,6 +119,17 @@ yarn dev
 ├── Dockerfile.dev
 └── .env.example
 ```
+
+## 📖 Experience Guides
+
+The app includes two in-app guides accessible via the "The Experience Guide" button:
+
+| Guide | Location | Pages | Description |
+|-------|----------|-------|-------------|
+| `booklet/` | `/public/booklet/` | 21 | Complete guide with full instructions |
+| `booklet-30secs/` | `/public/booklet-30secs/` | 4 | Quick 30-second read with essentials |
+
+Both guides are displayed in a mobile-optimized viewer with swipe navigation and require landscape orientation.
 
 ## 🗄️ Database Schema
 
