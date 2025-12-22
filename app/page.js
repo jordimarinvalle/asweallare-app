@@ -260,7 +260,7 @@ function GameStatusText({
       setIsPulsing(true)
       const timeout = setTimeout(() => {
         setIsPulsing(false)
-      }, 150) // 150ms for visibility (20ms is too fast to see)
+      }, 20) // 20ms as requested
       return () => clearTimeout(timeout)
     }
   }, [seconds, timerState, disabled])
