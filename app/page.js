@@ -552,7 +552,8 @@ function GamePlayView({
   whiteFlipped, setWhiteFlipped,
   onBackToBoxes,
   onNextPlayer,
-  onOpenBooklet
+  onOpenCompleteGuide,
+  onOpenQuickGuide
 }) {
   // Check if both cards are flipped (showing fronts)
   const bothCardsFlipped = currentBlack && currentWhite && blackFlipped && whiteFlipped
@@ -594,15 +595,10 @@ function GamePlayView({
         <Button variant="ghost" size="sm" onClick={onBackToBoxes}>
           ← Change Boxes
         </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onOpenBooklet}
-          className="text-gray-600"
-        >
-          <BookOpen className="w-4 h-4 mr-1" />
-          Guide
-        </Button>
+        <GuideSelectorCompact
+          onSelectComplete={onOpenCompleteGuide}
+          onSelectQuick={onOpenQuickGuide}
+        />
       </div>
       
       {/* Status text above cards */}
