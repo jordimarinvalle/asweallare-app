@@ -1839,6 +1839,7 @@ export default function App() {
             setWhiteFlipped={setWhiteFlipped}
             onBackToBoxes={handleBackToBoxes}
             onNextPlayer={handleNextPlayer}
+            onOpenBooklet={() => setBookletOpen(true)}
           />
         )}
         
