@@ -251,19 +251,8 @@ function GameStatusText({
   onReset,
   disabled = false
 }) {
-  const [isPulsing, setIsPulsing] = useState(false)
-  
-  // Pulse effect every second during countdown
-  useEffect(() => {
-    if (timerState === 'countdown' && !disabled) {
-      // Trigger pulse immediately when seconds change
-      setIsPulsing(true)
-      const timeout = setTimeout(() => {
-        setIsPulsing(false)
-      }, 20) // 20ms as requested
-      return () => clearTimeout(timeout)
-    }
-  }, [seconds, timerState, disabled])
+  // Use a key that changes with seconds to trigger CSS animation
+  const pulseKey = timerState === 'countdown' && !disabled ? `pulse-${seconds}` : 'no-pulse'
   
   const formatTime = (totalSeconds) => {
     const mins = Math.floor(Math.abs(totalSeconds) / 60)
