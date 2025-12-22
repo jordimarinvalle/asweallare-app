@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { ChevronLeft, ChevronRight, X, BookOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { RotateDeviceScreen } from './RotateDeviceScreen'
 
 // Default booklet images - sorted numerically by artboard number
 const DEFAULT_BOOKLET_IMAGES = [
@@ -138,64 +139,9 @@ export function BookletViewer({
 
   if (!isOpen) return null
 
-  // Show rotate screen if in portrait mode
+  // Show rotate screen if in portrait mode (using shared component)
   if (!isLandscape) {
-    return (
-      <div className="fixed inset-0 z-50 bg-white flex items-center justify-center p-8">
-        {/* Close button even in portrait */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10"
-          aria-label="Close booklet"
-        >
-          <X className="w-6 h-6 text-gray-700" />
-        </button>
-        
-        <div className="w-full max-w-xs">
-          {/* Animated Phone */}
-          <div className="animate-phone-rotate mx-auto mb-8" style={{ width: '180px' }}>
-            <div className="relative">
-              {/* Phone frame */}
-              <img 
-                src="/phone-transparent.png" 
-                alt="Phone" 
-                className="w-full rounded-3xl"
-                style={{ backgroundColor: '#E8E8E8', border: '#000 solid 4px' }}
-              />
-              {/* Phone notch */}
-              <div 
-                className="absolute left-1/2 -translate-x-1/2 rounded-xl"
-                style={{ width: '25%', height: '4%', top: '4%', backgroundColor: 'black' }}
-              />
-              {/* Logo inside phone (rotated 90deg) */}
-              <div 
-                className="absolute left-1/2 -translate-x-1/2 w-full p-4"
-                style={{ top: '22%' }}
-              >
-                <img 
-                  src="/logo-asweallare.png" 
-                  alt="AS WE ALL ARE" 
-                  className="w-full"
-                  style={{ transform: 'rotate(90deg)' }}
-                />
-              </div>
-              {/* Phone home indicator */}
-              <div 
-                className="absolute left-1/2 -translate-x-1/2 rounded"
-                style={{ width: '50%', height: '1%', bottom: '4%', backgroundColor: 'black' }}
-              />
-            </div>
-          </div>
-          
-          {/* Instructions */}
-          <div className="text-center">
-            <p className="text-gray-600 mb-4">
-              Please rotate your phone to landscape mode for the best reading experience.
-            </p>
-          </div>
-        </div>
-      </div>
-    )
+    return <RotateDeviceScreen onClose={onClose} showClose={true} />
   }
 
   return (
@@ -230,14 +176,14 @@ export function BookletViewer({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        {/* Left navigation arrow */}
+        {/* Left navigation arrow - translucent gray background */}
         <button
           onClick={goToPrevPage}
           disabled={currentPage === 0}
           className={`absolute left-2 sm:left-4 z-10 p-2 sm:p-3 rounded-full transition-all ${
             currentPage === 0
-              ? 'bg-white/5 text-white/20 cursor-not-allowed'
-              : 'bg-white/10 hover:bg-white/20 text-white'
+              ? 'bg-gray-400/20 text-white/30 cursor-not-allowed'
+              : 'bg-gray-600/60 hover:bg-gray-600/80 text-white shadow-lg'
           }`}
           aria-label="Previous page"
         >
@@ -254,14 +200,14 @@ export function BookletViewer({
           />
         </div>
 
-        {/* Right navigation arrow */}
+        {/* Right navigation arrow - translucent gray background */}
         <button
           onClick={goToNextPage}
           disabled={currentPage === images.length - 1}
           className={`absolute right-2 sm:right-4 z-10 p-2 sm:p-3 rounded-full transition-all ${
             currentPage === images.length - 1
-              ? 'bg-white/5 text-white/20 cursor-not-allowed'
-              : 'bg-white/10 hover:bg-white/20 text-white'
+              ? 'bg-gray-400/20 text-white/30 cursor-not-allowed'
+              : 'bg-gray-600/60 hover:bg-gray-600/80 text-white shadow-lg'
           }`}
           aria-label="Next page"
         >
