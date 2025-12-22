@@ -52,17 +52,17 @@
     font-size: 10pt;
   }
   
-  /* Countdown pulse animation - bold font and 2px border for first 20ms */
+  /* Countdown pulse animation - bold font and 2px border for first 200ms */
   @keyframes countdown-pulse {
     0% {
       font-weight: 700;
       border-width: 2px;
     }
-    2% {
+    20% {
       font-weight: 700;
       border-width: 2px;
     }
-    2.01% {
+    20.01% {
       font-weight: 500;
       border-width: 1px;
     }
