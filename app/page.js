@@ -550,7 +550,8 @@ function GamePlayView({
   blackFlipped, setBlackFlipped,
   whiteFlipped, setWhiteFlipped,
   onBackToBoxes,
-  onNextPlayer
+  onNextPlayer,
+  onOpenBooklet
 }) {
   // Check if both cards are flipped (showing fronts)
   const bothCardsFlipped = currentBlack && currentWhite && blackFlipped && whiteFlipped
@@ -587,10 +588,19 @@ function GamePlayView({
   
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 sm:p-8">
-      {/* Back to boxes button */}
-      <div className="absolute top-20 left-4">
+      {/* Top buttons row */}
+      <div className="absolute top-20 left-4 right-4 flex justify-between items-center">
         <Button variant="ghost" size="sm" onClick={onBackToBoxes}>
           ← Change Boxes
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onOpenBooklet}
+          className="text-gray-600"
+        >
+          <BookOpen className="w-4 h-4 mr-1" />
+          Guide
         </Button>
       </div>
       
