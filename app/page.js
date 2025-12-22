@@ -1067,6 +1067,9 @@ export default function App() {
   const [blackFlipped, setBlackFlipped] = useState(false)
   const [whiteFlipped, setWhiteFlipped] = useState(false)
   
+  // Booklet viewer state
+  const [bookletOpen, setBookletOpen] = useState(false)
+  
   // View state
   const [view, setView] = useState('game')
   const [purchases, setPurchases] = useState([])
