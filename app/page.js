@@ -340,7 +340,7 @@ function GameStatusText({
               style={disabled ? {} : { 
                 backgroundColor: '#D12128', 
                 borderColor: '#D12128',
-                borderWidth: '2px',
+                borderWidth: '1px',
                 borderStyle: 'solid'
               }}
             >
