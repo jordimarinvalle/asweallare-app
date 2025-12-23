@@ -1054,7 +1054,13 @@ export default function App() {
   const isAdmin = user?.email === ADMIN_EMAIL
   
   // Admin filter state
+  const [adminSeriesFilter, setAdminSeriesFilter] = useState('')
   const [adminBoxFilter, setAdminBoxFilter] = useState('')
+  const [adminPileFilter, setAdminPileFilter] = useState('')
+  
+  // Card editing state
+  const [editingCardId, setEditingCardId] = useState(null)
+  const [editingCardText, setEditingCardText] = useState('')
   
   // Box selection state
   const [boxes, setBoxes] = useState([])
