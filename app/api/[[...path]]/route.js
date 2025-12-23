@@ -241,7 +241,7 @@ export async function GET(request) {
       
       const { data: cards, error } = await supabase
         .from('cards')
-        .select('*, boxes(name, color), piles(name, slug)')
+        .select('*, boxes(name, color, collection_series_id, collection_series(name)), piles(name, slug)')
         .order('created_at', { ascending: false })
       
       if (error) {
