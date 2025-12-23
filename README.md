@@ -6,20 +6,22 @@ A mobile-first web app for meaningful conversations. Draw cards, share stories, 
 
 - **Card Drawing**: Draw black and white cards with a single tap
 - **Card Boxes**: Multiple themed collections (Demo, White, Black, Red)
-- **Timer**: Built-in sharing timer with bell sounds at 1, 2, and 3 minutes
-- **Save Draws**: Logged-in users can save memorable card combinations
+- **Timer**: Built-in sharing timer with visual feedback
+- **Experience Guide**: In-app booklet viewer (full + 30-second quick guide)
 - **Store**: Purchase individual boxes or subscribe for all-access
-- **Admin Panel**: Manage cards and boxes
+- **Admin Panel**: Manage cards, boxes, collection series, prices, and bundles
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
-- [Supabase](https://supabase.com) account (free tier works)
+- [Supabase](https://supabase.com) account (free tier works) OR local PostgreSQL
 - [Stripe](https://stripe.com) account (for payments)
 
-### 1. Clone and Setup Environment
+### Option A: Using Supabase (Recommended for Production)
+
+#### 1. Clone and Setup Environment
 
 ```bash
 # Clone the repository
@@ -30,7 +32,7 @@ cd as-we-all-are
 cp .env.example .env.local
 ```
 
-### 2. Configure Environment Variables
+#### 2. Configure Environment Variables
 
 Edit `.env.local` with your credentials:
 
@@ -48,6 +50,56 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 # App URL
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
+
+#### 3. Setup Supabase Database
+
+Run these SQL files in order in the Supabase SQL Editor:
+
+1. **Schema**: `/database/schema.sql` - Creates all tables and indexes
+2. **Fixtures**: `/database/fixtures.sql` - Inserts initial data (boxes, prices, etc.)
+3. **Fix RLS** (if needed): `/database/fix-rls-policies.sql` - Simplifies row-level security
+
+#### 4. Run with Docker
+
+```bash
+docker-compose up app
+```
+
+### Option B: Using Local PostgreSQL (Development)
+
+#### 1. Start Local Environment
+
+```bash
+# Start PostgreSQL + App + pgAdmin
+docker-compose --profile local up
+
+# PostgreSQL will auto-run schema.sql and fixtures.sql on first start
+```
+
+#### 2. Access Services
+
+- **App**: http://localhost:3000
+- **pgAdmin**: http://localhost:5050 (admin@admin.com / admin)
+- **PostgreSQL**: localhost:5432 (postgres / postgres)
+
+#### 3. Connect pgAdmin to PostgreSQL
+
+1. Open http://localhost:5050
+2. Add New Server:
+   - Name: Local
+   - Host: postgres
+   - Port: 5432
+   - Database: asweallare
+   - Username: postgres
+   - Password: postgres
+
+## 📁 Database Files
+
+| File | Purpose |
+|------|---------|
+| `/database/schema.sql` | Complete database schema (tables, indexes, triggers) |
+| `/database/fixtures.sql` | Initial data (series, boxes, prices, bundles, sample cards) |
+| `/database/fix-rls-policies.sql` | Simplified RLS policies for Supabase |
 
 ### 3. Setup Database
 
