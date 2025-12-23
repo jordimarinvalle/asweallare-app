@@ -241,8 +241,8 @@ export async function GET(request) {
       
       const { data: cards, error } = await supabase
         .from('cards')
-        .select('*, boxes(name, color)')
-        .order('createdat', { ascending: false })
+        .select('*, boxes(name, color), piles(name, slug)')
+        .order('created_at', { ascending: false })
       
       if (error) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
