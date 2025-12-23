@@ -2063,7 +2063,6 @@ export default function App() {
       toast({ title: 'Error: ' + err.message, variant: 'destructive' })
     }
   }
-  }
   
   const handleDeleteCard = async (cardId) => {
     await fetch(`/api/admin/cards/${cardId}`, { method: 'DELETE' })
