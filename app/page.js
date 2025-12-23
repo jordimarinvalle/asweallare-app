@@ -1639,7 +1639,9 @@ export default function App() {
         text: card.text,
         imagePath: card.image_path,
         isActive: card.is_active,
-        createdAt: card.created_at
+        createdAt: card.created_at,
+        seriesId: card.boxes?.collection_series_id,
+        seriesName: card.boxes?.collection_series?.name
       }))
       setAdminCards(normalizedCards)
     }
