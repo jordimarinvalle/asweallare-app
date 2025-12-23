@@ -2835,11 +2835,13 @@ export default function App() {
                   <Button onClick={() => {
                     setEditingPrice(null)
                     setPriceForm({ id: '', label: '', paymentInfo: '', hookInfo: '', amount: 0, promoAmount: null, promoEnabled: false, currency: 'USD', membershipDays: 30, displayOrder: 0, isActive: true })
+                    setShowPriceForm(true)
                   }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
                     <Plus className="w-4 h-4 mr-2" />Add Price
                   </Button>
                 </div>
                 
+                {showPriceForm && (
                 <Card className="p-6 mb-6">
                   <h4 className="font-medium mb-4">{editingPrice ? 'Edit Price' : 'New Price'}</h4>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -2889,9 +2891,10 @@ export default function App() {
                   </div>
                   <div className="flex gap-2 mt-4">
                     <Button onClick={handleSavePrice} className="bg-red-600 hover:bg-red-700 text-white">{editingPrice ? 'Update' : 'Create'}</Button>
-                    {editingPrice && <Button onClick={() => setEditingPrice(null)} variant="outline">Cancel</Button>}
+                    <Button onClick={() => { setShowPriceForm(false); setEditingPrice(null) }} variant="outline">Cancel</Button>
                   </div>
                 </Card>
+                )}
                 
                 <div className="space-y-2">
                   {adminPrices.map(price => {
@@ -2902,6 +2905,7 @@ export default function App() {
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="font-medium">{price.label}</span>
+                              <span className="text-xs text-gray-400">({price.id})</span>
                               <span className="text-sm font-bold text-green-600">${effectivePrice}</span>
                               {price.promo_enabled && price.promo_amount && (
                                 <>
@@ -2914,19 +2918,26 @@ export default function App() {
                             </div>
                             <p className="text-sm text-gray-500">{price.hook_info}</p>
                           </div>
-                          <Button onClick={() => { 
-                            setEditingPrice(price)
-                            setPriceForm({
-                              ...price,
-                              paymentInfo: price.payment_info,
-                              hookInfo: price.hook_info,
-                              promoAmount: price.promo_amount,
-                              promoEnabled: price.promo_enabled,
-                              membershipDays: price.membership_days,
-                              displayOrder: price.display_order,
-                              isActive: price.is_active
-                            })
-                          }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                          <div className="flex gap-1">
+                            <Button onClick={() => { 
+                              setEditingPrice(price)
+                              setPriceForm({
+                                id: price.id,
+                                label: price.label,
+                                paymentInfo: price.payment_info || '',
+                                hookInfo: price.hook_info || '',
+                                amount: price.amount,
+                                promoAmount: price.promo_amount,
+                                promoEnabled: price.promo_enabled || false,
+                                currency: price.currency || 'USD',
+                                membershipDays: price.membership_days || 30,
+                                displayOrder: price.display_order || 0,
+                                isActive: price.is_active !== false
+                              })
+                              setShowPriceForm(true)
+                            }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                            <Button onClick={() => { if(confirm('Delete this price?')) handleDeletePrice(price.id) }} size="sm" variant="ghost" className="text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                          </div>
                         </div>
                       </Card>
                     )
@@ -2943,11 +2954,13 @@ export default function App() {
                   <Button onClick={() => {
                     setEditingBundle(null)
                     setBundleForm({ id: '', name: '', description: '', priceId: '', boxIds: [], displayOrder: 0, isActive: true })
+                    setShowBundleForm(true)
                   }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
                     <Plus className="w-4 h-4 mr-2" />Add Bundle
                   </Button>
                 </div>
                 
+                {showBundleForm && (
                 <Card className="p-6 mb-6">
                   <h4 className="font-medium mb-4">{editingBundle ? 'Edit Bundle' : 'New Bundle'}</h4>
                   <div className="grid sm:grid-cols-2 gap-4">
@@ -2965,7 +2978,7 @@ export default function App() {
                     </div>
                     <div>
                       <Label>Price</Label>
-                      <select value={bundleForm.priceId} onChange={(e) => setBundleForm({ ...bundleForm, priceId: e.target.value })} className="w-full mt-1 p-2 border rounded-md">
+                      <select value={bundleForm.priceId || ''} onChange={(e) => setBundleForm({ ...bundleForm, priceId: e.target.value || null })} className="w-full mt-1 p-2 border rounded-md">
                         <option value="">-- Select Price --</option>
                         {adminPrices.map(p => <option key={p.id} value={p.id}>{p.label} (${p.amount})</option>)}
                       </select>
@@ -2981,12 +2994,12 @@ export default function App() {
                           <label key={box.id} className="flex items-center gap-2 p-2 border rounded-md cursor-pointer hover:bg-gray-50">
                             <input
                               type="checkbox"
-                              checked={bundleForm.boxIds.includes(box.id)}
+                              checked={(bundleForm.boxIds || []).includes(box.id)}
                               onChange={(e) => {
                                 if (e.target.checked) {
-                                  setBundleForm({ ...bundleForm, boxIds: [...bundleForm.boxIds, box.id] })
+                                  setBundleForm({ ...bundleForm, boxIds: [...(bundleForm.boxIds || []), box.id] })
                                 } else {
-                                  setBundleForm({ ...bundleForm, boxIds: bundleForm.boxIds.filter(id => id !== box.id) })
+                                  setBundleForm({ ...bundleForm, boxIds: (bundleForm.boxIds || []).filter(id => id !== box.id) })
                                 }
                               }}
                               className="rounded"
@@ -3003,9 +3016,10 @@ export default function App() {
                   </div>
                   <div className="flex gap-2 mt-4">
                     <Button onClick={handleSaveBundle} className="bg-red-600 hover:bg-red-700 text-white">{editingBundle ? 'Update' : 'Create'}</Button>
-                    {editingBundle && <Button onClick={() => setEditingBundle(null)} variant="outline">Cancel</Button>}
+                    <Button onClick={() => { setShowBundleForm(false); setEditingBundle(null) }} variant="outline">Cancel</Button>
                   </div>
                 </Card>
+                )}
                 
                 <div className="space-y-2">
                   {adminBundles.map(bundle => (
@@ -3014,12 +3028,13 @@ export default function App() {
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-medium">{bundle.name}</span>
+                            <span className="text-xs text-gray-400">({bundle.id})</span>
                             {bundle.priceLabel && <span className="text-sm text-green-600">${bundle.priceAmount} ({bundle.priceLabel})</span>}
                             {!bundle.isActive && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
                           </div>
                           <p className="text-sm text-gray-500">{bundle.description}</p>
                           <div className="flex flex-wrap gap-1 mt-2">
-                            {bundle.boxIds.map(boxId => {
+                            {(bundle.boxIds || []).map(boxId => {
                               const box = adminBoxes.find(b => b.id === boxId)
                               return box ? (
                                 <span key={boxId} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{box.name}</span>
@@ -3027,7 +3042,22 @@ export default function App() {
                             })}
                           </div>
                         </div>
-                        <Button onClick={() => { setEditingBundle(bundle); setBundleForm(bundle) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                        <div className="flex gap-1">
+                          <Button onClick={() => { 
+                            setEditingBundle(bundle)
+                            setBundleForm({
+                              id: bundle.id,
+                              name: bundle.name,
+                              description: bundle.description || '',
+                              priceId: bundle.priceId || '',
+                              boxIds: bundle.boxIds || [],
+                              displayOrder: bundle.displayOrder || 0,
+                              isActive: bundle.isActive !== false
+                            })
+                            setShowBundleForm(true)
+                          }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                          <Button onClick={() => { if(confirm('Delete this bundle?')) handleDeleteBundle(bundle.id) }} size="sm" variant="ghost" className="text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                        </div>
                       </div>
                     </Card>
                   ))}
