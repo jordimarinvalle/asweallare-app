@@ -2475,7 +2475,7 @@ export default function App() {
                   <h3 className="text-xl font-medium">Boxes (Decks)</h3>
                   <Button onClick={() => {
                     setEditingBox(null)
-                    setBoxForm({ name: '', description: '', descriptionShort: '', tagline: '', topics: [], priceId: '', color: '#000000', colorPalette: [], path: '', displayOrder: 0, isDemo: false, isActive: true, collectionSeriesId: '' })
+                    setBoxForm({ id: '', name: '', description: '', descriptionShort: '', tagline: '', topicsText: '', priceId: '', color: '#000000', colorPaletteText: '', displayOrder: 0, isDemo: false, isActive: true, collectionSeriesId: '' })
                     setShowBoxForm(true)
                   }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
                     <Plus className="w-4 h-4 mr-2" />Add Box
@@ -2486,6 +2486,17 @@ export default function App() {
                   <Card className="p-6 mb-6">
                     <h4 className="font-medium mb-4">{editingBox ? 'Edit Box' : 'New Box'}</h4>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div>
+                        <Label>ID (slug/folder name)</Label>
+                        <Input 
+                          value={boxForm.id} 
+                          onChange={(e) => setBoxForm({ ...boxForm, id: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') })} 
+                          placeholder="e.g., white-box-108" 
+                          className="mt-1" 
+                          disabled={!!editingBox}
+                        />
+                        <p className="text-xs text-gray-400 mt-1">Used as folder name for card images</p>
+                      </div>
                       <div>
                         <Label>Name</Label>
                         <Input value={boxForm.name} onChange={(e) => setBoxForm({ ...boxForm, name: e.target.value })} placeholder="e.g., White Box: Level 1" className="mt-1" />
@@ -2509,11 +2520,7 @@ export default function App() {
                           ))}
                         </select>
                       </div>
-                      <div>
-                        <Label>Path (folder name)</Label>
-                        <Input value={boxForm.path} onChange={(e) => setBoxForm({ ...boxForm, path: e.target.value })} placeholder="e.g., white-box-108" className="mt-1" />
-                      </div>
-                      <div className="sm:col-span-2 lg:col-span-3">
+                      <div className="sm:col-span-2">
                         <Label>Description</Label>
                         <Input value={boxForm.description} onChange={(e) => setBoxForm({ ...boxForm, description: e.target.value })} placeholder="Full description" className="mt-1" />
                       </div>
@@ -2554,6 +2561,12 @@ export default function App() {
                       </div>
                     </div>
                     
+                    {/* Buttons - moved above bulk upload */}
+                    <div className="flex gap-2 mt-4">
+                      <Button onClick={handleSaveBox} className="bg-red-600 hover:bg-red-700 text-white">{editingBox ? 'Update' : 'Create'}</Button>
+                      <Button onClick={() => { setShowBoxForm(false); setEditingBox(null); setUploadResult(null); setBulkUploadPileId('') }} variant="outline">Cancel</Button>
+                    </div>
+                    
                     {/* Bulk Card Upload - Only when editing */}
                     {editingBox && (
                       <div className="mt-6 pt-6 border-t">
@@ -2574,7 +2587,7 @@ export default function App() {
                             </select>
                           </div>
                           <div>
-                            <Label>ZIP File (PNG images)</Label>
+                            <Label>ZIP File (PNG/JPG images)</Label>
                             <div className="mt-1 relative">
                               <input
                                 type="file"
@@ -2614,16 +2627,11 @@ export default function App() {
                         <p className="text-xs text-gray-500 mt-2">
                           Upload a ZIP file containing PNG/JPG images. Files will be stored at: 
                           <code className="bg-gray-100 px-1 rounded">
-                            /cards/{editingBox.path || '{box_path}'}/{bulkUploadPileId ? adminPiles.find(p => p.id === bulkUploadPileId)?.slug || '{pile_slug}' : '{pile_slug}'}/{'{MD5}.{ext}'}
+                            /cards/{editingBox.id}/{bulkUploadPileId ? adminPiles.find(p => p.id === bulkUploadPileId)?.slug || '{pile_slug}' : '{pile_slug}'}/{'{MD5}.{ext}'}
                           </code>
                         </p>
                       </div>
                     )}
-                    
-                    <div className="flex gap-2 mt-4">
-                      <Button onClick={handleSaveBox} className="bg-red-600 hover:bg-red-700 text-white">{editingBox ? 'Update' : 'Create'}</Button>
-                      <Button onClick={() => { setShowBoxForm(false); setEditingBox(null); setUploadResult(null); setBulkUploadPileId('') }} variant="outline">Cancel</Button>
-                    </div>
                   </Card>
                 )}
                 
