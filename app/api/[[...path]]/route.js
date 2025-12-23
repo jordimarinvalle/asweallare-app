@@ -311,6 +311,26 @@ export async function GET(request) {
       return handleCORS(NextResponse.json({ prices: prices || [] }))
     }
 
+    // ADMIN ROUTES - Get all piles
+    if (path === 'admin/piles') {
+      const { user, error: authError } = await getAuthenticatedUser()
+      
+      if (authError || !user) {
+        return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
+      }
+      
+      const { data: piles, error } = await supabase
+        .from('piles')
+        .select('*, collection_series(name)')
+        .order('display_order', { ascending: true })
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ piles: piles || [] }))
+    }
+
     // ADMIN ROUTES - Get all bundles
     if (path === 'admin/bundles') {
       const { user, error: authError } = await getAuthenticatedUser()
