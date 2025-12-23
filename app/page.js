@@ -2386,79 +2386,90 @@ export default function App() {
                   <h3 className="text-xl font-medium">Boxes (Decks)</h3>
                   <Button onClick={() => {
                     setEditingBox(null)
-                    setBoxForm({ name: '', description: '', descriptionShort: '', tagline: '', topics: [], priceId: '', color: '#000000', colorPalette: [], path: '', displayOrder: 0, isDemo: false, isActive: true, collectionSeriesId: 'unscripted_conversations' })
+                    setBoxForm({ name: '', description: '', descriptionShort: '', tagline: '', topics: [], priceId: '', color: '#000000', colorPalette: [], path: '', displayOrder: 0, isDemo: false, isActive: true, collectionSeriesId: '' })
+                    setShowBoxForm(true)
                   }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
                     <Plus className="w-4 h-4 mr-2" />Add Box
                   </Button>
                 </div>
                 
-                <Card className="p-6 mb-6">
-                  <h4 className="font-medium mb-4">{editingBox ? 'Edit Box' : 'New Box'}</h4>
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                      <Label>Name</Label>
-                      <Input value={boxForm.name} onChange={(e) => setBoxForm({ ...boxForm, name: e.target.value })} placeholder="e.g., White Box: Level 1" className="mt-1" />
+                {showBoxForm && (
+                  <Card className="p-6 mb-6">
+                    <h4 className="font-medium mb-4">{editingBox ? 'Edit Box' : 'New Box'}</h4>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div>
+                        <Label>Name</Label>
+                        <Input value={boxForm.name} onChange={(e) => setBoxForm({ ...boxForm, name: e.target.value })} placeholder="e.g., White Box: Level 1" className="mt-1" />
+                      </div>
+                      <div>
+                        <Label>Collection Series</Label>
+                        <select value={boxForm.collectionSeriesId || ''} onChange={(e) => setBoxForm({ ...boxForm, collectionSeriesId: e.target.value || null })} className="w-full mt-1 p-2 border rounded-md">
+                          <option value="">-- Select Series --</option>
+                          {adminSeries.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <Label>Price</Label>
+                        <select value={boxForm.priceId || ''} onChange={(e) => setBoxForm({ ...boxForm, priceId: e.target.value || null })} className="w-full mt-1 p-2 border rounded-md">
+                          <option value="">-- No Price (Free/Demo) --</option>
+                          {adminPrices.map(p => (
+                            <option key={p.id} value={p.id}>
+                              {p.label} - ${p.promoEnabled && p.promoAmount ? p.promoAmount : p.amount}
+                              {p.promoEnabled && p.promoAmount && ` (was $${p.amount})`}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <Label>Path (folder name)</Label>
+                        <Input value={boxForm.path} onChange={(e) => setBoxForm({ ...boxForm, path: e.target.value })} placeholder="e.g., white-box-108" className="mt-1" />
+                      </div>
+                      <div className="sm:col-span-2 lg:col-span-3">
+                        <Label>Description</Label>
+                        <Input value={boxForm.description} onChange={(e) => setBoxForm({ ...boxForm, description: e.target.value })} placeholder="Full description" className="mt-1" />
+                      </div>
+                      <div>
+                        <Label>Short Description</Label>
+                        <Input value={boxForm.descriptionShort} onChange={(e) => setBoxForm({ ...boxForm, descriptionShort: e.target.value })} placeholder="e.g., 108 cards" className="mt-1" />
+                      </div>
+                      <div>
+                        <Label>Tagline</Label>
+                        <Input value={boxForm.tagline} onChange={(e) => setBoxForm({ ...boxForm, tagline: e.target.value })} placeholder="e.g., Level 1 — Life" className="mt-1" />
+                      </div>
+                      <div>
+                        <Label>Topics (comma-separated)</Label>
+                        <Input value={(boxForm.topics || []).join(', ')} onChange={(e) => setBoxForm({ ...boxForm, topics: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })} placeholder="Life, Growth, Dreams" className="mt-1" />
+                      </div>
+                      <div>
+                        <Label>Primary Color</Label>
+                        <div className="flex gap-2 mt-1">
+                          <Input type="color" value={boxForm.color || '#000000'} onChange={(e) => setBoxForm({ ...boxForm, color: e.target.value })} className="w-16 h-10" />
+                          <Input value={boxForm.color || '#000000'} onChange={(e) => setBoxForm({ ...boxForm, color: e.target.value })} className="flex-1" placeholder="#000000" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Color Palette (comma-separated hex)</Label>
+                        <Input value={(boxForm.colorPalette || []).join(', ')} onChange={(e) => setBoxForm({ ...boxForm, colorPalette: e.target.value.split(',').map(c => c.trim()).filter(Boolean) })} placeholder="#FF0000, #00FF00, #0000FF" className="mt-1" />
+                      </div>
+                      <div>
+                        <Label>Display Order</Label>
+                        <Input type="number" value={boxForm.displayOrder} onChange={(e) => setBoxForm({ ...boxForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <Label>Demo</Label>
+                        <Switch checked={boxForm.isDemo} onCheckedChange={(checked) => setBoxForm({ ...boxForm, isDemo: checked })} />
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <Label>Active</Label>
+                        <Switch checked={boxForm.isActive} onCheckedChange={(checked) => setBoxForm({ ...boxForm, isActive: checked })} />
+                      </div>
                     </div>
-                    <div>
-                      <Label>Collection Series</Label>
-                      <select value={boxForm.collectionSeriesId} onChange={(e) => setBoxForm({ ...boxForm, collectionSeriesId: e.target.value })} className="w-full mt-1 p-2 border rounded-md">
-                        {adminSeries.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                      </select>
+                    <div className="flex gap-2 mt-4">
+                      <Button onClick={handleSaveBox} className="bg-red-600 hover:bg-red-700 text-white">{editingBox ? 'Update' : 'Create'}</Button>
+                      <Button onClick={() => { setShowBoxForm(false); setEditingBox(null) }} variant="outline">Cancel</Button>
                     </div>
-                    <div>
-                      <Label>Price</Label>
-                      <select value={boxForm.priceId || ''} onChange={(e) => setBoxForm({ ...boxForm, priceId: e.target.value || null })} className="w-full mt-1 p-2 border rounded-md">
-                        <option value="">-- No Price (Free/Demo) --</option>
-                        {adminPrices.map(p => (
-                          <option key={p.id} value={p.id}>
-                            {p.label} - ${p.promoEnabled && p.promoAmount ? p.promoAmount : p.amount}
-                            {p.promoEnabled && p.promoAmount && ` (was $${p.amount})`}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <Label>Path (folder name)</Label>
-                      <Input value={boxForm.path} onChange={(e) => setBoxForm({ ...boxForm, path: e.target.value })} placeholder="e.g., white-box-108" className="mt-1" />
-                    </div>
-                    <div className="sm:col-span-2 lg:col-span-3">
-                      <Label>Description</Label>
-                      <Input value={boxForm.description} onChange={(e) => setBoxForm({ ...boxForm, description: e.target.value })} placeholder="Full description" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label>Short Description</Label>
-                      <Input value={boxForm.descriptionShort} onChange={(e) => setBoxForm({ ...boxForm, descriptionShort: e.target.value })} placeholder="e.g., 108 cards" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label>Tagline</Label>
-                      <Input value={boxForm.tagline} onChange={(e) => setBoxForm({ ...boxForm, tagline: e.target.value })} placeholder="e.g., Level 1 — Life" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label>Topics (comma-separated)</Label>
-                      <Input value={boxForm.topics.join(', ')} onChange={(e) => setBoxForm({ ...boxForm, topics: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })} placeholder="Life, Growth, Dreams" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label>Color</Label>
-                      <Input type="color" value={boxForm.color} onChange={(e) => setBoxForm({ ...boxForm, color: e.target.value })} className="mt-1 h-10" />
-                    </div>
-                    <div>
-                      <Label>Display Order</Label>
-                      <Input type="number" value={boxForm.displayOrder} onChange={(e) => setBoxForm({ ...boxForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Label>Demo</Label>
-                      <Switch checked={boxForm.isDemo} onCheckedChange={(checked) => setBoxForm({ ...boxForm, isDemo: checked })} />
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Label>Active</Label>
-                      <Switch checked={boxForm.isActive} onCheckedChange={(checked) => setBoxForm({ ...boxForm, isActive: checked })} />
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <Button onClick={handleSaveBox} className="bg-red-600 hover:bg-red-700 text-white">{editingBox ? 'Update' : 'Create'}</Button>
-                    {editingBox && <Button onClick={() => setEditingBox(null)} variant="outline">Cancel</Button>}
-                  </div>
-                </Card>
+                  </Card>
+                )}
                 
                 <div className="space-y-2">
                   {adminBoxes.map(box => {
@@ -2489,19 +2500,28 @@ export default function App() {
                               </p>
                             </div>
                           </div>
-                          <Button onClick={() => { 
-                            setEditingBox(box)
-                            setBoxForm({
-                              ...box,
-                              descriptionShort: box.description_short,
-                              collectionSeriesId: box.collection_series_id,
-                              priceId: box.price_id,
-                              isDemo: box.is_demo,
-                              isActive: box.is_active,
-                              displayOrder: box.display_order,
-                              colorPalette: box.color_palette || []
-                            })
-                          }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                          <div className="flex gap-1">
+                            <Button onClick={() => { 
+                              setEditingBox(box)
+                              setBoxForm({
+                                name: box.name,
+                                description: box.description || '',
+                                descriptionShort: box.description_short || '',
+                                tagline: box.tagline || '',
+                                topics: box.topics || [],
+                                collectionSeriesId: box.collection_series_id || '',
+                                priceId: box.price_id || '',
+                                color: box.color || '#000000',
+                                colorPalette: box.color_palette || [],
+                                path: box.path || '',
+                                isDemo: box.is_demo || false,
+                                isActive: box.is_active !== false,
+                                displayOrder: box.display_order || 0
+                              })
+                              setShowBoxForm(true)
+                            }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                            <Button onClick={() => { if(confirm('Delete this box?')) handleDeleteBox(box.id) }} size="sm" variant="ghost" className="text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                          </div>
                         </div>
                       </Card>
                     )
