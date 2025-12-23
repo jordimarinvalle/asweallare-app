@@ -180,6 +180,9 @@ CREATE TABLE subscription_plans (
 -- ============================================================================
 CREATE INDEX idx_cards_box_id ON cards(box_id);
 CREATE INDEX idx_cards_color ON cards(color);
+CREATE INDEX idx_cards_pile ON cards(pile_id);
+CREATE INDEX idx_piles_series ON piles(collection_series_id);
+CREATE INDEX idx_piles_slug ON piles(slug);
 CREATE INDEX idx_boxes_series ON boxes(collection_series_id);
 CREATE INDEX idx_boxes_price ON boxes(price_id);
 CREATE INDEX idx_boxes_display_order ON boxes(display_order);
@@ -212,6 +215,10 @@ CREATE TRIGGER update_boxes_updated_at
   BEFORE UPDATE ON boxes
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_piles_updated_at
+  BEFORE UPDATE ON piles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_bundles_updated_at
   BEFORE UPDATE ON bundles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -229,6 +236,7 @@ CREATE TRIGGER update_user_memberships_updated_at
 ALTER TABLE collection_series ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE boxes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE piles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bundles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_products ENABLE ROW LEVEL SECURITY;
@@ -242,6 +250,9 @@ CREATE POLICY prices_public_read ON prices
   FOR SELECT USING (true);
 
 CREATE POLICY boxes_public_read ON boxes
+  FOR SELECT USING (true);
+
+CREATE POLICY piles_public_read ON piles
   FOR SELECT USING (true);
 
 CREATE POLICY cards_public_read ON cards
