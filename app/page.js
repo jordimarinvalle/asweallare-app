@@ -1112,7 +1112,7 @@ export default function App() {
     descriptionShort: '',
     tagline: '',
     topics: [],
-    price: 10,
+    priceId: '',
     color: '#000000',
     colorPalette: [],
     path: '',
