@@ -278,6 +278,9 @@ CREATE POLICY prices_authenticated_all ON prices
 CREATE POLICY boxes_authenticated_all ON boxes
   FOR ALL USING (true) WITH CHECK (true);
 
+CREATE POLICY piles_authenticated_all ON piles
+  FOR ALL USING (true) WITH CHECK (true);
+
 CREATE POLICY cards_authenticated_all ON cards
   FOR ALL USING (true) WITH CHECK (true);
 
