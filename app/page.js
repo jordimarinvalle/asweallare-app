@@ -1084,7 +1084,17 @@ export default function App() {
   // Admin
   const [adminCards, setAdminCards] = useState([])
   const [adminBoxes, setAdminBoxes] = useState([])
+  const [adminSeries, setAdminSeries] = useState([])
+  const [adminPrices, setAdminPrices] = useState([])
+  const [adminBundles, setAdminBundles] = useState([])
+  const [adminTab, setAdminTab] = useState('cards')
+  
   const [editingCard, setEditingCard] = useState(null)
+  const [editingBox, setEditingBox] = useState(null)
+  const [editingSeries, setEditingSeries] = useState(null)
+  const [editingPrice, setEditingPrice] = useState(null)
+  const [editingBundle, setEditingBundle] = useState(null)
+  
   const [cardForm, setCardForm] = useState({
     color: 'black',
     title: '',
@@ -1095,6 +1105,54 @@ export default function App() {
     boxId: '',
     imagePath: ''
   })
+  
+  const [boxForm, setBoxForm] = useState({
+    name: '',
+    description: '',
+    descriptionShort: '',
+    tagline: '',
+    topics: [],
+    price: 10,
+    color: '#000000',
+    colorPalette: [],
+    path: '',
+    displayOrder: 0,
+    isDemo: false,
+    isActive: true,
+    collectionSeriesId: 'unscripted_conversations'
+  })
+  
+  const [seriesForm, setSeriesForm] = useState({
+    id: '',
+    name: '',
+    description: '',
+    displayOrder: 0,
+    isActive: true
+  })
+  
+  const [priceForm, setPriceForm] = useState({
+    id: '',
+    label: '',
+    paymentInfo: '',
+    hookInfo: '',
+    amount: 0,
+    currency: 'USD',
+    isMembership: true,
+    membershipDays: 30,
+    displayOrder: 0,
+    isActive: true
+  })
+  
+  const [bundleForm, setBundleForm] = useState({
+    id: '',
+    name: '',
+    description: '',
+    priceId: '',
+    boxIds: [],
+    displayOrder: 0,
+    isActive: true
+  })
+  
   const [uploadingImage, setUploadingImage] = useState(false)
   
   const supabase = createClient()
