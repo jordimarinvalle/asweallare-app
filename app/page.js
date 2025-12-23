@@ -2247,7 +2247,7 @@ export default function App() {
                   <h3 className="text-xl font-medium">Boxes (Decks)</h3>
                   <Button onClick={() => {
                     setEditingBox(null)
-                    setBoxForm({ name: '', description: '', descriptionShort: '', tagline: '', topics: [], price: 10, color: '#000000', colorPalette: [], path: '', displayOrder: 0, isDemo: false, isActive: true, collectionSeriesId: 'unscripted_conversations' })
+                    setBoxForm({ name: '', description: '', descriptionShort: '', tagline: '', topics: [], priceId: '', color: '#000000', colorPalette: [], path: '', displayOrder: 0, isDemo: false, isActive: true, collectionSeriesId: 'unscripted_conversations' })
                   }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
                     <Plus className="w-4 h-4 mr-2" />Add Box
                   </Button>
@@ -2264,6 +2264,18 @@ export default function App() {
                       <Label>Collection Series</Label>
                       <select value={boxForm.collectionSeriesId} onChange={(e) => setBoxForm({ ...boxForm, collectionSeriesId: e.target.value })} className="w-full mt-1 p-2 border rounded-md">
                         {adminSeries.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <Label>Price</Label>
+                      <select value={boxForm.priceId || ''} onChange={(e) => setBoxForm({ ...boxForm, priceId: e.target.value || null })} className="w-full mt-1 p-2 border rounded-md">
+                        <option value="">-- No Price (Free/Demo) --</option>
+                        {adminPrices.map(p => (
+                          <option key={p.id} value={p.id}>
+                            {p.label} - ${p.promoEnabled && p.promoAmount ? p.promoAmount : p.amount}
+                            {p.promoEnabled && p.promoAmount && ` (was $${p.amount})`}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div>
@@ -2285,10 +2297,6 @@ export default function App() {
                     <div>
                       <Label>Topics (comma-separated)</Label>
                       <Input value={boxForm.topics.join(', ')} onChange={(e) => setBoxForm({ ...boxForm, topics: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })} placeholder="Life, Growth, Dreams" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label>Price ($)</Label>
-                      <Input type="number" step="0.01" value={boxForm.price} onChange={(e) => setBoxForm({ ...boxForm, price: parseFloat(e.target.value) || 0 })} className="mt-1" />
                     </div>
                     <div>
                       <Label>Color</Label>
@@ -2314,27 +2322,51 @@ export default function App() {
                 </Card>
                 
                 <div className="space-y-2">
-                  {adminBoxes.map(box => (
-                    <Card key={box.id} className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="flex gap-3">
-                          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: box.color || '#ccc' }}>
-                            <Package className={`w-5 h-5 ${box.color === '#000000' || box.color === '#D12128' ? 'text-white' : 'text-gray-600'}`} />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{box.name}</span>
-                              {box.isDemo && <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">Demo</span>}
-                              {!box.isActive && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
+                  {adminBoxes.map(box => {
+                    const linkedPrice = box.prices
+                    const displayPrice = linkedPrice ? (linkedPrice.promo_enabled && linkedPrice.promo_amount ? linkedPrice.promo_amount : linkedPrice.amount) : null
+                    return (
+                      <Card key={box.id} className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex gap-3">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: box.color || '#ccc' }}>
+                              <Package className={`w-5 h-5 ${box.color === '#000000' || box.color === '#D12128' ? 'text-white' : 'text-gray-600'}`} />
                             </div>
-                            <p className="text-sm text-gray-500">{box.tagline || box.descriptionShort}</p>
-                            <p className="text-xs text-gray-400">Series: {box.seriesName} | Path: {box.path}</p>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{box.name}</span>
+                                {displayPrice !== null && <span className="text-sm font-bold text-green-600">${displayPrice}</span>}
+                                {linkedPrice?.promo_enabled && linkedPrice?.promo_amount && (
+                                  <span className="text-xs line-through text-gray-400">${linkedPrice.amount}</span>
+                                )}
+                                {box.is_demo && <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">Demo</span>}
+                                {!box.is_active && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
+                              </div>
+                              <p className="text-sm text-gray-500">{box.tagline || box.description_short}</p>
+                              <p className="text-xs text-gray-400">
+                                Series: {box.collection_series?.name || 'N/A'} | 
+                                Price: {linkedPrice?.label || 'Free'} | 
+                                Path: {box.path}
+                              </p>
+                            </div>
                           </div>
+                          <Button onClick={() => { 
+                            setEditingBox(box)
+                            setBoxForm({
+                              ...box,
+                              descriptionShort: box.description_short,
+                              collectionSeriesId: box.collection_series_id,
+                              priceId: box.price_id,
+                              isDemo: box.is_demo,
+                              isActive: box.is_active,
+                              displayOrder: box.display_order,
+                              colorPalette: box.color_palette || []
+                            })
+                          }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
                         </div>
-                        <Button onClick={() => { setEditingBox(box); setBoxForm(box) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    )
+                  })}
                 </div>
               </div>
             )}
