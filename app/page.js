@@ -2773,9 +2773,10 @@ export default function App() {
                   </div>
                   <div className="flex gap-2 mt-4">
                     <Button onClick={handleSaveCard} className="bg-red-600 hover:bg-red-700 text-white">{editingCard ? 'Update' : 'Create'}</Button>
-                    {editingCard && <Button onClick={() => setEditingCard(null)} variant="outline">Cancel</Button>}
+                    <Button onClick={() => { setShowCardForm(false); setEditingCard(null) }} variant="outline">Cancel</Button>
                   </div>
                 </Card>
+                )}
                 
                 {/* Filter */}
                 <div className="mb-4 flex items-center gap-4">
