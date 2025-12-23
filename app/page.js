@@ -3121,7 +3121,7 @@ export default function App() {
                         </div>
                       </div>
                     </Card>
-                  ))}
+                  )})}
                 </div>
                 
                 {adminCards.length === 0 && (
