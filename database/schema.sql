@@ -174,8 +174,8 @@ CREATE TABLE subscription_plans (
 -- INDEXES
 -- ============================================================================
 CREATE INDEX idx_cards_box_id ON cards(box_id);
-CREATE INDEX idx_cards_color ON cards(color);
 CREATE INDEX idx_cards_pile ON cards(pile_id);
+CREATE INDEX idx_cards_active ON cards(is_active);
 CREATE INDEX idx_piles_series ON piles(collection_series_id);
 CREATE INDEX idx_piles_slug ON piles(slug);
 CREATE INDEX idx_boxes_series ON boxes(collection_series_id);
