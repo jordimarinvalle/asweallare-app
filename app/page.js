@@ -1689,6 +1689,24 @@ export default function App() {
     }
   }
   
+  const loadAdminPiles = async () => {
+    const response = await fetch('/api/admin/piles')
+    const data = await response.json()
+    if (data.piles) {
+      const normalizedPiles = data.piles.map(p => ({
+        id: p.id,
+        slug: p.slug,
+        name: p.name,
+        imagePath: p.image_path,
+        collectionSeriesId: p.collection_series_id,
+        seriesName: p.collection_series?.name,
+        displayOrder: p.display_order,
+        isActive: p.is_active
+      }))
+      setAdminPiles(normalizedPiles)
+    }
+  }
+  
   const loadAdminBundles = async () => {
     const response = await fetch('/api/admin/bundles')
     const data = await response.json()
@@ -1714,6 +1732,7 @@ export default function App() {
       loadAdminBoxes(),
       loadAdminSeries(),
       loadAdminPrices(),
+      loadAdminPiles(),
       loadAdminBundles()
     ])
   }
