@@ -1034,8 +1034,9 @@ export async function PUT(request) {
       if (body.paymentInfo !== undefined) updateData.payment_info = body.paymentInfo
       if (body.hookInfo !== undefined) updateData.hook_info = body.hookInfo
       if (body.amount !== undefined) updateData.amount = body.amount
+      if (body.promoAmount !== undefined) updateData.promo_amount = body.promoAmount
+      if (body.promoEnabled !== undefined) updateData.promo_enabled = body.promoEnabled
       if (body.currency !== undefined) updateData.currency = body.currency
-      if (body.isMembership !== undefined) updateData.is_membership = body.isMembership
       if (body.membershipDays !== undefined) updateData.membership_days = body.membershipDays
       if (body.stripePriceId !== undefined) updateData.stripe_price_id = body.stripePriceId
       if (body.displayOrder !== undefined) updateData.display_order = body.displayOrder
