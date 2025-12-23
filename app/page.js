@@ -1970,6 +1970,7 @@ export default function App() {
     }
     
     setEditingBundle(null)
+    setShowBundleForm(false)
     setBundleForm({ id: '', name: '', description: '', priceId: '', boxIds: [], displayOrder: 0, isActive: true })
     loadAdminBundles()
   }
@@ -1978,6 +1979,41 @@ export default function App() {
     await fetch(`/api/admin/cards/${cardId}`, { method: 'DELETE' })
     toast({ title: 'Card deleted' })
     loadAdminCards()
+  }
+  
+  const handleDeleteBox = async (boxId) => {
+    const res = await fetch(`/api/admin/boxes/${boxId}`, { method: 'DELETE' })
+    if (res.ok) {
+      toast({ title: 'Box deleted' })
+      loadAdminBoxes()
+    } else {
+      const err = await res.json()
+      toast({ title: err.error || 'Failed to delete', variant: 'destructive' })
+    }
+  }
+  
+  const handleDeleteSeries = async (seriesId) => {
+    await fetch(`/api/admin/collection-series/${seriesId}`, { method: 'DELETE' })
+    toast({ title: 'Series deleted' })
+    loadAdminSeries()
+  }
+  
+  const handleDeletePrice = async (priceId) => {
+    await fetch(`/api/admin/prices/${priceId}`, { method: 'DELETE' })
+    toast({ title: 'Price deleted' })
+    loadAdminPrices()
+  }
+  
+  const handleDeletePile = async (pileId) => {
+    await fetch(`/api/admin/piles/${pileId}`, { method: 'DELETE' })
+    toast({ title: 'Pile deleted' })
+    loadAdminPiles()
+  }
+  
+  const handleDeleteBundle = async (bundleId) => {
+    await fetch(`/api/admin/bundles/${bundleId}`, { method: 'DELETE' })
+    toast({ title: 'Bundle deleted' })
+    loadAdminBundles()
   }
   
   useEffect(() => {
