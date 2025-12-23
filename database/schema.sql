@@ -74,7 +74,24 @@ CREATE TABLE boxes (
 );
 
 -- ============================================================================
--- 4. CARDS TABLE
+-- 4. PILES TABLE
+-- Represents card back designs (black pile, white pile)
+-- Default fallback images for card backs within a collection series
+-- ============================================================================
+CREATE TABLE piles (
+  id TEXT PRIMARY KEY,
+  slug TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  image_path TEXT NOT NULL,
+  collection_series_id TEXT REFERENCES collection_series(id),
+  display_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================================================
+-- 5. CARDS TABLE
 -- Individual cards with title, hint, image
 -- ============================================================================
 CREATE TABLE cards (
@@ -86,13 +103,14 @@ CREATE TABLE cards (
   isdemo BOOLEAN DEFAULT false,
   isactive BOOLEAN DEFAULT true,
   box_id TEXT REFERENCES boxes(id),
+  pile_id TEXT REFERENCES piles(id),
   image_path TEXT,
   createdat TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updatedat TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- ============================================================================
--- 5. BUNDLES TABLE
+-- 6. BUNDLES TABLE
 -- Groups of boxes with a shared price
 -- NOTE: price_id links to a Price entity
 -- ============================================================================
