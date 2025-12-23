@@ -2495,7 +2495,7 @@ export default function App() {
                   <h3 className="text-xl font-medium">Prices (Membership Options)</h3>
                   <Button onClick={() => {
                     setEditingPrice(null)
-                    setPriceForm({ id: '', label: '', paymentInfo: '', hookInfo: '', amount: 0, currency: 'USD', isMembership: true, membershipDays: 30, displayOrder: 0, isActive: true })
+                    setPriceForm({ id: '', label: '', paymentInfo: '', hookInfo: '', amount: 0, promoAmount: null, promoEnabled: false, currency: 'USD', membershipDays: 30, displayOrder: 0, isActive: true })
                   }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
                     <Plus className="w-4 h-4 mr-2" />Add Price
                   </Button>
@@ -2513,8 +2513,19 @@ export default function App() {
                       <Input value={priceForm.label} onChange={(e) => setPriceForm({ ...priceForm, label: e.target.value })} placeholder="e.g., 30-Day Membership" className="mt-1" />
                     </div>
                     <div>
-                      <Label>Amount ($)</Label>
+                      <Label>Regular Amount ($)</Label>
                       <Input type="number" step="0.01" value={priceForm.amount} onChange={(e) => setPriceForm({ ...priceForm, amount: parseFloat(e.target.value) || 0 })} className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Promo Amount ($)</Label>
+                      <Input type="number" step="0.01" value={priceForm.promoAmount || ''} onChange={(e) => setPriceForm({ ...priceForm, promoAmount: e.target.value ? parseFloat(e.target.value) : null })} placeholder="Leave empty if no promo" className="mt-1" />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Label>Enable Promo</Label>
+                      <Switch checked={priceForm.promoEnabled || false} onCheckedChange={(checked) => setPriceForm({ ...priceForm, promoEnabled: checked })} />
+                      {priceForm.promoEnabled && priceForm.promoAmount && (
+                        <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Promo Active!</span>
+                      )}
                     </div>
                     <div>
                       <Label>Payment Info</Label>
@@ -2533,10 +2544,6 @@ export default function App() {
                       <Input type="number" value={priceForm.displayOrder} onChange={(e) => setPriceForm({ ...priceForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
                     </div>
                     <div className="flex items-center gap-4">
-                      <Label>Membership</Label>
-                      <Switch checked={priceForm.isMembership} onCheckedChange={(checked) => setPriceForm({ ...priceForm, isMembership: checked })} />
-                    </div>
-                    <div className="flex items-center gap-4">
                       <Label>Active</Label>
                       <Switch checked={priceForm.isActive} onCheckedChange={(checked) => setPriceForm({ ...priceForm, isActive: checked })} />
                     </div>
@@ -2548,22 +2555,43 @@ export default function App() {
                 </Card>
                 
                 <div className="space-y-2">
-                  {adminPrices.map(price => (
-                    <Card key={price.id} className="p-4">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{price.label}</span>
-                            <span className="text-sm font-bold text-green-600">${price.amount}</span>
-                            {price.isMembership && <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded">{price.membershipDays} days</span>}
-                            {!price.isActive && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
+                  {adminPrices.map(price => {
+                    const effectivePrice = price.promo_enabled && price.promo_amount ? price.promo_amount : price.amount
+                    return (
+                      <Card key={price.id} className="p-4">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{price.label}</span>
+                              <span className="text-sm font-bold text-green-600">${effectivePrice}</span>
+                              {price.promo_enabled && price.promo_amount && (
+                                <>
+                                  <span className="text-xs line-through text-gray-400">${price.amount}</span>
+                                  <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded">PROMO</span>
+                                </>
+                              )}
+                              <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded">{price.membership_days} days</span>
+                              {!price.is_active && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
+                            </div>
+                            <p className="text-sm text-gray-500">{price.hook_info}</p>
                           </div>
-                          <p className="text-sm text-gray-500">{price.hookInfo}</p>
+                          <Button onClick={() => { 
+                            setEditingPrice(price)
+                            setPriceForm({
+                              ...price,
+                              paymentInfo: price.payment_info,
+                              hookInfo: price.hook_info,
+                              promoAmount: price.promo_amount,
+                              promoEnabled: price.promo_enabled,
+                              membershipDays: price.membership_days,
+                              displayOrder: price.display_order,
+                              isActive: price.is_active
+                            })
+                          }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
                         </div>
-                        <Button onClick={() => { setEditingPrice(price); setPriceForm(price) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    )
+                  })}
                 </div>
               </div>
             )}
