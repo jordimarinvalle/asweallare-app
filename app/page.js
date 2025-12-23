@@ -1697,12 +1697,19 @@ export default function App() {
         paymentInfo: p.payment_info,
         hookInfo: p.hook_info,
         amount: p.amount,
+        promo_amount: p.promo_amount,
+        promo_enabled: p.promo_enabled,
         currency: p.currency,
         isMembership: p.is_membership,
+        membership_days: p.membership_days,
         membershipDays: p.membership_days,
         stripePriceId: p.stripe_price_id,
+        display_order: p.display_order,
         displayOrder: p.display_order,
-        isActive: p.is_active
+        is_active: p.is_active,
+        isActive: p.is_active,
+        payment_info: p.payment_info,
+        hook_info: p.hook_info
       }))
       setAdminPrices(normalizedPrices)
     }
