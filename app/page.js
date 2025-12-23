@@ -1090,6 +1090,14 @@ export default function App() {
   const [adminBundles, setAdminBundles] = useState([])
   const [adminTab, setAdminTab] = useState('cards')
   
+  // Show/hide forms (forms hidden by default)
+  const [showCardForm, setShowCardForm] = useState(false)
+  const [showBoxForm, setShowBoxForm] = useState(false)
+  const [showSeriesForm, setShowSeriesForm] = useState(false)
+  const [showPriceForm, setShowPriceForm] = useState(false)
+  const [showPileForm, setShowPileForm] = useState(false)
+  const [showBundleForm, setShowBundleForm] = useState(false)
+  
   const [editingCard, setEditingCard] = useState(null)
   const [editingBox, setEditingBox] = useState(null)
   const [editingSeries, setEditingSeries] = useState(null)
