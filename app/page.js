@@ -3022,21 +3022,6 @@ export default function App() {
                     <p className="text-sm mt-1">Edit a box → Select pile → Upload ZIP file</p>
                   </div>
                 )}
-                          <Button onClick={() => { if(confirm('Delete this card?')) handleDeleteCard(card.id) }} size="sm" variant="ghost" className="text-red-600 h-7 px-2">
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-                
-                {adminCards.length === 0 && (
-                  <div className="text-center py-12 text-gray-500">
-                    <p>No cards yet. Upload cards via the Boxes tab.</p>
-                    <p className="text-sm mt-1">Edit a box → Select pile → Upload ZIP file</p>
-                  </div>
-                )}
               </div>
             )}
 
