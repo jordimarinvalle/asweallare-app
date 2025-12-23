@@ -2679,7 +2679,7 @@ export default function App() {
                               <p className="text-xs text-gray-400">
                                 Series: {box.collection_series?.name || 'N/A'} | 
                                 Price: {linkedPrice?.label || 'Free'} | 
-                                Path: {box.path}
+                                ID: {box.id}
                               </p>
                             </div>
                           </div>
