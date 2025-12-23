@@ -3051,11 +3051,14 @@ export default function App() {
                       if (adminPileFilter && card.pileId !== adminPileFilter) return false
                       return true
                     })
-                    .map(card => (
+                    .map(card => {
+                    const imgPath = card.imagePath || card.image_path
+                    const imgSrc = imgPath ? (imgPath.startsWith('/') ? imgPath : `/${imgPath}`) : null
+                    return (
                     <Card key={card.id} className="p-3 overflow-hidden">
                       <div className="aspect-[3/4] mb-2 rounded overflow-hidden bg-gray-100 relative">
-                        {card.imagePath ? (
-                          <img src={`/${card.imagePath}`} alt="" className="w-full h-full object-cover" />
+                        {imgSrc ? (
+                          <img src={imgSrc} alt="" className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <Image className="w-8 h-8 text-gray-300" />
