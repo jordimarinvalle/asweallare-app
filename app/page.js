@@ -1123,6 +1123,7 @@ export default function App() {
   })
   
   const [boxForm, setBoxForm] = useState({
+    id: '',  // Slug - also used as folder name for cards
     name: '',
     description: '',
     descriptionShort: '',
@@ -1131,7 +1132,6 @@ export default function App() {
     priceId: '',
     color: '#000000',
     colorPaletteText: '',  // Store as text, parse on save
-    path: '',
     displayOrder: 0,
     isDemo: false,
     isActive: true,
