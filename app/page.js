@@ -2318,40 +2318,43 @@ export default function App() {
                   <Button onClick={() => {
                     setEditingSeries(null)
                     setSeriesForm({ id: '', name: '', description: '', displayOrder: 0, isActive: true })
+                    setShowSeriesForm(true)
                   }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
                     <Plus className="w-4 h-4 mr-2" />Add Series
                   </Button>
                 </div>
                 
-                <Card className="p-6 mb-6">
-                  <h4 className="font-medium mb-4">{editingSeries ? 'Edit Series' : 'New Series'}</h4>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label>ID (slug)</Label>
-                      <Input value={seriesForm.id} onChange={(e) => setSeriesForm({ ...seriesForm, id: e.target.value.toLowerCase().replace(/\s+/g, '_') })} placeholder="e.g., unscripted_conversations" className="mt-1" disabled={!!editingSeries} />
+                {showSeriesForm && (
+                  <Card className="p-6 mb-6">
+                    <h4 className="font-medium mb-4">{editingSeries ? 'Edit Series' : 'New Series'}</h4>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label>ID (slug)</Label>
+                        <Input value={seriesForm.id} onChange={(e) => setSeriesForm({ ...seriesForm, id: e.target.value.toLowerCase().replace(/\s+/g, '_') })} placeholder="e.g., unscripted_conversations" className="mt-1" disabled={!!editingSeries} />
+                      </div>
+                      <div>
+                        <Label>Name</Label>
+                        <Input value={seriesForm.name} onChange={(e) => setSeriesForm({ ...seriesForm, name: e.target.value })} placeholder="e.g., Unscripted Conversations" className="mt-1" />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <Label>Description</Label>
+                        <Input value={seriesForm.description} onChange={(e) => setSeriesForm({ ...seriesForm, description: e.target.value })} placeholder="Brief description" className="mt-1" />
+                      </div>
+                      <div>
+                        <Label>Display Order</Label>
+                        <Input type="number" value={seriesForm.displayOrder} onChange={(e) => setSeriesForm({ ...seriesForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <Label>Active</Label>
+                        <Switch checked={seriesForm.isActive} onCheckedChange={(checked) => setSeriesForm({ ...seriesForm, isActive: checked })} />
+                      </div>
                     </div>
-                    <div>
-                      <Label>Name</Label>
-                      <Input value={seriesForm.name} onChange={(e) => setSeriesForm({ ...seriesForm, name: e.target.value })} placeholder="e.g., Unscripted Conversations" className="mt-1" />
+                    <div className="flex gap-2 mt-4">
+                      <Button onClick={handleSaveSeries} className="bg-red-600 hover:bg-red-700 text-white">{editingSeries ? 'Update' : 'Create'}</Button>
+                      <Button onClick={() => { setShowSeriesForm(false); setEditingSeries(null) }} variant="outline">Cancel</Button>
                     </div>
-                    <div className="sm:col-span-2">
-                      <Label>Description</Label>
-                      <Input value={seriesForm.description} onChange={(e) => setSeriesForm({ ...seriesForm, description: e.target.value })} placeholder="Brief description" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label>Display Order</Label>
-                      <Input type="number" value={seriesForm.displayOrder} onChange={(e) => setSeriesForm({ ...seriesForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Label>Active</Label>
-                      <Switch checked={seriesForm.isActive} onCheckedChange={(checked) => setSeriesForm({ ...seriesForm, isActive: checked })} />
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <Button onClick={handleSaveSeries} className="bg-red-600 hover:bg-red-700 text-white">{editingSeries ? 'Update' : 'Create'}</Button>
-                    {editingSeries && <Button onClick={() => setEditingSeries(null)} variant="outline">Cancel</Button>}
-                  </div>
-                </Card>
+                  </Card>
+                )}
                 
                 <div className="space-y-2">
                   {adminSeries.map(s => (
@@ -2365,7 +2368,10 @@ export default function App() {
                           </div>
                           <p className="text-sm text-gray-500">{s.description}</p>
                         </div>
-                        <Button onClick={() => { setEditingSeries(s); setSeriesForm(s) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                        <div className="flex gap-1">
+                          <Button onClick={() => { setEditingSeries(s); setSeriesForm(s); setShowSeriesForm(true) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                          <Button onClick={() => { if(confirm('Delete this series?')) handleDeleteSeries(s.id) }} size="sm" variant="ghost" className="text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                        </div>
                       </div>
                     </Card>
                   ))}
