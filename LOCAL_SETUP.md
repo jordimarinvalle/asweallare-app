@@ -55,9 +55,16 @@ app-1  |  ✓ Ready in Xms
 
 When running locally:
 - **No Supabase needed** - Uses local PostgreSQL
-- **No authentication required** - Auto-logged in as admin
-- **Full admin access** - All features unlocked
+- **Local authentication** - Sign up/Sign in works without email verification
+- **Admin access** - First user or users with `is_admin=true` get admin panel
 - **No Stripe needed** - Payment features disabled
+
+### Default Admin Account
+You can sign up with any email, or use the pre-created admin:
+- **Email**: `admin@local.dev`
+- **Password**: `admin123`
+
+Or sign up with any email - all users can access admin in local mode.
 
 ---
 
