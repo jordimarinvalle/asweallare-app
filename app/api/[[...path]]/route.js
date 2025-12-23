@@ -1223,6 +1223,70 @@ export async function DELETE(request) {
       return handleCORS(NextResponse.json({ success: true }))
     }
 
+    // ADMIN ROUTES - Delete collection series
+    if (path.startsWith('admin/collection-series/')) {
+      const seriesId = path.split('/')[2]
+      
+      const { error } = await supabase
+        .from('collection_series')
+        .delete()
+        .eq('id', seriesId)
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ success: true }))
+    }
+
+    // ADMIN ROUTES - Delete price
+    if (path.startsWith('admin/prices/')) {
+      const priceId = path.split('/')[2]
+      
+      const { error } = await supabase
+        .from('prices')
+        .delete()
+        .eq('id', priceId)
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ success: true }))
+    }
+
+    // ADMIN ROUTES - Delete pile
+    if (path.startsWith('admin/piles/')) {
+      const pileId = path.split('/')[2]
+      
+      const { error } = await supabase
+        .from('piles')
+        .delete()
+        .eq('id', pileId)
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ success: true }))
+    }
+
+    // ADMIN ROUTES - Delete bundle
+    if (path.startsWith('admin/bundles/')) {
+      const bundleId = path.split('/')[2]
+      
+      const { error } = await supabase
+        .from('bundles')
+        .delete()
+        .eq('id', bundleId)
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ success: true }))
+    }
+
     return handleCORS(NextResponse.json({ error: 'Route not found' }, { status: 404 }))
     
   } catch (error) {
