@@ -1626,16 +1626,14 @@ export default function App() {
     if (data.cards) {
       const normalizedCards = data.cards.map(card => ({
         id: card.id,
-        color: card.color,
-        title: card.title,
-        hint: card.hint,
-        language: card.language,
-        isDemo: card.isdemo,
-        isActive: card.isactive,
         boxId: card.box_id,
         boxName: card.boxes?.name,
+        pileId: card.pile_id,
+        pileName: card.piles?.name,
+        text: card.text,
         imagePath: card.image_path,
-        createdAt: card.createdat
+        isActive: card.is_active,
+        createdAt: card.created_at
       }))
       setAdminCards(normalizedCards)
     }
