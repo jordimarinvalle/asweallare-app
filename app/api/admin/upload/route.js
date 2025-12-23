@@ -1,22 +1,55 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseServer } from '../../../../lib/supabase-server'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
 
-// Admin email restriction
+// Helper to get authenticated user (supports both local and Supabase)
+async function getAuthenticatedUser() {
+  // In local mode, check the auth-token cookie
+  if (process.env.LOCAL_MODE === 'true') {
+    const { cookies } = await import('next/headers')
+    const { getUserFromToken } = await import('../../../../lib/auth-local')
+    
+    const cookieStore = cookies()
+    const token = cookieStore.get('auth-token')?.value
+    
+    if (token) {
+      const user = await getUserFromToken(token)
+      if (user) {
+        return { user, error: null }
+      }
+    }
+    return { user: null, error: 'Not authenticated' }
+  }
+  
+  // Supabase mode
+  const { createSupabaseServer } = await import('../../../../lib/supabase-server')
+  const supabase = createSupabaseServer()
+  const { data: { user }, error } = await supabase.auth.getUser()
+  return { user, error }
+}
+
+// Admin email restriction (for Supabase mode)
 const ADMIN_EMAIL = 'mocasin@gmail.com'
 
 export async function POST(request) {
-  const supabase = createSupabaseServer()
-  
   try {
     // Check auth
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { user, error: authError } = await getAuthenticatedUser()
     
-    if (authError || !user || user.email !== ADMIN_EMAIL) {
+    // In local mode, any authenticated user is admin
+    // In Supabase mode, check admin email or is_admin flag
+    const isLocalMode = process.env.LOCAL_MODE === 'true'
+    const isAuthorized = isLocalMode 
+      ? (user !== null)
+      : (user && (user.email === ADMIN_EMAIL || user.is_admin))
+    
+    if (authError || !isAuthorized) {
+      console.log('[UPLOAD] Auth failed:', { authError, user: user?.email, isLocalMode })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    
+    console.log('[UPLOAD] Auth passed for:', user?.email)
     
     const formData = await request.formData()
     const file = formData.get('file')
@@ -51,12 +84,12 @@ export async function POST(request) {
     if (folder) {
       // Generic folder upload (for piles, etc.)
       folderPath = path.join(process.cwd(), 'public', folder)
-      imagePath = `${folder}/${filename}`
+      imagePath = `/${folder}/${filename}`
     } else {
       // Card-specific upload (legacy behavior)
       const colorFolder = cardColor === 'black' ? `${boxFolder}-blacks` : `${boxFolder}-whites`
       folderPath = path.join(process.cwd(), 'public', 'cards', boxFolder, colorFolder)
-      imagePath = `${boxFolder}/${colorFolder}/${filename}`
+      imagePath = `/cards/${boxFolder}/${colorFolder}/${filename}`
     }
     
     // Create directory if it doesn't exist
@@ -66,18 +99,19 @@ export async function POST(request) {
     const filePath = path.join(folderPath, filename)
     await writeFile(filePath, buffer)
     
-    console.log(`File uploaded: ${filePath}`)
+    console.log(`[UPLOAD] File uploaded: ${filePath}`)
     
     return NextResponse.json({ 
       success: true, 
       path: imagePath,
       imagePath,
+      image_path: imagePath,
       filename,
       message: 'Image uploaded successfully'
     })
     
   } catch (error) {
-    console.error('Upload error:', error)
+    console.error('[UPLOAD] Error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
