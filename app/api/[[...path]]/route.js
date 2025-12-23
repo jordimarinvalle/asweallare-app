@@ -18,6 +18,24 @@ export async function OPTIONS() {
 
 // Helper to get authenticated user
 async function getAuthenticatedUser() {
+  // In local mode, check the auth-token cookie
+  if (process.env.LOCAL_MODE === 'true') {
+    const { cookies } = await import('next/headers')
+    const { getUserFromToken } = await import('../../../lib/auth-local')
+    
+    const cookieStore = cookies()
+    const token = cookieStore.get('auth-token')?.value
+    
+    if (token) {
+      const user = await getUserFromToken(token)
+      if (user) {
+        return { user, error: null }
+      }
+    }
+    return { user: null, error: null }
+  }
+  
+  // Supabase mode
   const supabase = createSupabaseServer()
   const { data: { user }, error } = await supabase.auth.getUser()
   return { user, error }
