@@ -140,51 +140,68 @@ export async function GET(request) {
       // Get user's accessible boxes
       const { accessibleBoxIds } = await getUserAccessibleBoxes(user?.id || null)
       
-      let query = supabase
+      // Determine which boxes to query
+      let queryBoxIds = []
+      if (boxIds.length > 0) {
+        queryBoxIds = boxIds.filter(id => accessibleBoxIds.includes(id))
+        if (queryBoxIds.length === 0) {
+          return handleCORS(NextResponse.json({ cards: [], message: 'No accessible boxes' }))
+        }
+      } else if (accessibleBoxIds.length > 0) {
+        queryBoxIds = accessibleBoxIds
+      } else {
+        return handleCORS(NextResponse.json({ cards: [], message: 'No accessible boxes' }))
+      }
+      
+      // Query cards
+      const { data: cards, error } = await supabase
         .from('cards')
-        .select('*, piles(slug, name, image_path)')
+        .select('*')
+        .in('box_id', queryBoxIds)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
       
-      if (boxIds.length > 0) {
-        // Filter by requested boxes, but only include accessible ones
-        const allowedBoxIds = boxIds.filter(id => accessibleBoxIds.includes(id))
-        if (allowedBoxIds.length > 0) {
-          query = query.in('box_id', allowedBoxIds)
-        } else {
-          // No accessible boxes requested, return empty
-          return handleCORS(NextResponse.json({ cards: [], message: 'No accessible boxes' }))
-        }
-      } else {
-        // No specific boxes requested - return cards from all accessible boxes
-        if (accessibleBoxIds.length > 0) {
-          query = query.in('box_id', accessibleBoxIds)
-        } else {
-          // Fallback: return empty
-          return handleCORS(NextResponse.json({ cards: [], message: 'No accessible boxes' }))
-        }
-      }
-      
-      const { data: cards, error } = await query
-      
       if (error) {
+        console.error('[CARDS API] Error fetching cards:', error)
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
       }
       
+      // If we have cards, fetch piles separately for card back images
+      let pilesMap = {}
+      if (cards && cards.length > 0) {
+        const pileIds = [...new Set(cards.map(c => c.pile_id).filter(Boolean))]
+        if (pileIds.length > 0) {
+          const { data: piles } = await supabase
+            .from('piles')
+            .select('*')
+            .in('id', pileIds)
+          
+          if (piles) {
+            piles.forEach(p => { pilesMap[p.id] = p })
+          }
+        }
+      }
+      
       // Transform cards to include pile info for the frontend
-      const transformedCards = (cards || []).map(card => ({
-        id: card.id,
-        box_id: card.box_id,
-        pile_id: card.pile_id,
-        text: card.text,
-        image_path: card.image_path,
-        is_active: card.is_active,
-        created_at: card.created_at,
-        // Add pile info for card back images
-        color: card.piles?.slug || 'black', // 'black' or 'white' from pile slug
-        pile_name: card.piles?.name,
-        pile_image: card.piles?.image_path
-      }))
+      const transformedCards = (cards || []).map(card => {
+        const pile = pilesMap[card.pile_id] || {}
+        return {
+          id: card.id,
+          box_id: card.box_id,
+          pile_id: card.pile_id,
+          text: card.text,
+          image_path: card.image_path,
+          is_active: card.is_active,
+          created_at: card.created_at,
+          // Add pile info for card back images
+          color: pile.slug || 'black', // 'black' or 'white' from pile slug
+          pile_name: pile.name,
+          pile_image: pile.image_path,
+          // Legacy fields for compatibility
+          title: card.text,
+          imagePath: card.image_path
+        }
+      })
       
       return handleCORS(NextResponse.json({ cards: transformedCards }))
     }
