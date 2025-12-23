@@ -980,7 +980,7 @@ export async function PUT(request) {
       if (body.descriptionShort !== undefined) updateData.description_short = body.descriptionShort
       if (body.tagline !== undefined) updateData.tagline = body.tagline
       if (body.topics !== undefined) updateData.topics = body.topics
-      if (body.price !== undefined) updateData.price = body.price
+      if (body.priceId !== undefined) updateData.price_id = body.priceId
       if (body.color !== undefined) updateData.color = body.color
       if (body.colorPalette !== undefined) updateData.color_palette = body.colorPalette
       if (body.path !== undefined) updateData.path = body.path
