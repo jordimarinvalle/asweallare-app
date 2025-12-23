@@ -28,9 +28,8 @@ CREATE TABLE local_users (
 );
 
 -- Insert default admin user (password: admin123)
--- Password hash is bcrypt of 'admin123'
 INSERT INTO local_users (id, email, password_hash, is_admin) VALUES
-('00000000-0000-0000-0000-000000000001', 'admin@local.dev', '$2b$10$rQZ8K1F1F1F1F1F1F1F1F.1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1', true);
+('00000000-0000-0000-0000-000000000001', 'admin@local.dev', '$2b$10$fZpKf/cVULz6SO7a.zDgn.yjF8rKHU/PrHxAhMdGQWkG6PtQWSAgC', true);
 
 -- ============================================================================
 -- 1. COLLECTION_SERIES TABLE
