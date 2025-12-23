@@ -6,10 +6,10 @@
 -- Drop existing tables (in correct order due to foreign keys)
 DROP TABLE IF EXISTS user_memberships CASCADE;
 DROP TABLE IF EXISTS bundles CASCADE;
-DROP TABLE IF EXISTS prices CASCADE;
 DROP TABLE IF EXISTS user_products CASCADE;
 DROP TABLE IF EXISTS cards CASCADE;
 DROP TABLE IF EXISTS boxes CASCADE;
+DROP TABLE IF EXISTS prices CASCADE;
 DROP TABLE IF EXISTS collection_series CASCADE;
 DROP TABLE IF EXISTS subscription_plans CASCADE;
 
@@ -28,8 +28,30 @@ CREATE TABLE collection_series (
 );
 
 -- ============================================================================
--- 2. BOXES TABLE
+-- 2. PRICES TABLE (now defined BEFORE boxes since boxes reference it)
+-- Membership/access pricing options - reusable across boxes and bundles
+-- ============================================================================
+CREATE TABLE prices (
+  id TEXT PRIMARY KEY,
+  label TEXT NOT NULL,
+  payment_info TEXT,
+  hook_info TEXT,
+  amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  promo_amount DECIMAL(10,2) DEFAULT NULL,
+  promo_enabled BOOLEAN DEFAULT false,
+  currency TEXT DEFAULT 'USD',
+  membership_days INTEGER,
+  stripe_price_id TEXT,
+  display_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================================================
+-- 3. BOXES TABLE
 -- Card collections/decks with metadata
+-- NOTE: price_id links to a Price entity (no direct price value on box)
 -- ============================================================================
 CREATE TABLE boxes (
   id TEXT PRIMARY KEY,
@@ -38,7 +60,7 @@ CREATE TABLE boxes (
   description_short TEXT,
   tagline TEXT,
   topics TEXT[],
-  price DECIMAL(10,2) DEFAULT 0,
+  price_id TEXT REFERENCES prices(id),
   color TEXT DEFAULT '#000000',
   color_palette TEXT[],
   path TEXT,
@@ -51,7 +73,7 @@ CREATE TABLE boxes (
 );
 
 -- ============================================================================
--- 3. CARDS TABLE
+-- 4. CARDS TABLE
 -- Individual cards with title, hint, image
 -- ============================================================================
 CREATE TABLE cards (
@@ -69,28 +91,9 @@ CREATE TABLE cards (
 );
 
 -- ============================================================================
--- 4. PRICES TABLE
--- Membership/access pricing options
--- ============================================================================
-CREATE TABLE prices (
-  id TEXT PRIMARY KEY,
-  label TEXT NOT NULL,
-  payment_info TEXT,
-  hook_info TEXT,
-  amount DECIMAL(10,2) NOT NULL DEFAULT 0,
-  currency TEXT DEFAULT 'USD',
-  is_membership BOOLEAN DEFAULT true,
-  membership_days INTEGER,
-  stripe_price_id TEXT,
-  display_order INTEGER DEFAULT 0,
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- ============================================================================
 -- 5. BUNDLES TABLE
--- Links boxes to prices for purchasing
+-- Groups of boxes with a shared price
+-- NOTE: price_id links to a Price entity
 -- ============================================================================
 CREATE TABLE bundles (
   id TEXT PRIMARY KEY,
@@ -159,7 +162,9 @@ CREATE TABLE subscription_plans (
 CREATE INDEX idx_cards_box_id ON cards(box_id);
 CREATE INDEX idx_cards_color ON cards(color);
 CREATE INDEX idx_boxes_series ON boxes(collection_series_id);
+CREATE INDEX idx_boxes_price ON boxes(price_id);
 CREATE INDEX idx_boxes_display_order ON boxes(display_order);
+CREATE INDEX idx_bundles_price ON bundles(price_id);
 CREATE INDEX idx_user_products_user_id ON user_products(user_id);
 CREATE INDEX idx_user_memberships_user_id ON user_memberships(user_id);
 CREATE INDEX idx_user_memberships_expires ON user_memberships(expires_at);
@@ -180,12 +185,12 @@ CREATE TRIGGER update_collection_series_updated_at
   BEFORE UPDATE ON collection_series
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_boxes_updated_at
-  BEFORE UPDATE ON boxes
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 CREATE TRIGGER update_prices_updated_at
   BEFORE UPDATE ON prices
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_boxes_updated_at
+  BEFORE UPDATE ON boxes
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_bundles_updated_at
@@ -203,9 +208,9 @@ CREATE TRIGGER update_user_memberships_updated_at
 
 -- Enable RLS
 ALTER TABLE collection_series ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE boxes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cards ENABLE ROW LEVEL SECURITY;
-ALTER TABLE prices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bundles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_memberships ENABLE ROW LEVEL SECURITY;
@@ -214,13 +219,13 @@ ALTER TABLE user_memberships ENABLE ROW LEVEL SECURITY;
 CREATE POLICY collection_series_public_read ON collection_series
   FOR SELECT USING (true);
 
+CREATE POLICY prices_public_read ON prices
+  FOR SELECT USING (true);
+
 CREATE POLICY boxes_public_read ON boxes
   FOR SELECT USING (true);
 
 CREATE POLICY cards_public_read ON cards
-  FOR SELECT USING (true);
-
-CREATE POLICY prices_public_read ON prices
   FOR SELECT USING (true);
 
 CREATE POLICY bundles_public_read ON bundles
@@ -237,13 +242,13 @@ CREATE POLICY user_memberships_read_own ON user_memberships
 CREATE POLICY collection_series_authenticated_all ON collection_series
   FOR ALL USING (true) WITH CHECK (true);
 
+CREATE POLICY prices_authenticated_all ON prices
+  FOR ALL USING (true) WITH CHECK (true);
+
 CREATE POLICY boxes_authenticated_all ON boxes
   FOR ALL USING (true) WITH CHECK (true);
 
 CREATE POLICY cards_authenticated_all ON cards
-  FOR ALL USING (true) WITH CHECK (true);
-
-CREATE POLICY prices_authenticated_all ON prices
   FOR ALL USING (true) WITH CHECK (true);
 
 CREATE POLICY bundles_authenticated_all ON bundles
