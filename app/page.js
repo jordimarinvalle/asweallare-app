@@ -2685,6 +2685,7 @@ export default function App() {
                             <Button onClick={() => { 
                               setEditingBox(box)
                               setBoxForm({
+                                id: box.id || '',
                                 name: box.name,
                                 description: box.description || '',
                                 descriptionShort: box.description_short || '',
@@ -2694,7 +2695,6 @@ export default function App() {
                                 priceId: box.price_id || '',
                                 color: box.color || '#000000',
                                 colorPaletteText: (box.color_palette || []).join(', '),
-                                path: box.path || '',
                                 isDemo: box.is_demo || false,
                                 isActive: box.is_active !== false,
                                 displayOrder: box.display_order || 0
