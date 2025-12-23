@@ -137,22 +137,51 @@ Both guides are displayed in a mobile-optimized viewer with swipe navigation and
 
 | Table | Description |
 |-------|-------------|
-| `boxes` | Card collections (Demo, White, Black, Red) |
+| `collection_series` | Game families (e.g., Unscripted Conversations) |
+| `boxes` | Card collections/decks with metadata |
 | `cards` | Individual cards with title, hint, image_path |
-| `saved_draws` | User's saved card pairs |
-| `user_products` | Box purchases and subscriptions |
-| `subscription_plans` | Pricing configuration |
-| `user_access` | Legacy payment tracking |
+| `prices` | Membership/access pricing options |
+| `bundles` | Links boxes to prices |
+| `user_products` | Legacy box purchases (maintained for backwards compatibility) |
+| `user_memberships` | Time-based membership tracking |
+| `subscription_plans` | Legacy pricing configuration |
+
+### New Data Model (v2)
+
+#### Collection Series
+Represents a family of games that can be combined together.
+- Boxes can only be combined if they belong to the same CollectionSeries
+- UI groups boxes by CollectionSeries
+
+#### Boxes (Decks)
+Enhanced with:
+- `collection_series_id` - Links to parent series
+- `description_short` - Brief description
+- `tagline` - Marketing tagline
+- `topics` - Array of example topics
+- `color_palette` - Array of 3 brand colors
+- `path` - Asset folder path
+- `display_order` - Intentional ordering
+
+#### Prices (Membership Options)
+Time-based access options:
+- 24-hour pass ($1)
+- 90-day membership ($3)
+- 180-day membership ($5)
+- Annual membership ($7)
+
+#### Bundles
+Links boxes to prices for purchasing.
 
 ### Default Boxes
 
-| Box ID | Name | Cards | Price |
-|--------|------|-------|-------|
-| `box_demo` | Demo Box | 24 | Free |
-| `box_white` | White Box | 108 | $15 |
-| `box_white_xl` | White Box XL | 216 | $25 |
-| `box_black` | Black Box | 108 | $15 |
-| `box_red` | Red Box | 108 | $15 |
+| Box ID | Name | Cards | Tagline |
+|--------|------|-------|---------|
+| `box_demo` | Demo Box | 24 | Sample cards |
+| `box_white` | White Box | 108 | Level 1 — Life · Vol 1 |
+| `box_white_xl` | White Box XL | 216 | Level 1 — Life · Vols 1 & 2 |
+| `box_black` | Black Box | 108 | Level 3 — Life Struggles |
+| `box_red` | Red Box | 108 | Level 2 — Intimacy & Love |
 
 ## 🔧 API Endpoints
 
@@ -160,24 +189,32 @@ Both guides are displayed in a mobile-optimized viewer with swipe navigation and
 - `GET /api/boxes` - List all boxes with access info
 - `GET /api/cards?box_ids=...` - Get cards for selected boxes
 - `GET /api/plans` - Get subscription plans
+- `GET /api/store/prices` - Get active pricing options
+- `GET /api/store/bundles` - Get active bundles
 
 ### Authenticated
 - `POST /api/auth/signup` - Create account
 - `POST /api/auth/signin` - Sign in
 - `POST /api/auth/signout` - Sign out
 - `POST /api/auth/google` - Google OAuth
+- `POST /api/auth/reset-password` - Request password reset
 - `GET /api/auth/user` - Get current user
-- `GET /api/draws` - Get saved draws
-- `POST /api/draws/save` - Save a draw
 
 ### Payments
 - `POST /api/payment/purchase-box` - Buy a single box
 - `POST /api/payment/subscribe-all` - Subscribe to all boxes
 - `POST /api/payment/webhook` - Stripe webhook
 
-### Admin
+### Admin (Protected)
 - `GET/POST /api/admin/cards` - Manage cards
 - `GET/POST /api/admin/boxes` - Manage boxes
+- `PUT /api/admin/boxes/:id` - Update box
+- `GET/POST /api/admin/collection-series` - Manage series
+- `PUT /api/admin/collection-series/:id` - Update series
+- `GET/POST /api/admin/prices` - Manage prices
+- `PUT /api/admin/prices/:id` - Update price
+- `GET/POST /api/admin/bundles` - Manage bundles
+- `PUT /api/admin/bundles/:id` - Update bundle
 - `GET/POST /api/admin/import-cards` - Import cards from images
 
 ## 🎨 Adding Card Images
