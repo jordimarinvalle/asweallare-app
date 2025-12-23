@@ -2537,104 +2537,120 @@ export default function App() {
                   <h3 className="text-xl font-medium">Piles (Card Backs)</h3>
                   <Button onClick={() => {
                     setEditingPile(null)
-                    setPileForm({ id: '', slug: '', name: '', imagePath: '', collectionSeriesId: 'unscripted_conversations', displayOrder: 0, isActive: true })
+                    setPileForm({ id: '', slug: '', name: '', imagePath: '', collectionSeriesId: '', displayOrder: 0, isActive: true })
+                    setShowPileForm(true)
                   }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
                     <Plus className="w-4 h-4 mr-2" />Add Pile
                   </Button>
                 </div>
                 
-                <Card className="p-6 mb-6">
-                  <h4 className="font-medium mb-4">{editingPile ? 'Edit Pile' : 'New Pile'}</h4>
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                      <Label>Name</Label>
-                      <Input value={pileForm.name} onChange={(e) => setPileForm({ ...pileForm, name: e.target.value })} placeholder="e.g., Black" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label>Slug</Label>
-                      <Input 
-                        value={pileForm.slug} 
-                        onChange={(e) => setPileForm({ ...pileForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '_') })} 
-                        placeholder="e.g., black" 
-                        className="mt-1" 
-                        disabled={!!editingPile}
-                      />
-                    </div>
-                    <div>
-                      <Label>Collection Series</Label>
-                      <select value={pileForm.collectionSeriesId || ''} onChange={(e) => setPileForm({ ...pileForm, collectionSeriesId: e.target.value || null })} className="w-full mt-1 p-2 border rounded-md">
-                        <option value="">-- No Series --</option>
-                        {adminSeries.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                      </select>
-                    </div>
-                    <div className="sm:col-span-2 lg:col-span-3">
-                      <Label>Image Path</Label>
-                      <div className="flex gap-2 mt-1">
-                        <Input 
-                          value={pileForm.imagePath} 
-                          onChange={(e) => setPileForm({ ...pileForm, imagePath: e.target.value })} 
-                          placeholder="e.g., collections/unscripted_conversations/piles/black.png" 
-                          className="flex-1"
-                        />
-                        <div className="relative">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0]
-                              if (!file) return
-                              
-                              setUploadingPileImage(true)
-                              const formData = new FormData()
-                              formData.append('file', file)
-                              formData.append('folder', 'collections/unscripted_conversations/piles')
-                              
-                              try {
-                                const response = await fetch('/api/admin/upload', { method: 'POST', body: formData })
-                                const data = await response.json()
-                                if (data.path) {
-                                  setPileForm({ ...pileForm, imagePath: data.path })
-                                  toast({ title: 'Image uploaded!' })
-                                }
-                              } catch (err) {
-                                toast({ title: 'Upload failed', variant: 'destructive' })
-                              }
-                              setUploadingPileImage(false)
-                            }}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            disabled={uploadingPileImage}
-                          />
-                          <Button variant="outline" disabled={uploadingPileImage}>
-                            <Image className="w-4 h-4 mr-2" />
-                            {uploadingPileImage ? 'Uploading...' : 'Upload'}
-                          </Button>
-                        </div>
+                {showPileForm && (
+                  <Card className="p-6 mb-6">
+                    <h4 className="font-medium mb-4">{editingPile ? 'Edit Pile' : 'New Pile'}</h4>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div>
+                        <Label>Name</Label>
+                        <Input value={pileForm.name} onChange={(e) => setPileForm({ ...pileForm, name: e.target.value })} placeholder="e.g., Black" className="mt-1" />
                       </div>
-                      {pileForm.imagePath && (
-                        <div className="mt-2">
-                          <img 
-                            src={`/${pileForm.imagePath}`} 
-                            alt="Pile preview" 
-                            className="h-24 object-contain rounded border"
-                            onError={(e) => e.target.style.display = 'none'}
+                      <div>
+                        <Label>Slug</Label>
+                        <Input 
+                          value={pileForm.slug} 
+                          onChange={(e) => setPileForm({ ...pileForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '_') })} 
+                          placeholder="e.g., black" 
+                          className="mt-1" 
+                          disabled={!!editingPile}
+                        />
+                      </div>
+                      <div>
+                        <Label>Collection Series</Label>
+                        <select value={pileForm.collectionSeriesId || ''} onChange={(e) => {
+                          const seriesId = e.target.value || null
+                          // Auto-generate image path when series changes
+                          let newImagePath = pileForm.imagePath
+                          if (seriesId && pileForm.slug) {
+                            newImagePath = `collections/${seriesId}/piles/${pileForm.slug}.png`
+                          }
+                          setPileForm({ ...pileForm, collectionSeriesId: seriesId, imagePath: newImagePath })
+                        }} className="w-full mt-1 p-2 border rounded-md">
+                          <option value="">-- Select Series --</option>
+                          {adminSeries.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                        </select>
+                      </div>
+                      <div className="sm:col-span-2 lg:col-span-3">
+                        <Label>Image Path (auto-generated from series + slug)</Label>
+                        <div className="flex gap-2 mt-1">
+                          <Input 
+                            value={pileForm.imagePath} 
+                            onChange={(e) => setPileForm({ ...pileForm, imagePath: e.target.value })} 
+                            placeholder="collections/{series}/piles/{slug}.png" 
+                            className="flex-1"
                           />
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0]
+                                if (!file) return
+                                
+                                setUploadingPileImage(true)
+                                // Generate folder based on series
+                                const folder = pileForm.collectionSeriesId 
+                                  ? `collections/${pileForm.collectionSeriesId}/piles`
+                                  : 'collections/piles'
+                                
+                                const formData = new FormData()
+                                formData.append('file', file)
+                                formData.append('folder', folder)
+                                
+                                try {
+                                  const response = await fetch('/api/admin/upload', { method: 'POST', body: formData })
+                                  const data = await response.json()
+                                  if (data.path) {
+                                    setPileForm({ ...pileForm, imagePath: data.path })
+                                    toast({ title: 'Image uploaded!' })
+                                  }
+                                } catch (err) {
+                                  toast({ title: 'Upload failed', variant: 'destructive' })
+                                }
+                                setUploadingPileImage(false)
+                              }}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              disabled={uploadingPileImage}
+                            />
+                            <Button variant="outline" disabled={uploadingPileImage}>
+                              <Image className="w-4 h-4 mr-2" />
+                              {uploadingPileImage ? 'Uploading...' : 'Upload'}
+                            </Button>
+                          </div>
                         </div>
-                      )}
+                        {pileForm.imagePath && (
+                          <div className="mt-2">
+                            <img 
+                              src={`/${pileForm.imagePath}`} 
+                              alt="Pile preview" 
+                              className="h-24 object-contain rounded border"
+                              onError={(e) => e.target.style.display = 'none'}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Label>Display Order</Label>
+                        <Input type="number" value={pileForm.displayOrder} onChange={(e) => setPileForm({ ...pileForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <Label>Active</Label>
+                        <Switch checked={pileForm.isActive} onCheckedChange={(checked) => setPileForm({ ...pileForm, isActive: checked })} />
+                      </div>
                     </div>
-                    <div>
-                      <Label>Display Order</Label>
-                      <Input type="number" value={pileForm.displayOrder} onChange={(e) => setPileForm({ ...pileForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
+                    <div className="flex gap-2 mt-4">
+                      <Button onClick={handleSavePile} className="bg-red-600 hover:bg-red-700 text-white">{editingPile ? 'Update' : 'Create'}</Button>
+                      <Button onClick={() => { setShowPileForm(false); setEditingPile(null) }} variant="outline">Cancel</Button>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <Label>Active</Label>
-                      <Switch checked={pileForm.isActive} onCheckedChange={(checked) => setPileForm({ ...pileForm, isActive: checked })} />
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <Button onClick={handleSavePile} className="bg-red-600 hover:bg-red-700 text-white">{editingPile ? 'Update' : 'Create'}</Button>
-                    {editingPile && <Button onClick={() => setEditingPile(null)} variant="outline">Cancel</Button>}
-                  </div>
-                </Card>
+                  </Card>
+                )}
                 
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {adminPiles.map(pile => (
@@ -2657,25 +2673,28 @@ export default function App() {
                           </div>
                           <p className="text-xs text-gray-500 mb-1">Slug: {pile.slug}</p>
                           <p className="text-xs text-gray-400">Series: {pile.seriesName || 'N/A'}</p>
-                          <Button 
-                            onClick={() => { 
-                              setEditingPile(pile)
-                              setPileForm({
-                                id: pile.id,
-                                slug: pile.slug,
-                                name: pile.name,
-                                imagePath: pile.imagePath,
-                                collectionSeriesId: pile.collectionSeriesId,
-                                displayOrder: pile.displayOrder,
-                                isActive: pile.isActive
-                              })
-                            }} 
-                            size="sm" 
-                            variant="ghost"
-                            className="mt-2"
-                          >
-                            <Edit className="w-4 h-4 mr-1" /> Edit
-                          </Button>
+                          <div className="flex gap-1 mt-2">
+                            <Button 
+                              onClick={() => { 
+                                setEditingPile(pile)
+                                setPileForm({
+                                  id: pile.id,
+                                  slug: pile.slug,
+                                  name: pile.name,
+                                  imagePath: pile.imagePath,
+                                  collectionSeriesId: pile.collectionSeriesId || '',
+                                  displayOrder: pile.displayOrder,
+                                  isActive: pile.isActive
+                                })
+                                setShowPileForm(true)
+                              }} 
+                              size="sm" 
+                              variant="ghost"
+                            >
+                              <Edit className="w-4 h-4 mr-1" /> Edit
+                            </Button>
+                            <Button onClick={() => { if(confirm('Delete this pile?')) handleDeletePile(pile.id) }} size="sm" variant="ghost" className="text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                          </div>
                         </div>
                       </div>
                     </Card>
@@ -2692,11 +2711,13 @@ export default function App() {
                   <Button onClick={() => {
                     setEditingCard(null)
                     setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '', imagePath: '' })
+                    setShowCardForm(true)
                   }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
                     <Plus className="w-4 h-4 mr-2" />Add Card
                   </Button>
                 </div>
                 
+                {showCardForm && (
                 <Card className="p-6 mb-6">
                   <h4 className="font-medium mb-4">{editingCard ? 'Edit Card' : 'New Card'}</h4>
                   <div className="grid sm:grid-cols-2 gap-4">
