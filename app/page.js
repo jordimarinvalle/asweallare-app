@@ -1429,7 +1429,7 @@ export default function App() {
     setAuthLoading(true)
     
     try {
-      // Handle password reset separately
+      // Handle password reset separately (Supabase only)
       if (authMode === 'forgot') {
         const response = await fetch('/api/auth/reset-password', {
           method: 'POST',
@@ -1450,48 +1450,82 @@ export default function App() {
         return
       }
       
-      const response = await fetch(`/api/auth/${authMode}`, {
+      // Try local auth first
+      const localEndpoint = authMode === 'signin' ? '/api/auth/local/signin' : '/api/auth/local/signup'
+      let response = await fetch(localEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       })
       
-      const data = await response.json()
+      let data = await response.json()
+      
+      // If local auth fails with "not enabled", fall back to Supabase
+      if (data.error === 'Local auth not enabled') {
+        response = await fetch(`/api/auth/${authMode}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        })
+        data = await response.json()
+      }
       
       if (data.error) {
         if (data.error.includes('Email not confirmed')) {
           setAuthError('Please check your email and click the confirmation link before signing in.')
-        } else if (data.error.includes('Invalid login credentials')) {
+        } else if (data.error.includes('Invalid login credentials') || data.error.includes('Invalid email or password')) {
           setAuthError('Invalid email or password. Please try again.')
+        } else if (data.error.includes('User already exists')) {
+          setAuthError('An account with this email already exists. Try signing in instead.')
         } else {
           setAuthError(data.error)
         }
       } else {
-        if (authMode === 'signup') {
+        if (data.success) {
+          // Local auth success - user is auto-logged in
+          setAuthOpen(false)
+          setEmail('')
+          setPassword('')
+          
+          // Fetch fresh user data
+          const userResponse = await fetch('/api/auth/local/user')
+          const userData = await userResponse.json()
+          if (userData.user) {
+            setUser(userData.user)
+          }
+          
+          // Refresh boxes
+          const boxResponse = await fetch('/api/boxes')
+          const boxData = await boxResponse.json()
+          if (boxData.boxes) {
+            setBoxes(boxData.boxes)
+            setHasAllAccess(boxData.hasAllAccess || false)
+            const accessibleBoxIds = boxData.boxes.filter(b => b.hasAccess).map(b => b.id)
+            setSelectedBoxIds(accessibleBoxIds.length > 0 ? accessibleBoxIds : boxData.boxes.filter(b => b.is_demo && b.hasAccess).map(b => b.id))
+          }
+        } else if (authMode === 'signup') {
+          // Supabase signup - needs email confirmation
           setAuthSuccess('Success! Please check your email to confirm your account before signing in.')
           setEmail('')
           setPassword('')
           setTimeout(() => { setAuthMode('signin'); setAuthSuccess('') }, 3000)
         } else {
-          // Sign in successful - refresh user data and close dialog
+          // Supabase sign in successful
           setAuthOpen(false)
           setEmail('')
           setPassword('')
           
-          // Fetch fresh user data immediately
           const userResponse = await fetch('/api/auth/user')
           const userData = await userResponse.json()
           if (userData.user) {
             setUser(userData.user)
           }
           
-          // Refresh boxes with new user access
           const boxResponse = await fetch('/api/boxes')
           const boxData = await boxResponse.json()
           if (boxData.boxes) {
             setBoxes(boxData.boxes)
             setHasAllAccess(boxData.hasAllAccess || false)
-            // Auto-select accessible boxes
             const accessibleBoxIds = boxData.boxes.filter(b => b.hasAccess).map(b => b.id)
             setSelectedBoxIds(accessibleBoxIds.length > 0 ? accessibleBoxIds : boxData.boxes.filter(b => b.is_demo && b.hasAccess).map(b => b.id))
           }
