@@ -1655,18 +1655,28 @@ export default function App() {
         id: box.id,
         name: box.name,
         description: box.description,
+        description_short: box.description_short,
         descriptionShort: box.description_short,
         tagline: box.tagline,
         topics: box.topics || [],
         price: box.price,
+        price_id: box.price_id,
+        priceId: box.price_id,
         color: box.color,
+        color_palette: box.color_palette || [],
         colorPalette: box.color_palette || [],
         path: box.path,
+        display_order: box.display_order,
         displayOrder: box.display_order,
+        is_demo: box.is_demo,
         isDemo: box.is_demo,
+        is_active: box.is_active,
         isActive: box.is_active,
+        collection_series_id: box.collection_series_id,
         collectionSeriesId: box.collection_series_id,
-        seriesName: box.collection_series?.name
+        collection_series: box.collection_series,
+        seriesName: box.collection_series?.name,
+        prices: box.prices
       }))
       setAdminBoxes(normalizedBoxes)
     }
