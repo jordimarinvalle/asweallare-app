@@ -1108,6 +1108,31 @@ export async function PUT(request) {
       return handleCORS(NextResponse.json({ success: true }))
     }
 
+    // ADMIN ROUTES - Update pile
+    if (path.startsWith('admin/piles/')) {
+      const pileId = path.split('/')[2]
+      const body = await request.json()
+      
+      const updateData = {}
+      if (body.slug !== undefined) updateData.slug = body.slug
+      if (body.name !== undefined) updateData.name = body.name
+      if (body.imagePath !== undefined) updateData.image_path = body.imagePath
+      if (body.collectionSeriesId !== undefined) updateData.collection_series_id = body.collectionSeriesId
+      if (body.displayOrder !== undefined) updateData.display_order = body.displayOrder
+      if (body.isActive !== undefined) updateData.is_active = body.isActive
+      
+      const { error } = await supabase
+        .from('piles')
+        .update(updateData)
+        .eq('id', pileId)
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ success: true }))
+    }
+
     // ADMIN ROUTES - Update bundle
     if (path.startsWith('admin/bundles/')) {
       const bundleId = path.split('/')[2]
