@@ -92,21 +92,16 @@ CREATE TABLE piles (
 
 -- ============================================================================
 -- 5. CARDS TABLE
--- Individual cards with title, hint, image
+-- Individual cards linked to a box and pile
 -- ============================================================================
 CREATE TABLE cards (
   id TEXT PRIMARY KEY,
-  color TEXT NOT NULL CHECK (color IN ('black', 'white')),
-  title TEXT NOT NULL,
-  hint TEXT,
-  language TEXT DEFAULT 'en',
-  isdemo BOOLEAN DEFAULT false,
-  isactive BOOLEAN DEFAULT true,
-  box_id TEXT REFERENCES boxes(id),
-  pile_id TEXT REFERENCES piles(id),
-  image_path TEXT,
-  createdat TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updatedat TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  box_id TEXT REFERENCES boxes(id) NOT NULL,
+  pile_id TEXT REFERENCES piles(id) NOT NULL,
+  text TEXT,
+  image_path TEXT NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- ============================================================================
