@@ -2,39 +2,8 @@ version: '3.8'
 
 services:
   # ============================================================================
-  # PRODUCTION MODE (with Supabase)
-  # Run: docker-compose --profile prod up
-  # ============================================================================
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-http://localhost:3000}
-      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
-      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
-    env_file:
-      - .env.local
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/boxes"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    profiles:
-      - prod
-
-  # ============================================================================
-  # LOCAL DEVELOPMENT MODE (with local PostgreSQL)
-  # Run: docker-compose --profile local up
+  # FULLY LOCAL DEVELOPMENT (No external services needed)
+  # Run: docker-compose up
   # ============================================================================
   
   # PostgreSQL Database
@@ -48,18 +17,16 @@ services:
       POSTGRES_DB: asweallare
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/schema-local.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - ./database/fixtures.sql:/docker-entrypoint-initdb.d/02-fixtures.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
-    profiles:
-      - local
 
-  # App with local PostgreSQL
-  app-local:
+  # Next.js App (Local Mode)
+  app:
     build:
       context: .
       dockerfile: Dockerfile.dev
@@ -70,8 +37,7 @@ services:
       - NEXT_PUBLIC_BASE_URL=http://localhost:3000
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/asweallare
       - USE_LOCAL_DB=true
-    env_file:
-      - .env.local
+      - LOCAL_MODE=true
     volumes:
       - .:/app
       - /app/node_modules
@@ -79,10 +45,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    profiles:
-      - local
 
-  # pgAdmin (optional - for database management UI)
+  # pgAdmin (Database UI)
   pgadmin:
     image: dpage/pgadmin4:latest
     ports:
@@ -95,8 +59,6 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
-    profiles:
-      - local
 
 volumes:
   postgres_data:
