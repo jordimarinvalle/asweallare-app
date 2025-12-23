@@ -261,7 +261,7 @@ export async function GET(request) {
       
       const { data: boxes, error } = await supabase
         .from('boxes')
-        .select('*, collection_series(name)')
+        .select('*, collection_series(name), prices(id, label, amount, promo_amount, promo_enabled)')
         .order('display_order', { ascending: true })
       
       if (error) {
