@@ -967,7 +967,7 @@ export async function PUT(request) {
       return handleCORS(NextResponse.json({ success: true }))
     }
 
-    // ADMIN ROUTES - Update box
+    // ADMIN ROUTES - Update box (enhanced with new fields)
     if (path.startsWith('admin/boxes/')) {
       const boxId = path.split('/')[2]
       const body = await request.json()
@@ -976,16 +976,99 @@ export async function PUT(request) {
       const updateData = {}
       if (body.name !== undefined) updateData.name = body.name
       if (body.description !== undefined) updateData.description = body.description
+      if (body.descriptionShort !== undefined) updateData.description_short = body.descriptionShort
+      if (body.tagline !== undefined) updateData.tagline = body.tagline
+      if (body.topics !== undefined) updateData.topics = body.topics
       if (body.price !== undefined) updateData.price = body.price
       if (body.color !== undefined) updateData.color = body.color
+      if (body.colorPalette !== undefined) updateData.color_palette = body.colorPalette
+      if (body.path !== undefined) updateData.path = body.path
       if (body.displayOrder !== undefined) updateData.display_order = body.displayOrder
       if (body.isDemo !== undefined) updateData.is_demo = body.isDemo
       if (body.isActive !== undefined) updateData.is_active = body.isActive
+      if (body.collectionSeriesId !== undefined) updateData.collection_series_id = body.collectionSeriesId
       
       const { error } = await supabase
         .from('boxes')
         .update(updateData)
         .eq('id', boxId)
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ success: true }))
+    }
+
+    // ADMIN ROUTES - Update collection series
+    if (path.startsWith('admin/collection-series/')) {
+      const seriesId = path.split('/')[2]
+      const body = await request.json()
+      
+      const updateData = {}
+      if (body.name !== undefined) updateData.name = body.name
+      if (body.description !== undefined) updateData.description = body.description
+      if (body.displayOrder !== undefined) updateData.display_order = body.displayOrder
+      if (body.isActive !== undefined) updateData.is_active = body.isActive
+      
+      const { error } = await supabase
+        .from('collection_series')
+        .update(updateData)
+        .eq('id', seriesId)
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ success: true }))
+    }
+
+    // ADMIN ROUTES - Update price
+    if (path.startsWith('admin/prices/')) {
+      const priceId = path.split('/')[2]
+      const body = await request.json()
+      
+      const updateData = {}
+      if (body.label !== undefined) updateData.label = body.label
+      if (body.paymentInfo !== undefined) updateData.payment_info = body.paymentInfo
+      if (body.hookInfo !== undefined) updateData.hook_info = body.hookInfo
+      if (body.amount !== undefined) updateData.amount = body.amount
+      if (body.currency !== undefined) updateData.currency = body.currency
+      if (body.isMembership !== undefined) updateData.is_membership = body.isMembership
+      if (body.membershipDays !== undefined) updateData.membership_days = body.membershipDays
+      if (body.stripePriceId !== undefined) updateData.stripe_price_id = body.stripePriceId
+      if (body.displayOrder !== undefined) updateData.display_order = body.displayOrder
+      if (body.isActive !== undefined) updateData.is_active = body.isActive
+      
+      const { error } = await supabase
+        .from('prices')
+        .update(updateData)
+        .eq('id', priceId)
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ success: true }))
+    }
+
+    // ADMIN ROUTES - Update bundle
+    if (path.startsWith('admin/bundles/')) {
+      const bundleId = path.split('/')[2]
+      const body = await request.json()
+      
+      const updateData = {}
+      if (body.name !== undefined) updateData.name = body.name
+      if (body.description !== undefined) updateData.description = body.description
+      if (body.priceId !== undefined) updateData.price_id = body.priceId
+      if (body.boxIds !== undefined) updateData.box_ids = body.boxIds
+      if (body.displayOrder !== undefined) updateData.display_order = body.displayOrder
+      if (body.isActive !== undefined) updateData.is_active = body.isActive
+      
+      const { error } = await supabase
+        .from('bundles')
+        .update(updateData)
+        .eq('id', bundleId)
       
       if (error) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
