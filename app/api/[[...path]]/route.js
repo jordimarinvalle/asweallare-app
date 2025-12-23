@@ -910,6 +910,40 @@ export async function POST(request) {
       return handleCORS(NextResponse.json({ price: data }))
     }
 
+    // ADMIN ROUTES - Create pile
+    if (path === 'admin/piles') {
+      const { user, error: authError } = await getAuthenticatedUser()
+      
+      if (authError || !user) {
+        return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
+      }
+      
+      const { id, slug, name, imagePath, collectionSeriesId, displayOrder, isActive } = body
+      
+      const pile = {
+        id: id || `pile_${uuidv4().slice(0, 8)}`,
+        slug: slug || name.toLowerCase().replace(/\s+/g, '_'),
+        name,
+        image_path: imagePath || '',
+        collection_series_id: collectionSeriesId || null,
+        display_order: displayOrder || 0,
+        is_active: isActive !== false,
+        created_at: new Date().toISOString()
+      }
+      
+      const { data, error } = await supabase
+        .from('piles')
+        .insert([pile])
+        .select()
+        .single()
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ pile: data }))
+    }
+
     // ADMIN ROUTES - Create bundle
     if (path === 'admin/bundles') {
       const { user, error: authError } = await getAuthenticatedUser()
