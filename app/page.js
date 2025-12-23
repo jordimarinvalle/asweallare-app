@@ -1086,6 +1086,7 @@ export default function App() {
   const [adminBoxes, setAdminBoxes] = useState([])
   const [adminSeries, setAdminSeries] = useState([])
   const [adminPrices, setAdminPrices] = useState([])
+  const [adminPiles, setAdminPiles] = useState([])
   const [adminBundles, setAdminBundles] = useState([])
   const [adminTab, setAdminTab] = useState('cards')
   
@@ -1093,6 +1094,7 @@ export default function App() {
   const [editingBox, setEditingBox] = useState(null)
   const [editingSeries, setEditingSeries] = useState(null)
   const [editingPrice, setEditingPrice] = useState(null)
+  const [editingPile, setEditingPile] = useState(null)
   const [editingBundle, setEditingBundle] = useState(null)
   
   const [cardForm, setCardForm] = useState({
@@ -1144,6 +1146,16 @@ export default function App() {
     isActive: true
   })
   
+  const [pileForm, setPileForm] = useState({
+    id: '',
+    slug: '',
+    name: '',
+    imagePath: '',
+    collectionSeriesId: 'unscripted_conversations',
+    displayOrder: 0,
+    isActive: true
+  })
+  
   const [bundleForm, setBundleForm] = useState({
     id: '',
     name: '',
@@ -1155,6 +1167,7 @@ export default function App() {
   })
   
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [uploadingPileImage, setUploadingPileImage] = useState(false)
   
   const supabase = createClient()
   
