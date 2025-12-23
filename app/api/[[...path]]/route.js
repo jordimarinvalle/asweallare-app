@@ -1005,12 +1005,12 @@ export async function PUT(request) {
       const cardId = path.split('/')[2]
       const body = await request.json()
       
-      // Map camelCase to snake_case for box_id
-      const updateData = { ...body }
-      if (body.boxId !== undefined) {
-        updateData.box_id = body.boxId
-        delete updateData.boxId
-      }
+      const updateData = {}
+      if (body.boxId !== undefined) updateData.box_id = body.boxId
+      if (body.pileId !== undefined) updateData.pile_id = body.pileId
+      if (body.text !== undefined) updateData.text = body.text
+      if (body.imagePath !== undefined) updateData.image_path = body.imagePath
+      if (body.isActive !== undefined) updateData.is_active = body.isActive
       
       const { error } = await supabase
         .from('cards')
