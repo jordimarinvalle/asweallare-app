@@ -2905,22 +2905,6 @@ export default function App() {
                 )}
               </div>
             )}
-                          {card.hint && <p className="text-xs text-gray-500 italic">{card.hint}</p>}
-                        </div>
-                        <div className="flex gap-1">
-                          <Button onClick={() => { 
-                            setEditingCard(card)
-                            setCardForm({ color: card.color, title: card.title, hint: card.hint || '', language: card.language, isDemo: card.isDemo, isActive: card.isActive, boxId: card.boxId || '', imagePath: card.imagePath || '' })
-                            setShowCardForm(true)
-                          }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
-                          <Button onClick={() => { if(confirm('Delete this card?')) handleDeleteCard(card.id) }} size="sm" variant="ghost" className="text-red-600"><Trash2 className="w-4 h-4" /></Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* PRICES TAB */}
             {adminTab === 'prices' && (
