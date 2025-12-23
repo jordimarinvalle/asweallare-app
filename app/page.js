@@ -1873,8 +1873,8 @@ export default function App() {
       return
     }
     
-    // Use box path or generate from name
-    const boxSlug = editingBox.path || editingBox.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+    // Use box ID as the folder name (it's the slug)
+    const boxSlug = editingBox.id
     
     setUploadingCards(true)
     setUploadResult(null)
