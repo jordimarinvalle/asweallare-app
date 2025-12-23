@@ -39,6 +39,35 @@ export async function POST(request) {
     // Create target directory
     // Path: /public/cards/{box_slug}/{pile_slug}/
     const targetDir = path.join(process.cwd(), 'public', 'cards', boxSlug, pileSlug)
+    
+    // Delete existing cards for this box+pile combination
+    const { data: existingCards, error: fetchError } = await supabase
+      .from('cards')
+      .select('id, image_path')
+      .eq('box_id', boxId)
+      .eq('pile_id', pileId)
+    
+    if (existingCards && existingCards.length > 0) {
+      // Delete from database
+      const { error: deleteError } = await supabase
+        .from('cards')
+        .delete()
+        .eq('box_id', boxId)
+        .eq('pile_id', pileId)
+      
+      if (deleteError) {
+        console.error('Error deleting existing cards:', deleteError)
+      }
+      
+      // Try to remove existing files from disk
+      try {
+        await rm(targetDir, { recursive: true, force: true })
+      } catch (err) {
+        // Directory might not exist, that's ok
+      }
+    }
+    
+    // Recreate target directory
     await mkdir(targetDir, { recursive: true })
     
     // Extract ZIP using adm-zip
@@ -124,9 +153,12 @@ export async function POST(request) {
       }
     }
     
+    const deletedCount = existingCards?.length || 0
+    
     return NextResponse.json({
       success: true,
-      message: `Processed ${imageEntries.length} images`,
+      message: `Replaced ${deletedCount} existing cards with ${createdCards.length} new cards`,
+      deleted: deletedCount,
       created: createdCards.length,
       cards: createdCards,
       errors: errors.length > 0 ? errors : undefined
