@@ -5,7 +5,32 @@ import path from 'path'
 import crypto from 'crypto'
 import AdmZip from 'adm-zip'
 
-// Admin email restriction
+// Helper to get authenticated user (supports both local and Supabase)
+async function getAuthenticatedUser() {
+  // In local mode, check the auth-token cookie
+  if (process.env.LOCAL_MODE === 'true') {
+    const { cookies } = await import('next/headers')
+    const { getUserFromToken } = await import('../../../../lib/auth-local')
+    
+    const cookieStore = cookies()
+    const token = cookieStore.get('auth-token')?.value
+    
+    if (token) {
+      const user = await getUserFromToken(token)
+      if (user) {
+        return { user, error: null }
+      }
+    }
+    return { user: null, error: 'Not authenticated' }
+  }
+  
+  // Supabase mode
+  const supabase = createSupabaseServer()
+  const { data: { user }, error } = await supabase.auth.getUser()
+  return { user, error }
+}
+
+// Admin email restriction (for Supabase mode)
 const ADMIN_EMAIL = 'mocasin@gmail.com'
 
 export async function POST(request) {
@@ -13,11 +38,21 @@ export async function POST(request) {
   
   try {
     // Check auth
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { user, error: authError } = await getAuthenticatedUser()
     
-    if (authError || !user || user.email !== ADMIN_EMAIL) {
+    // In local mode, any authenticated user is admin
+    // In Supabase mode, check admin email or is_admin flag
+    const isLocalMode = process.env.LOCAL_MODE === 'true'
+    const isAuthorized = isLocalMode 
+      ? (user !== null)
+      : (user && (user.email === ADMIN_EMAIL || user.is_admin))
+    
+    if (authError || !isAuthorized) {
+      console.log('[UPLOAD-CARDS] Auth failed:', { authError, user: user?.email, isLocalMode })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    
+    console.log('[UPLOAD-CARDS] Auth passed for:', user?.email)
     
     const formData = await request.formData()
     const zipFile = formData.get('file')
@@ -32,6 +67,8 @@ export async function POST(request) {
       }, { status: 400 })
     }
     
+    console.log('[UPLOAD-CARDS] Processing ZIP for box:', boxSlug, 'pile:', pileSlug)
+    
     // Get ZIP file buffer
     const bytes = await zipFile.arrayBuffer()
     const buffer = Buffer.from(bytes)
@@ -41,23 +78,19 @@ export async function POST(request) {
     const targetDir = path.join(process.cwd(), 'public', 'cards', boxSlug, pileSlug)
     
     // Delete existing cards for this box+pile combination
-    const { data: existingCards, error: fetchError } = await supabase
+    const { data: existingCards } = await supabase
       .from('cards')
-      .select('id, image_path')
+      .select('*')
       .eq('box_id', boxId)
       .eq('pile_id', pileId)
     
     if (existingCards && existingCards.length > 0) {
       // Delete from database
-      const { error: deleteError } = await supabase
+      await supabase
         .from('cards')
         .delete()
         .eq('box_id', boxId)
         .eq('pile_id', pileId)
-      
-      if (deleteError) {
-        console.error('Error deleting existing cards:', deleteError)
-      }
       
       // Try to remove existing files from disk
       try {
@@ -96,6 +129,8 @@ export async function POST(request) {
       return NextResponse.json({ error: 'No PNG/JPG images found in ZIP file' }, { status: 400 })
     }
     
+    console.log('[UPLOAD-CARDS] Found', imageEntries.length, 'images in ZIP')
+    
     // Process each image file
     const createdCards = []
     const errors = []
@@ -116,16 +151,16 @@ export async function POST(request) {
         const targetPath = path.join(targetDir, newFilename)
         await writeFile(targetPath, fileBuffer)
         
-        // Relative path for database (without /public prefix)
-        const relativeImagePath = `cards/${boxSlug}/${pileSlug}/${newFilename}`
+        // Relative path for database (with leading slash for web access)
+        const relativeImagePath = `/cards/${boxSlug}/${pileSlug}/${newFilename}`
         
         // Create card record in database
         // Use MD5 as the card ID
         const cardId = md5Hash
         
-        const { data: card, error: dbError } = await supabase
+        const { error: dbError } = await supabase
           .from('cards')
-          .upsert({
+          .insert({
             id: cardId,
             box_id: boxId,
             pile_id: pileId,
@@ -133,11 +168,7 @@ export async function POST(request) {
             image_path: relativeImagePath,
             is_active: true,
             created_at: new Date().toISOString()
-          }, {
-            onConflict: 'id'
           })
-          .select()
-          .single()
         
         if (dbError) {
           errors.push({ file: entry.entryName, error: dbError.message })
@@ -155,6 +186,8 @@ export async function POST(request) {
     
     const deletedCount = existingCards?.length || 0
     
+    console.log('[UPLOAD-CARDS] Created', createdCards.length, 'cards, deleted', deletedCount)
+    
     return NextResponse.json({
       success: true,
       message: `Replaced ${deletedCount} existing cards with ${createdCards.length} new cards`,
@@ -165,7 +198,7 @@ export async function POST(request) {
     })
     
   } catch (error) {
-    console.error('Upload cards error:', error)
+    console.error('[UPLOAD-CARDS] Error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
