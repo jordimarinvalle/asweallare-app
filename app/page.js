@@ -2156,154 +2156,484 @@ export default function App() {
         {view === 'admin' && isAdmin && (
           <div className="max-w-6xl mx-auto p-8">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-serif text-gray-900">Card Management</h2>
-              <Button onClick={() => {
-                setEditingCard(null)
-                setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '', imagePath: '' })
-              }} className="bg-red-600 hover:bg-red-700 text-white">
-                <Plus className="w-4 h-4 mr-2" />Add Card
-              </Button>
+              <h2 className="text-3xl font-serif text-gray-900">Admin Panel</h2>
             </div>
             
-            <Card className="p-6 mb-8">
-              <h3 className="text-xl font-serif mb-4">{editingCard ? 'Edit Card' : 'New Card'}</h3>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <Label>Color</Label>
-                  <select value={cardForm.color} onChange={(e) => setCardForm({ ...cardForm, color: e.target.value })} className="w-full mt-2 p-2 border border-gray-300 rounded-md">
-                    <option value="black">Black</option>
-                    <option value="white">White</option>
-                  </select>
-                </div>
-                <div>
-                  <Label>Box</Label>
-                  <select value={cardForm.boxId} onChange={(e) => setCardForm({ ...cardForm, boxId: e.target.value })} className="w-full mt-2 p-2 border border-gray-300 rounded-md">
-                    <option value="">No Box</option>
-                    {adminBoxes.map(box => (
-                      <option key={box.id} value={box.id}>{box.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="sm:col-span-2">
-                  <Label>Title</Label>
-                  <Input value={cardForm.title} onChange={(e) => setCardForm({ ...cardForm, title: e.target.value })} placeholder="Card title" className="mt-2" />
-                </div>
-                <div className="sm:col-span-2">
-                  <Label>Hint (Optional)</Label>
-                  <Input value={cardForm.hint} onChange={(e) => setCardForm({ ...cardForm, hint: e.target.value })} placeholder="Optional hint text" className="mt-2" />
-                </div>
-                
-                {/* Image Upload Section */}
-                <div className="sm:col-span-2">
-                  <Label>Card Image</Label>
-                  <div className="mt-2 flex items-start gap-4">
-                    {cardForm.imagePath && (
-                      <div className="w-24 h-32 border rounded overflow-hidden flex-shrink-0">
-                        <img 
-                          src={`/cards/${cardForm.imagePath}`} 
-                          alt="Card preview" 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Input 
-                          type="file" 
-                          accept="image/png,image/jpeg,image/jpg"
-                          onChange={handleImageUpload}
-                          disabled={uploadingImage || !cardForm.boxId}
-                          className="flex-1"
-                        />
-                        {uploadingImage && <span className="text-sm text-gray-500">Uploading...</span>}
-                      </div>
-                      {!cardForm.boxId && (
-                        <p className="text-xs text-amber-600 mt-1">Select a box first to enable image upload</p>
-                      )}
-                      {cardForm.imagePath && (
-                        <p className="text-xs text-gray-500 mt-1">Path: {cardForm.imagePath}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="isDemo">Demo Card</Label>
-                  <Switch id="isDemo" checked={cardForm.isDemo} onCheckedChange={(checked) => setCardForm({ ...cardForm, isDemo: checked })} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="isActive">Active</Label>
-                  <Switch id="isActive" checked={cardForm.isActive} onCheckedChange={(checked) => setCardForm({ ...cardForm, isActive: checked })} />
-                </div>
-              </div>
-              <div className="flex gap-4 mt-6">
-                <Button onClick={handleSaveCard} className="bg-red-600 hover:bg-red-700 text-white">
-                  {editingCard ? 'Update Card' : 'Create Card'}
-                </Button>
-                {editingCard && (
-                  <Button onClick={() => { setEditingCard(null); setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '', imagePath: '' }) }} variant="outline">Cancel</Button>
-                )}
-              </div>
-            </Card>
-            
-            {/* Filter by Box */}
-            <div className="mb-6 flex items-center gap-4">
-              <Label className="whitespace-nowrap">Filter by Box:</Label>
-              <select 
-                value={adminBoxFilter} 
-                onChange={(e) => setAdminBoxFilter(e.target.value)} 
-                className="p-2 border border-gray-300 rounded-md min-w-[200px]"
-              >
-                <option value="">All Boxes</option>
-                {adminBoxes.map(box => (
-                  <option key={box.id} value={box.id}>{box.name}</option>
-                ))}
-              </select>
-              <span className="text-sm text-gray-500">
-                Showing {adminBoxFilter ? adminCards.filter(c => c.boxId === adminBoxFilter).length : adminCards.length} cards
-              </span>
-            </div>
-            
-            <div className="space-y-4">
-              {adminCards
-                .filter(card => !adminBoxFilter || card.boxId === adminBoxFilter)
-                .map(card => (
-                <Card key={card.id} className="p-4">
-                  <div className="flex justify-between items-start">
-                    {/* Thumbnail */}
-                    {card.imagePath && (
-                      <div className="w-16 h-20 mr-4 flex-shrink-0 border rounded overflow-hidden bg-gray-100">
-                        <img 
-                          src={`/cards/${card.imagePath}`}
-                          alt={card.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    {!card.imagePath && (
-                      <div className="w-16 h-20 mr-4 flex-shrink-0 border rounded bg-gray-100 flex items-center justify-center">
-                        <Image className="w-6 h-6 text-gray-300" />
-                      </div>
-                    )}
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`px-2 py-1 text-xs rounded ${card.color === 'black' ? 'bg-black text-white' : 'bg-white text-black border'}`}>{card.color}</span>
-                        {card.boxName && <span className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">{card.boxName}</span>}
-                        {card.isDemo && <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">Demo</span>}
-                        {!card.isActive && <span className="px-2 py-1 text-xs rounded bg-red-100 text-red-800">Inactive</span>}
-                      </div>
-                      <div className="font-serif text-lg mb-1">{card.title}</div>
-                      {card.hint && <div className="text-sm text-gray-600 italic">{card.hint}</div>}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button onClick={() => { setEditingCard(card); setCardForm({ color: card.color, title: card.title, hint: card.hint || '', language: card.language, isDemo: card.isDemo, isActive: card.isActive, boxId: card.boxId || '', imagePath: card.imagePath || '' }) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
-                      <Button onClick={() => handleDeleteCard(card.id)} size="sm" variant="ghost" className="text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
-                    </div>
-                  </div>
-                </Card>
+            {/* Admin Tabs */}
+            <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto pb-px">
+              {['series', 'boxes', 'cards', 'prices', 'bundles'].map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setAdminTab(tab)}
+                  className={`px-4 py-2 font-medium text-sm whitespace-nowrap transition-colors border-b-2 -mb-px ${
+                    adminTab === tab 
+                      ? 'border-red-600 text-red-600' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {tab === 'series' ? 'Collection Series' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
               ))}
             </div>
+
+            {/* SERIES TAB */}
+            {adminTab === 'series' && (
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-medium">Collection Series</h3>
+                  <Button onClick={() => {
+                    setEditingSeries(null)
+                    setSeriesForm({ id: '', name: '', description: '', displayOrder: 0, isActive: true })
+                  }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />Add Series
+                  </Button>
+                </div>
+                
+                <Card className="p-6 mb-6">
+                  <h4 className="font-medium mb-4">{editingSeries ? 'Edit Series' : 'New Series'}</h4>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label>ID (slug)</Label>
+                      <Input value={seriesForm.id} onChange={(e) => setSeriesForm({ ...seriesForm, id: e.target.value.toLowerCase().replace(/\s+/g, '_') })} placeholder="e.g., unscripted_conversations" className="mt-1" disabled={!!editingSeries} />
+                    </div>
+                    <div>
+                      <Label>Name</Label>
+                      <Input value={seriesForm.name} onChange={(e) => setSeriesForm({ ...seriesForm, name: e.target.value })} placeholder="e.g., Unscripted Conversations" className="mt-1" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Description</Label>
+                      <Input value={seriesForm.description} onChange={(e) => setSeriesForm({ ...seriesForm, description: e.target.value })} placeholder="Brief description" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Display Order</Label>
+                      <Input type="number" value={seriesForm.displayOrder} onChange={(e) => setSeriesForm({ ...seriesForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Label>Active</Label>
+                      <Switch checked={seriesForm.isActive} onCheckedChange={(checked) => setSeriesForm({ ...seriesForm, isActive: checked })} />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <Button onClick={handleSaveSeries} className="bg-red-600 hover:bg-red-700 text-white">{editingSeries ? 'Update' : 'Create'}</Button>
+                    {editingSeries && <Button onClick={() => setEditingSeries(null)} variant="outline">Cancel</Button>}
+                  </div>
+                </Card>
+                
+                <div className="space-y-2">
+                  {adminSeries.map(s => (
+                    <Card key={s.id} className="p-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{s.name}</span>
+                            <span className="text-xs text-gray-400">({s.id})</span>
+                            {!s.isActive && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
+                          </div>
+                          <p className="text-sm text-gray-500">{s.description}</p>
+                        </div>
+                        <Button onClick={() => { setEditingSeries(s); setSeriesForm(s) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* BOXES TAB */}
+            {adminTab === 'boxes' && (
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-medium">Boxes (Decks)</h3>
+                  <Button onClick={() => {
+                    setEditingBox(null)
+                    setBoxForm({ name: '', description: '', descriptionShort: '', tagline: '', topics: [], price: 10, color: '#000000', colorPalette: [], path: '', displayOrder: 0, isDemo: false, isActive: true, collectionSeriesId: 'unscripted_conversations' })
+                  }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />Add Box
+                  </Button>
+                </div>
+                
+                <Card className="p-6 mb-6">
+                  <h4 className="font-medium mb-4">{editingBox ? 'Edit Box' : 'New Box'}</h4>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <Label>Name</Label>
+                      <Input value={boxForm.name} onChange={(e) => setBoxForm({ ...boxForm, name: e.target.value })} placeholder="e.g., White Box: Level 1" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Collection Series</Label>
+                      <select value={boxForm.collectionSeriesId} onChange={(e) => setBoxForm({ ...boxForm, collectionSeriesId: e.target.value })} className="w-full mt-1 p-2 border rounded-md">
+                        {adminSeries.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <Label>Path (folder name)</Label>
+                      <Input value={boxForm.path} onChange={(e) => setBoxForm({ ...boxForm, path: e.target.value })} placeholder="e.g., white-box-108" className="mt-1" />
+                    </div>
+                    <div className="sm:col-span-2 lg:col-span-3">
+                      <Label>Description</Label>
+                      <Input value={boxForm.description} onChange={(e) => setBoxForm({ ...boxForm, description: e.target.value })} placeholder="Full description" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Short Description</Label>
+                      <Input value={boxForm.descriptionShort} onChange={(e) => setBoxForm({ ...boxForm, descriptionShort: e.target.value })} placeholder="e.g., 108 cards" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Tagline</Label>
+                      <Input value={boxForm.tagline} onChange={(e) => setBoxForm({ ...boxForm, tagline: e.target.value })} placeholder="e.g., Level 1 — Life" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Topics (comma-separated)</Label>
+                      <Input value={boxForm.topics.join(', ')} onChange={(e) => setBoxForm({ ...boxForm, topics: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })} placeholder="Life, Growth, Dreams" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Price ($)</Label>
+                      <Input type="number" step="0.01" value={boxForm.price} onChange={(e) => setBoxForm({ ...boxForm, price: parseFloat(e.target.value) || 0 })} className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Color</Label>
+                      <Input type="color" value={boxForm.color} onChange={(e) => setBoxForm({ ...boxForm, color: e.target.value })} className="mt-1 h-10" />
+                    </div>
+                    <div>
+                      <Label>Display Order</Label>
+                      <Input type="number" value={boxForm.displayOrder} onChange={(e) => setBoxForm({ ...boxForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Label>Demo</Label>
+                      <Switch checked={boxForm.isDemo} onCheckedChange={(checked) => setBoxForm({ ...boxForm, isDemo: checked })} />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Label>Active</Label>
+                      <Switch checked={boxForm.isActive} onCheckedChange={(checked) => setBoxForm({ ...boxForm, isActive: checked })} />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <Button onClick={handleSaveBox} className="bg-red-600 hover:bg-red-700 text-white">{editingBox ? 'Update' : 'Create'}</Button>
+                    {editingBox && <Button onClick={() => setEditingBox(null)} variant="outline">Cancel</Button>}
+                  </div>
+                </Card>
+                
+                <div className="space-y-2">
+                  {adminBoxes.map(box => (
+                    <Card key={box.id} className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex gap-3">
+                          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: box.color || '#ccc' }}>
+                            <Package className={`w-5 h-5 ${box.color === '#000000' || box.color === '#D12128' ? 'text-white' : 'text-gray-600'}`} />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{box.name}</span>
+                              {box.isDemo && <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">Demo</span>}
+                              {!box.isActive && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
+                            </div>
+                            <p className="text-sm text-gray-500">{box.tagline || box.descriptionShort}</p>
+                            <p className="text-xs text-gray-400">Series: {box.seriesName} | Path: {box.path}</p>
+                          </div>
+                        </div>
+                        <Button onClick={() => { setEditingBox(box); setBoxForm(box) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* CARDS TAB */}
+            {adminTab === 'cards' && (
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-medium">Cards</h3>
+                  <Button onClick={() => {
+                    setEditingCard(null)
+                    setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '', imagePath: '' })
+                  }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />Add Card
+                  </Button>
+                </div>
+                
+                <Card className="p-6 mb-6">
+                  <h4 className="font-medium mb-4">{editingCard ? 'Edit Card' : 'New Card'}</h4>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Color</Label>
+                      <select value={cardForm.color} onChange={(e) => setCardForm({ ...cardForm, color: e.target.value })} className="w-full mt-1 p-2 border rounded-md">
+                        <option value="black">Black</option>
+                        <option value="white">White</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label>Box</Label>
+                      <select value={cardForm.boxId} onChange={(e) => setCardForm({ ...cardForm, boxId: e.target.value })} className="w-full mt-1 p-2 border rounded-md">
+                        <option value="">-- Select Box --</option>
+                        {adminBoxes.map(box => <option key={box.id} value={box.id}>{box.name}</option>)}
+                      </select>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Title</Label>
+                      <Input value={cardForm.title} onChange={(e) => setCardForm({ ...cardForm, title: e.target.value })} className="mt-1" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Hint (optional)</Label>
+                      <Input value={cardForm.hint} onChange={(e) => setCardForm({ ...cardForm, hint: e.target.value })} className="mt-1" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Image</Label>
+                      <div className="flex items-center gap-4 mt-1">
+                        <Input type="file" accept="image/*" disabled={!cardForm.boxId || uploadingImage} onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (!file || !cardForm.boxId) return
+                          setUploadingImage(true)
+                          const formData = new FormData()
+                          formData.append('file', file)
+                          formData.append('boxId', cardForm.boxId)
+                          const response = await fetch('/api/admin/upload', { method: 'POST', body: formData })
+                          const data = await response.json()
+                          if (data.path) setCardForm({ ...cardForm, imagePath: data.path })
+                          setUploadingImage(false)
+                        }} className="flex-1" />
+                        {uploadingImage && <span className="text-sm text-gray-500">Uploading...</span>}
+                      </div>
+                      {cardForm.imagePath && <p className="text-xs text-gray-500 mt-1">Path: {cardForm.imagePath}</p>}
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Label>Demo</Label>
+                      <Switch checked={cardForm.isDemo} onCheckedChange={(checked) => setCardForm({ ...cardForm, isDemo: checked })} />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Label>Active</Label>
+                      <Switch checked={cardForm.isActive} onCheckedChange={(checked) => setCardForm({ ...cardForm, isActive: checked })} />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <Button onClick={handleSaveCard} className="bg-red-600 hover:bg-red-700 text-white">{editingCard ? 'Update' : 'Create'}</Button>
+                    {editingCard && <Button onClick={() => setEditingCard(null)} variant="outline">Cancel</Button>}
+                  </div>
+                </Card>
+                
+                {/* Filter */}
+                <div className="mb-4 flex items-center gap-4">
+                  <Label>Filter by Box:</Label>
+                  <select value={adminBoxFilter} onChange={(e) => setAdminBoxFilter(e.target.value)} className="p-2 border rounded-md min-w-[200px]">
+                    <option value="">All Boxes</option>
+                    {adminBoxes.map(box => <option key={box.id} value={box.id}>{box.name}</option>)}
+                  </select>
+                  <span className="text-sm text-gray-500">
+                    {adminBoxFilter ? adminCards.filter(c => c.boxId === adminBoxFilter).length : adminCards.length} cards
+                  </span>
+                </div>
+                
+                <div className="space-y-2">
+                  {adminCards.filter(card => !adminBoxFilter || card.boxId === adminBoxFilter).map(card => (
+                    <Card key={card.id} className="p-4">
+                      <div className="flex justify-between items-start">
+                        {card.imagePath ? (
+                          <div className="w-14 h-18 mr-3 flex-shrink-0 border rounded overflow-hidden bg-gray-100">
+                            <img src={`/cards/${card.imagePath}`} alt="" className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-14 h-18 mr-3 flex-shrink-0 border rounded bg-gray-100 flex items-center justify-center">
+                            <Image className="w-5 h-5 text-gray-300" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`px-2 py-0.5 text-xs rounded ${card.color === 'black' ? 'bg-black text-white' : 'bg-white border text-black'}`}>{card.color}</span>
+                            {card.boxName && <span className="text-xs text-gray-400">{card.boxName}</span>}
+                            {card.isDemo && <span className="text-xs bg-blue-100 text-blue-600 px-1 rounded">Demo</span>}
+                          </div>
+                          <p className="font-medium text-sm">{card.title}</p>
+                          {card.hint && <p className="text-xs text-gray-500 italic">{card.hint}</p>}
+                        </div>
+                        <div className="flex gap-1">
+                          <Button onClick={() => { setEditingCard(card); setCardForm({ color: card.color, title: card.title, hint: card.hint || '', language: card.language, isDemo: card.isDemo, isActive: card.isActive, boxId: card.boxId || '', imagePath: card.imagePath || '' }) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                          <Button onClick={() => handleDeleteCard(card.id)} size="sm" variant="ghost" className="text-red-600"><Trash2 className="w-4 h-4" /></Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* PRICES TAB */}
+            {adminTab === 'prices' && (
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-medium">Prices (Membership Options)</h3>
+                  <Button onClick={() => {
+                    setEditingPrice(null)
+                    setPriceForm({ id: '', label: '', paymentInfo: '', hookInfo: '', amount: 0, currency: 'USD', isMembership: true, membershipDays: 30, displayOrder: 0, isActive: true })
+                  }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />Add Price
+                  </Button>
+                </div>
+                
+                <Card className="p-6 mb-6">
+                  <h4 className="font-medium mb-4">{editingPrice ? 'Edit Price' : 'New Price'}</h4>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <Label>ID (slug)</Label>
+                      <Input value={priceForm.id} onChange={(e) => setPriceForm({ ...priceForm, id: e.target.value.toLowerCase().replace(/\s+/g, '_') })} placeholder="e.g., membership_30d" className="mt-1" disabled={!!editingPrice} />
+                    </div>
+                    <div>
+                      <Label>Label</Label>
+                      <Input value={priceForm.label} onChange={(e) => setPriceForm({ ...priceForm, label: e.target.value })} placeholder="e.g., 30-Day Membership" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Amount ($)</Label>
+                      <Input type="number" step="0.01" value={priceForm.amount} onChange={(e) => setPriceForm({ ...priceForm, amount: parseFloat(e.target.value) || 0 })} className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Payment Info</Label>
+                      <Input value={priceForm.paymentInfo} onChange={(e) => setPriceForm({ ...priceForm, paymentInfo: e.target.value })} placeholder="e.g., One-time payment" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Hook Info</Label>
+                      <Input value={priceForm.hookInfo} onChange={(e) => setPriceForm({ ...priceForm, hookInfo: e.target.value })} placeholder="Marketing hook text" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Membership Days</Label>
+                      <Input type="number" value={priceForm.membershipDays} onChange={(e) => setPriceForm({ ...priceForm, membershipDays: parseInt(e.target.value) || 0 })} className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Display Order</Label>
+                      <Input type="number" value={priceForm.displayOrder} onChange={(e) => setPriceForm({ ...priceForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Label>Membership</Label>
+                      <Switch checked={priceForm.isMembership} onCheckedChange={(checked) => setPriceForm({ ...priceForm, isMembership: checked })} />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Label>Active</Label>
+                      <Switch checked={priceForm.isActive} onCheckedChange={(checked) => setPriceForm({ ...priceForm, isActive: checked })} />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <Button onClick={handleSavePrice} className="bg-red-600 hover:bg-red-700 text-white">{editingPrice ? 'Update' : 'Create'}</Button>
+                    {editingPrice && <Button onClick={() => setEditingPrice(null)} variant="outline">Cancel</Button>}
+                  </div>
+                </Card>
+                
+                <div className="space-y-2">
+                  {adminPrices.map(price => (
+                    <Card key={price.id} className="p-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{price.label}</span>
+                            <span className="text-sm font-bold text-green-600">${price.amount}</span>
+                            {price.isMembership && <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded">{price.membershipDays} days</span>}
+                            {!price.isActive && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
+                          </div>
+                          <p className="text-sm text-gray-500">{price.hookInfo}</p>
+                        </div>
+                        <Button onClick={() => { setEditingPrice(price); setPriceForm(price) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* BUNDLES TAB */}
+            {adminTab === 'bundles' && (
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-medium">Bundles</h3>
+                  <Button onClick={() => {
+                    setEditingBundle(null)
+                    setBundleForm({ id: '', name: '', description: '', priceId: '', boxIds: [], displayOrder: 0, isActive: true })
+                  }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />Add Bundle
+                  </Button>
+                </div>
+                
+                <Card className="p-6 mb-6">
+                  <h4 className="font-medium mb-4">{editingBundle ? 'Edit Bundle' : 'New Bundle'}</h4>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label>ID (slug)</Label>
+                      <Input value={bundleForm.id} onChange={(e) => setBundleForm({ ...bundleForm, id: e.target.value.toLowerCase().replace(/\s+/g, '_') })} placeholder="e.g., all_access" className="mt-1" disabled={!!editingBundle} />
+                    </div>
+                    <div>
+                      <Label>Name</Label>
+                      <Input value={bundleForm.name} onChange={(e) => setBundleForm({ ...bundleForm, name: e.target.value })} placeholder="e.g., All Access Bundle" className="mt-1" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Description</Label>
+                      <Input value={bundleForm.description} onChange={(e) => setBundleForm({ ...bundleForm, description: e.target.value })} placeholder="Bundle description" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label>Price</Label>
+                      <select value={bundleForm.priceId} onChange={(e) => setBundleForm({ ...bundleForm, priceId: e.target.value })} className="w-full mt-1 p-2 border rounded-md">
+                        <option value="">-- Select Price --</option>
+                        {adminPrices.map(p => <option key={p.id} value={p.id}>{p.label} (${p.amount})</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <Label>Display Order</Label>
+                      <Input type="number" value={bundleForm.displayOrder} onChange={(e) => setBundleForm({ ...bundleForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Included Boxes</Label>
+                      <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {adminBoxes.map(box => (
+                          <label key={box.id} className="flex items-center gap-2 p-2 border rounded-md cursor-pointer hover:bg-gray-50">
+                            <input
+                              type="checkbox"
+                              checked={bundleForm.boxIds.includes(box.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setBundleForm({ ...bundleForm, boxIds: [...bundleForm.boxIds, box.id] })
+                                } else {
+                                  setBundleForm({ ...bundleForm, boxIds: bundleForm.boxIds.filter(id => id !== box.id) })
+                                }
+                              }}
+                              className="rounded"
+                            />
+                            <span className="text-sm">{box.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Label>Active</Label>
+                      <Switch checked={bundleForm.isActive} onCheckedChange={(checked) => setBundleForm({ ...bundleForm, isActive: checked })} />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <Button onClick={handleSaveBundle} className="bg-red-600 hover:bg-red-700 text-white">{editingBundle ? 'Update' : 'Create'}</Button>
+                    {editingBundle && <Button onClick={() => setEditingBundle(null)} variant="outline">Cancel</Button>}
+                  </div>
+                </Card>
+                
+                <div className="space-y-2">
+                  {adminBundles.map(bundle => (
+                    <Card key={bundle.id} className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{bundle.name}</span>
+                            {bundle.priceLabel && <span className="text-sm text-green-600">${bundle.priceAmount} ({bundle.priceLabel})</span>}
+                            {!bundle.isActive && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
+                          </div>
+                          <p className="text-sm text-gray-500">{bundle.description}</p>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {bundle.boxIds.map(boxId => {
+                              const box = adminBoxes.find(b => b.id === boxId)
+                              return box ? (
+                                <span key={boxId} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{box.name}</span>
+                              ) : null
+                            })}
+                          </div>
+                        </div>
+                        <Button onClick={() => { setEditingBundle(bundle); setBundleForm(bundle) }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
         
