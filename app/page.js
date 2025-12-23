@@ -1817,6 +1817,7 @@ export default function App() {
       : []
     
     const payload = {
+      id: boxForm.id || undefined,  // Include id for new boxes (slug)
       name: boxForm.name,
       description: boxForm.description,
       descriptionShort: boxForm.descriptionShort,
@@ -1825,7 +1826,6 @@ export default function App() {
       priceId: boxForm.priceId || null,
       color: boxForm.color,
       colorPalette: colorPalette,
-      path: boxForm.path,
       displayOrder: boxForm.displayOrder,
       isDemo: boxForm.isDemo,
       isActive: boxForm.isActive,
@@ -1840,10 +1840,12 @@ export default function App() {
       })
       toast({ title: 'Box updated successfully!' })
     } else {
+      // For new box, use the form's id as the slug
+      const newBoxPayload = { ...payload }
       await fetch('/api/admin/boxes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(newBoxPayload)
       })
       toast({ title: 'Box created successfully!' })
     }
