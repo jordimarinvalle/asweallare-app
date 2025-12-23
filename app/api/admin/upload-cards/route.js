@@ -1,12 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServer } from '../../../../lib/supabase-server'
-import { writeFile, mkdir, readdir, unlink, rm } from 'fs/promises'
+import { writeFile, mkdir, rm } from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
-import { exec } from 'child_process'
-import { promisify } from 'util'
-
-const execAsync = promisify(exec)
+import AdmZip from 'adm-zip'
 
 // Admin email restriction
 const ADMIN_EMAIL = 'mocasin@gmail.com'
@@ -39,51 +36,34 @@ export async function POST(request) {
     const bytes = await zipFile.arrayBuffer()
     const buffer = Buffer.from(bytes)
     
-    // Create temp directory for extraction
-    const tempDir = path.join(process.cwd(), 'temp', `upload_${Date.now()}`)
-    await mkdir(tempDir, { recursive: true })
-    
-    // Save ZIP file temporarily
-    const zipPath = path.join(tempDir, 'upload.zip')
-    await writeFile(zipPath, buffer)
-    
-    // Extract ZIP file
-    try {
-      await execAsync(`unzip -o "${zipPath}" -d "${tempDir}"`)
-    } catch (err) {
-      await rm(tempDir, { recursive: true, force: true })
-      return NextResponse.json({ error: 'Failed to extract ZIP file' }, { status: 400 })
-    }
-    
     // Create target directory
     // Path: /public/cards/{box_slug}/{pile_slug}/
     const targetDir = path.join(process.cwd(), 'public', 'cards', boxSlug, pileSlug)
     await mkdir(targetDir, { recursive: true })
     
-    // Find all PNG files in extracted content (including subdirectories)
-    const findPngFiles = async (dir) => {
-      const files = []
-      const entries = await readdir(dir, { withFileTypes: true })
-      
-      for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name)
-        if (entry.isDirectory()) {
-          // Skip __MACOSX folder
-          if (entry.name !== '__MACOSX') {
-            const subFiles = await findPngFiles(fullPath)
-            files.push(...subFiles)
-          }
-        } else if (entry.isFile() && /\.(png|jpg|jpeg)$/i.test(entry.name)) {
-          files.push(fullPath)
-        }
-      }
-      return files
+    // Extract ZIP using adm-zip
+    let zip
+    try {
+      zip = new AdmZip(buffer)
+    } catch (err) {
+      return NextResponse.json({ error: 'Invalid ZIP file format' }, { status: 400 })
     }
     
-    const imageFiles = await findPngFiles(tempDir)
+    const zipEntries = zip.getEntries()
     
-    if (imageFiles.length === 0) {
-      await rm(tempDir, { recursive: true, force: true })
+    // Filter for image files only
+    const imageEntries = zipEntries.filter(entry => {
+      const name = entry.entryName.toLowerCase()
+      // Skip directories, __MACOSX files, and hidden files
+      if (entry.isDirectory) return false
+      if (name.includes('__macosx')) return false
+      if (name.startsWith('.')) return false
+      if (path.basename(name).startsWith('.')) return false
+      // Only allow image files
+      return /\.(png|jpg|jpeg)$/i.test(name)
+    })
+    
+    if (imageEntries.length === 0) {
       return NextResponse.json({ error: 'No PNG/JPG images found in ZIP file' }, { status: 400 })
     }
     
@@ -91,18 +71,19 @@ export async function POST(request) {
     const createdCards = []
     const errors = []
     
-    for (const imagePath of imageFiles) {
+    for (const entry of imageEntries) {
       try {
-        // Read file content
-        const { readFile } = await import('fs/promises')
-        const fileBuffer = await readFile(imagePath)
+        // Get file buffer
+        const fileBuffer = entry.getData()
         
         // Generate MD5 hash as filename
         const md5Hash = crypto.createHash('md5').update(fileBuffer).digest('hex')
-        const extension = path.extname(imagePath).toLowerCase() || '.png'
-        const newFilename = `${md5Hash}${extension}`
         
-        // Copy file to target directory
+        // Keep original extension
+        const originalExt = path.extname(entry.entryName).toLowerCase() || '.png'
+        const newFilename = `${md5Hash}${originalExt}`
+        
+        // Write file to target directory
         const targetPath = path.join(targetDir, newFilename)
         await writeFile(targetPath, fileBuffer)
         
@@ -130,25 +111,22 @@ export async function POST(request) {
           .single()
         
         if (dbError) {
-          errors.push({ file: path.basename(imagePath), error: dbError.message })
+          errors.push({ file: entry.entryName, error: dbError.message })
         } else {
           createdCards.push({
             id: cardId,
-            originalFile: path.basename(imagePath),
+            originalFile: path.basename(entry.entryName),
             imagePath: relativeImagePath
           })
         }
       } catch (err) {
-        errors.push({ file: path.basename(imagePath), error: err.message })
+        errors.push({ file: entry.entryName, error: err.message })
       }
     }
     
-    // Cleanup temp directory
-    await rm(tempDir, { recursive: true, force: true })
-    
     return NextResponse.json({
       success: true,
-      message: `Processed ${imageFiles.length} images`,
+      message: `Processed ${imageEntries.length} images`,
       created: createdCards.length,
       cards: createdCards,
       errors: errors.length > 0 ? errors : undefined
@@ -164,7 +142,7 @@ export async function GET() {
   return NextResponse.json({ 
     message: 'POST a ZIP file to bulk upload cards',
     fields: {
-      file: 'ZIP file containing PNG images (required)',
+      file: 'ZIP file containing PNG/JPG images (required)',
       boxId: 'Box ID (required)',
       boxSlug: 'Box slug/path for file storage (required)',
       pileId: 'Pile ID - black or white (required)',
