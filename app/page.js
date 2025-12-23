@@ -1049,9 +1049,9 @@ export default function App() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [purchaseToCancel, setPurchaseToCancel] = useState(null)
   
-  // Admin email restriction
+  // Admin email restriction - also check is_admin flag from local auth
   const ADMIN_EMAIL = 'mocasin@gmail.com'
-  const isAdmin = user?.email === ADMIN_EMAIL
+  const isAdmin = user?.email === ADMIN_EMAIL || user?.is_admin === true
   
   // Admin filter state
   const [adminSeriesFilter, setAdminSeriesFilter] = useState('')
