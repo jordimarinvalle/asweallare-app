@@ -1553,11 +1553,16 @@ export default function App() {
   
   const handleSignOut = async () => {
     try {
-      // Sign out on server first (this clears server-side cookies)
-      await fetch('/api/auth/signout', { method: 'POST' })
+      // Try local signout first
+      await fetch('/api/auth/local/signout', { method: 'POST' })
       
-      // Also sign out on client to clear local session and any localStorage
-      await supabase.auth.signOut({ scope: 'global' })
+      // Also try Supabase signout
+      try {
+        await fetch('/api/auth/signout', { method: 'POST' })
+        await supabase.auth.signOut({ scope: 'global' })
+      } catch (e) {
+        // Supabase not configured
+      }
       
       // Clear any remaining localStorage items from Supabase
       if (typeof window !== 'undefined') {
