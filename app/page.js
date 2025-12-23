@@ -1174,6 +1174,11 @@ export default function App() {
     isActive: true
   })
   
+  // Bulk card upload state
+  const [bulkUploadPileId, setBulkUploadPileId] = useState('')
+  const [uploadingCards, setUploadingCards] = useState(false)
+  const [uploadResult, setUploadResult] = useState(null)
+  
   const [uploadingImage, setUploadingImage] = useState(false)
   const [uploadingPileImage, setUploadingPileImage] = useState(false)
   
