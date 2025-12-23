@@ -2446,7 +2446,7 @@ export default function App() {
                       </div>
                       <div>
                         <Label>Topics (comma-separated)</Label>
-                        <Input value={(boxForm.topics || []).join(', ')} onChange={(e) => setBoxForm({ ...boxForm, topics: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })} placeholder="Life, Growth, Dreams" className="mt-1" />
+                        <Input value={boxForm.topicsText} onChange={(e) => setBoxForm({ ...boxForm, topicsText: e.target.value })} placeholder="Life, Growth, Dreams" className="mt-1" />
                       </div>
                       <div>
                         <Label>Primary Color</Label>
@@ -2457,7 +2457,7 @@ export default function App() {
                       </div>
                       <div>
                         <Label>Color Palette (comma-separated hex)</Label>
-                        <Input value={(boxForm.colorPalette || []).join(', ')} onChange={(e) => setBoxForm({ ...boxForm, colorPalette: e.target.value.split(',').map(c => c.trim()).filter(Boolean) })} placeholder="#FF0000, #00FF00, #0000FF" className="mt-1" />
+                        <Input value={boxForm.colorPaletteText} onChange={(e) => setBoxForm({ ...boxForm, colorPaletteText: e.target.value })} placeholder="#FF0000, #00FF00, #0000FF" className="mt-1" />
                       </div>
                       <div>
                         <Label>Display Order</Label>
