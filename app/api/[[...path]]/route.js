@@ -764,18 +764,20 @@ export async function POST(request) {
         return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
       }
       
-      const { color, title, hint, language, isDemo, isActive, boxId } = body
+      const { boxId, pileId, text, imagePath, isActive } = body
+      
+      // Generate MD5 hash ID
+      const crypto = await import('crypto')
+      const cardId = crypto.createHash('md5').update(`${Date.now()}-${Math.random()}`).digest('hex')
       
       const card = {
-        id: uuidv4(),
-        color,
-        title,
-        hint: hint || '',
-        language: language || 'en',
-        isdemo: isDemo || false,
-        isactive: isActive !== false,
-        box_id: boxId || null,
-        createdat: new Date().toISOString()
+        id: cardId,
+        box_id: boxId,
+        pile_id: pileId,
+        text: text || null,
+        image_path: imagePath || '',
+        is_active: isActive !== false,
+        created_at: new Date().toISOString()
       }
       
       const { data, error } = await supabase
