@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # Production app
   app:
     build:
       context: .
@@ -26,7 +27,7 @@ services:
       retries: 3
       start_period: 40s
 
-  # Development mode with hot reload
+  # Development mode with hot reload (uses Supabase)
   app-dev:
     build:
       context: .
@@ -44,3 +45,72 @@ services:
       - /app/.next
     profiles:
       - dev
+
+  # ============================================================================
+  # LOCAL POSTGRESQL DEVELOPMENT
+  # Use this for local development without Supabase
+  # Run: docker-compose --profile local up
+  # ============================================================================
+  
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: asweallare
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/fixtures.sql:/docker-entrypoint-initdb.d/02-fixtures.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - local
+
+  # App with local PostgreSQL
+  app-local:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_BASE_URL=http://localhost:3000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/asweallare
+      - USE_LOCAL_DB=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - local
+
+  # pgAdmin (optional - for database management UI)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    profiles:
+      - local
+
+volumes:
+  postgres_data:
+  pgadmin_data:
