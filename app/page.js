@@ -2226,7 +2226,7 @@ export default function App() {
             
             {/* Admin Tabs */}
             <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto pb-px">
-              {['series', 'boxes', 'cards', 'prices', 'bundles'].map(tab => (
+              {['series', 'boxes', 'piles', 'cards', 'prices', 'bundles'].map(tab => (
                 <button
                   key={tab}
                   onClick={() => setAdminTab(tab)}
