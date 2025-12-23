@@ -174,23 +174,26 @@ Change it to your email.
 ## Common Commands
 
 ```bash
-# Start with Supabase
-docker-compose up app
-
-# Start with local PostgreSQL
+# Start with local PostgreSQL (development)
 docker-compose --profile local up
 
-# Start in background
+# Start with Supabase (production)
+docker-compose --profile prod up
+
+# Start in background (detached)
 docker-compose --profile local up -d
 
 # Stop everything
-docker-compose down
+docker-compose --profile local down
 
-# Stop and remove volumes (reset database)
+# Stop and remove volumes (RESET DATABASE)
 docker-compose --profile local down -v
 
 # View logs
-docker-compose logs -f app-local
+docker-compose --profile local logs -f
+
+# View only app logs
+docker-compose --profile local logs -f app-local
 
 # Rebuild after code changes
 docker-compose --profile local up --build
