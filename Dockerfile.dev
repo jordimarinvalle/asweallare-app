@@ -6,11 +6,17 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install
 
-# Copy source
+# Copy source (excluding .next to ensure fresh dev build)
 COPY . .
+
+# Remove any pre-built .next folder to ensure dev mode
+RUN rm -rf .next
 
 # Expose port
 EXPOSE 3000
 
-# Start in development mode
-CMD ["yarn", "dev"]
+# Set environment explicitly
+ENV NODE_ENV=development
+
+# Start in development mode with explicit host binding
+CMD ["yarn", "dev", "-H", "0.0.0.0"]
