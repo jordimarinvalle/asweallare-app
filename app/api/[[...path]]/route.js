@@ -857,8 +857,8 @@ export async function POST(request) {
       }
       
       const { 
-        id, label, paymentInfo, hookInfo, amount, currency,
-        isMembership, membershipDays, stripePriceId, displayOrder, isActive 
+        id, label, paymentInfo, hookInfo, amount, promoAmount, promoEnabled, currency,
+        membershipDays, stripePriceId, displayOrder, isActive 
       } = body
       
       const price = {
@@ -867,8 +867,9 @@ export async function POST(request) {
         payment_info: paymentInfo || '',
         hook_info: hookInfo || '',
         amount: amount || 0,
+        promo_amount: promoAmount || null,
+        promo_enabled: promoEnabled || false,
         currency: currency || 'USD',
-        is_membership: isMembership !== false,
         membership_days: membershipDays || null,
         stripe_price_id: stripePriceId || null,
         display_order: displayOrder || 0,
