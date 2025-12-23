@@ -2533,8 +2533,8 @@ export default function App() {
                           <option value="">-- No Price (Free/Demo) --</option>
                           {adminPrices.map(p => (
                             <option key={p.id} value={p.id}>
-                              {p.label} - ${p.promoEnabled && p.promoAmount ? p.promoAmount : p.amount}
-                              {p.promoEnabled && p.promoAmount && ` (was $${p.amount})`}
+                              {p.label} - ${p.promo_enabled && p.promo_amount ? p.promo_amount : p.amount}
+                              {p.promo_enabled && p.promo_amount && ` (was $${p.amount})`}
                             </option>
                           ))}
                         </select>
