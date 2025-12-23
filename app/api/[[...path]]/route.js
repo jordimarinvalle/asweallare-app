@@ -289,9 +289,10 @@ export async function GET(request) {
         return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
       }
       
+      // Simple query without joins for local mode compatibility
       const { data: cards, error } = await supabase
         .from('cards')
-        .select('*, boxes(name, color, collection_series_id, collection_series(name)), piles(name, slug)')
+        .select('*')
         .order('created_at', { ascending: false })
       
       if (error) {
@@ -309,9 +310,10 @@ export async function GET(request) {
         return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
       }
       
+      // Simple query without joins for local mode compatibility
       const { data: boxes, error } = await supabase
         .from('boxes')
-        .select('*, collection_series(name), prices(id, label, amount, promo_amount, promo_enabled)')
+        .select('*')
         .order('display_order', { ascending: true })
       
       if (error) {
