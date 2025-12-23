@@ -1136,8 +1136,9 @@ export default function App() {
     paymentInfo: '',
     hookInfo: '',
     amount: 0,
+    promoAmount: null,
+    promoEnabled: false,
     currency: 'USD',
-    isMembership: true,
     membershipDays: 30,
     displayOrder: 0,
     isActive: true
