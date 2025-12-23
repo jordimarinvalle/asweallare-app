@@ -2602,15 +2602,25 @@ export default function App() {
                                 const file = e.target.files?.[0]
                                 if (!file) return
                                 
+                                if (!pileForm.slug) {
+                                  toast({ title: 'Please enter a slug first', variant: 'destructive' })
+                                  return
+                                }
+                                
                                 setUploadingPileImage(true)
                                 // Generate folder based on series
                                 const folder = pileForm.collectionSeriesId 
                                   ? `collections/${pileForm.collectionSeriesId}/piles`
                                   : 'collections/piles'
                                 
+                                // Use slug as filename
+                                const extension = file.name.split('.').pop() || 'png'
+                                const filename = `${pileForm.slug}.${extension}`
+                                
                                 const formData = new FormData()
                                 formData.append('file', file)
                                 formData.append('folder', folder)
+                                formData.append('filename', filename)
                                 
                                 try {
                                   const response = await fetch('/api/admin/upload', { method: 'POST', body: formData })
@@ -2618,6 +2628,8 @@ export default function App() {
                                   if (data.path) {
                                     setPileForm({ ...pileForm, imagePath: data.path })
                                     toast({ title: 'Image uploaded!' })
+                                  } else if (data.error) {
+                                    toast({ title: data.error, variant: 'destructive' })
                                   }
                                 } catch (err) {
                                   toast({ title: 'Upload failed', variant: 'destructive' })
