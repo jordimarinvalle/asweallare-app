@@ -2846,108 +2846,65 @@ export default function App() {
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-medium">Cards</h3>
-                  <Button onClick={() => {
-                    setEditingCard(null)
-                    setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '', imagePath: '' })
-                    setShowCardForm(true)
-                  }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
-                    <Plus className="w-4 h-4 mr-2" />Add Card
-                  </Button>
+                  <p className="text-sm text-gray-500">Cards are created via bulk ZIP upload in the Boxes tab</p>
                 </div>
                 
-                {showCardForm && (
-                <Card className="p-6 mb-6">
-                  <h4 className="font-medium mb-4">{editingCard ? 'Edit Card' : 'New Card'}</h4>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Color</Label>
-                      <select value={cardForm.color} onChange={(e) => setCardForm({ ...cardForm, color: e.target.value })} className="w-full mt-1 p-2 border rounded-md">
-                        <option value="black">Black</option>
-                        <option value="white">White</option>
-                      </select>
-                    </div>
-                    <div>
-                      <Label>Box</Label>
-                      <select value={cardForm.boxId} onChange={(e) => setCardForm({ ...cardForm, boxId: e.target.value })} className="w-full mt-1 p-2 border rounded-md">
-                        <option value="">-- Select Box --</option>
-                        {adminBoxes.map(box => <option key={box.id} value={box.id}>{box.name}</option>)}
-                      </select>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label>Title</Label>
-                      <Input value={cardForm.title} onChange={(e) => setCardForm({ ...cardForm, title: e.target.value })} className="mt-1" />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label>Hint (optional)</Label>
-                      <Input value={cardForm.hint} onChange={(e) => setCardForm({ ...cardForm, hint: e.target.value })} className="mt-1" />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <Label>Image</Label>
-                      <div className="flex items-center gap-4 mt-1">
-                        <Input type="file" accept="image/*" disabled={!cardForm.boxId || uploadingImage} onChange={async (e) => {
-                          const file = e.target.files?.[0]
-                          if (!file || !cardForm.boxId) return
-                          setUploadingImage(true)
-                          const formData = new FormData()
-                          formData.append('file', file)
-                          formData.append('boxId', cardForm.boxId)
-                          const response = await fetch('/api/admin/upload', { method: 'POST', body: formData })
-                          const data = await response.json()
-                          if (data.path) setCardForm({ ...cardForm, imagePath: data.path })
-                          setUploadingImage(false)
-                        }} className="flex-1" />
-                        {uploadingImage && <span className="text-sm text-gray-500">Uploading...</span>}
-                      </div>
-                      {cardForm.imagePath && <p className="text-xs text-gray-500 mt-1">Path: {cardForm.imagePath}</p>}
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Label>Demo</Label>
-                      <Switch checked={cardForm.isDemo} onCheckedChange={(checked) => setCardForm({ ...cardForm, isDemo: checked })} />
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Label>Active</Label>
-                      <Switch checked={cardForm.isActive} onCheckedChange={(checked) => setCardForm({ ...cardForm, isActive: checked })} />
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <Button onClick={handleSaveCard} className="bg-red-600 hover:bg-red-700 text-white">{editingCard ? 'Update' : 'Create'}</Button>
-                    <Button onClick={() => { setShowCardForm(false); setEditingCard(null) }} variant="outline">Cancel</Button>
-                  </div>
-                </Card>
-                )}
-                
                 {/* Filter */}
-                <div className="mb-4 flex items-center gap-4">
-                  <Label>Filter by Box:</Label>
-                  <select value={adminBoxFilter} onChange={(e) => setAdminBoxFilter(e.target.value)} className="p-2 border rounded-md min-w-[200px]">
-                    <option value="">All Boxes</option>
-                    {adminBoxes.map(box => <option key={box.id} value={box.id}>{box.name}</option>)}
-                  </select>
+                <div className="mb-4 flex flex-wrap items-center gap-4">
+                  <div>
+                    <Label>Filter by Box:</Label>
+                    <select value={adminBoxFilter} onChange={(e) => setAdminBoxFilter(e.target.value)} className="ml-2 p-2 border rounded-md min-w-[200px]">
+                      <option value="">All Boxes</option>
+                      {adminBoxes.map(box => <option key={box.id} value={box.id}>{box.name}</option>)}
+                    </select>
+                  </div>
                   <span className="text-sm text-gray-500">
                     {adminBoxFilter ? adminCards.filter(c => c.boxId === adminBoxFilter).length : adminCards.length} cards
                   </span>
                 </div>
                 
-                <div className="space-y-2">
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {adminCards.filter(card => !adminBoxFilter || card.boxId === adminBoxFilter).map(card => (
-                    <Card key={card.id} className="p-4">
-                      <div className="flex justify-between items-start">
+                    <Card key={card.id} className="p-3 overflow-hidden">
+                      <div className="aspect-[3/4] mb-2 rounded overflow-hidden bg-gray-100 relative">
                         {card.imagePath ? (
-                          <div className="w-14 h-18 mr-3 flex-shrink-0 border rounded overflow-hidden bg-gray-100">
-                            <img src={`/cards/${card.imagePath}`} alt="" className="w-full h-full object-cover" />
-                          </div>
+                          <img src={`/${card.imagePath}`} alt="" className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-14 h-18 mr-3 flex-shrink-0 border rounded bg-gray-100 flex items-center justify-center">
-                            <Image className="w-5 h-5 text-gray-300" />
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Image className="w-8 h-8 text-gray-300" />
                           </div>
                         )}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`px-2 py-0.5 text-xs rounded ${card.color === 'black' ? 'bg-black text-white' : 'bg-white border text-black'}`}>{card.color}</span>
-                            {card.boxName && <span className="text-xs text-gray-400">{card.boxName}</span>}
-                            {card.isDemo && <span className="text-xs bg-blue-100 text-blue-600 px-1 rounded">Demo</span>}
-                          </div>
-                          <p className="font-medium text-sm">{card.title}</p>
+                        {!card.isActive && (
+                          <div className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded">Inactive</div>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <span className={`px-1.5 py-0.5 text-xs rounded ${card.pileName?.toLowerCase() === 'black' ? 'bg-black text-white' : 'bg-white border text-black'}`}>
+                            {card.pileName || 'N/A'}
+                          </span>
+                          <span className="text-xs text-gray-400 truncate">{card.boxName || 'N/A'}</span>
+                        </div>
+                        {card.text && <p className="text-xs text-gray-600 truncate">{card.text}</p>}
+                        <p className="text-[10px] text-gray-400 truncate">ID: {card.id.slice(0, 8)}...</p>
+                        <div className="flex gap-1 mt-1">
+                          <Button onClick={() => { if(confirm('Delete this card?')) handleDeleteCard(card.id) }} size="sm" variant="ghost" className="text-red-600 h-7 px-2">
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+                
+                {adminCards.length === 0 && (
+                  <div className="text-center py-12 text-gray-500">
+                    <p>No cards yet. Upload cards via the Boxes tab.</p>
+                    <p className="text-sm mt-1">Edit a box → Select pile → Upload ZIP file</p>
+                  </div>
+                )}
+              </div>
+            )}
                           {card.hint && <p className="text-xs text-gray-500 italic">{card.hint}</p>}
                         </div>
                         <div className="flex gap-1">
