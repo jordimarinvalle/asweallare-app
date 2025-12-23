@@ -1873,8 +1873,40 @@ export default function App() {
     }
     
     setEditingPrice(null)
-    setPriceForm({ id: '', label: '', paymentInfo: '', hookInfo: '', amount: 0, currency: 'USD', isMembership: true, membershipDays: 30, displayOrder: 0, isActive: true })
+    setPriceForm({ id: '', label: '', paymentInfo: '', hookInfo: '', amount: 0, promoAmount: null, promoEnabled: false, currency: 'USD', membershipDays: 30, displayOrder: 0, isActive: true })
     loadAdminPrices()
+  }
+  
+  const handleSavePile = async () => {
+    const payload = {
+      id: pileForm.id || undefined,
+      slug: pileForm.slug || pileForm.name.toLowerCase().replace(/\s+/g, '_'),
+      name: pileForm.name,
+      imagePath: pileForm.imagePath,
+      collectionSeriesId: pileForm.collectionSeriesId || null,
+      displayOrder: pileForm.displayOrder,
+      isActive: pileForm.isActive
+    }
+    
+    if (editingPile) {
+      await fetch(`/api/admin/piles/${editingPile.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      toast({ title: 'Pile updated successfully!' })
+    } else {
+      await fetch('/api/admin/piles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      toast({ title: 'Pile created successfully!' })
+    }
+    
+    setEditingPile(null)
+    setPileForm({ id: '', slug: '', name: '', imagePath: '', collectionSeriesId: 'unscripted_conversations', displayOrder: 0, isActive: true })
+    loadAdminPiles()
   }
   
   const handleSaveBundle = async () => {
