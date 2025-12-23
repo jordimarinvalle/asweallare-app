@@ -2525,9 +2525,76 @@ export default function App() {
                         <Switch checked={boxForm.isActive} onCheckedChange={(checked) => setBoxForm({ ...boxForm, isActive: checked })} />
                       </div>
                     </div>
+                    
+                    {/* Bulk Card Upload - Only when editing */}
+                    {editingBox && (
+                      <div className="mt-6 pt-6 border-t">
+                        <h5 className="font-medium mb-4 flex items-center gap-2">
+                          <Upload className="w-4 h-4" />
+                          Bulk Upload Cards (ZIP)
+                        </h5>
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Pile (Black/White)</Label>
+                            <select 
+                              value={bulkUploadPileId} 
+                              onChange={(e) => setBulkUploadPileId(e.target.value)} 
+                              className="w-full mt-1 p-2 border rounded-md"
+                            >
+                              <option value="">-- Select Pile --</option>
+                              {adminPiles.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <Label>ZIP File (PNG images)</Label>
+                            <div className="mt-1 relative">
+                              <input
+                                type="file"
+                                accept=".zip"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0]
+                                  if (file) handleBulkUploadCards(file)
+                                }}
+                                disabled={uploadingCards || !bulkUploadPileId}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                              />
+                              <Button 
+                                variant="outline" 
+                                disabled={uploadingCards || !bulkUploadPileId}
+                                className="w-full"
+                              >
+                                <Upload className="w-4 h-4 mr-2" />
+                                {uploadingCards ? 'Uploading...' : 'Select ZIP File'}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                        {uploadResult && (
+                          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                            <p className="text-green-800 font-medium">✓ {uploadResult.created} cards created</p>
+                            <p className="text-sm text-green-600">{uploadResult.message}</p>
+                            {uploadResult.errors && uploadResult.errors.length > 0 && (
+                              <div className="mt-2 text-sm text-red-600">
+                                <p>Errors:</p>
+                                {uploadResult.errors.map((err, i) => (
+                                  <p key={i}>- {err.file}: {err.error}</p>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <p className="text-xs text-gray-500 mt-2">
+                          Upload a ZIP file containing PNG images. Files will be stored at: 
+                          <code className="bg-gray-100 px-1 rounded">
+                            /cards/{editingBox.path || 'box-slug'}/{'{'}{'{pile_slug}'}{'}/'}{'{MD5}.png'}
+                          </code>
+                        </p>
+                      </div>
+                    )}
+                    
                     <div className="flex gap-2 mt-4">
                       <Button onClick={handleSaveBox} className="bg-red-600 hover:bg-red-700 text-white">{editingBox ? 'Update' : 'Create'}</Button>
-                      <Button onClick={() => { setShowBoxForm(false); setEditingBox(null) }} variant="outline">Cancel</Button>
+                      <Button onClick={() => { setShowBoxForm(false); setEditingBox(null); setUploadResult(null); setBulkUploadPileId('') }} variant="outline">Cancel</Button>
                     </div>
                   </Card>
                 )}
