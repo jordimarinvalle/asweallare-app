@@ -1204,31 +1204,61 @@ export default function App() {
     }
   }, [])
   
-  // Auth check
+  // Auth check - supports both local and Supabase auth
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {
-        const response = await fetch('/api/auth/user')
-        const data = await response.json()
-        setUser(data.user)
+      // First try local auth
+      try {
+        const localResponse = await fetch('/api/auth/local/user')
+        const localData = await localResponse.json()
+        if (localData.user) {
+          setUser(localData.user)
+          setLoading(false)
+          return
+        }
+      } catch (e) {
+        // Local auth not available, try Supabase
+      }
+      
+      // Fall back to Supabase auth
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
+          const response = await fetch('/api/auth/user')
+          const data = await response.json()
+          setUser(data.user)
+        }
+      } catch (e) {
+        // Supabase not configured
       }
       setLoading(false)
     }
     
     checkAuth()
     
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const response = await fetch('/api/auth/user')
-        const data = await response.json()
-        setUser(data.user)
-      } else {
-        setUser(null)
-      }
-    })
+    // Only set up Supabase listener if available
+    let subscription = null
+    try {
+      const result = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (session?.user) {
+          const response = await fetch('/api/auth/user')
+          const data = await response.json()
+          setUser(data.user)
+        } else {
+          // Check local auth before clearing user
+          const localResponse = await fetch('/api/auth/local/user')
+          const localData = await localResponse.json()
+          if (!localData.user) {
+            setUser(null)
+          }
+        }
+      })
+      subscription = result.data?.subscription
+    } catch (e) {
+      // Supabase not configured
+    }
     
-    return () => subscription.unsubscribe()
+    return () => subscription?.unsubscribe?.()
   }, [])
   
   // Handle payment success - check URL params and refresh data
