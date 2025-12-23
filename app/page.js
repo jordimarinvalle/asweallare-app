@@ -215,8 +215,17 @@ function CardPile({
                 // Show image if available
                 <div className={`w-full h-full border-2 ${borderColor} rounded-lg overflow-hidden`}>
                   <img 
-                    src={`/cards/${currentCard.imagePath}`}
+                    src={currentCard.imagePath.startsWith('/') ? currentCard.imagePath : `/${currentCard.imagePath}`}
                     alt={currentCard.title || 'Card'}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : currentCard?.image_path ? (
+                // Also check image_path field
+                <div className={`w-full h-full border-2 ${borderColor} rounded-lg overflow-hidden`}>
+                  <img 
+                    src={currentCard.image_path.startsWith('/') ? currentCard.image_path : `/${currentCard.image_path}`}
+                    alt={currentCard.title || currentCard.text || 'Card'}
                     className="w-full h-full object-cover"
                   />
                 </div>
