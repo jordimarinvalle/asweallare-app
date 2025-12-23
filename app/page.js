@@ -1774,6 +1774,7 @@ export default function App() {
     }
     
     setEditingCard(null)
+    setShowCardForm(false)
     setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '', imagePath: '' })
     loadAdminCards()
   }
@@ -1785,14 +1786,14 @@ export default function App() {
       descriptionShort: boxForm.descriptionShort,
       tagline: boxForm.tagline,
       topics: boxForm.topics,
-      price: boxForm.price,
+      priceId: boxForm.priceId || null,
       color: boxForm.color,
       colorPalette: boxForm.colorPalette,
       path: boxForm.path,
       displayOrder: boxForm.displayOrder,
       isDemo: boxForm.isDemo,
       isActive: boxForm.isActive,
-      collectionSeriesId: boxForm.collectionSeriesId
+      collectionSeriesId: boxForm.collectionSeriesId || null
     }
     
     if (editingBox) {
@@ -1812,10 +1813,11 @@ export default function App() {
     }
     
     setEditingBox(null)
+    setShowBoxForm(false)
     setBoxForm({
       name: '', description: '', descriptionShort: '', tagline: '', topics: [],
-      price: 10, color: '#000000', colorPalette: [], path: '', displayOrder: 0,
-      isDemo: false, isActive: true, collectionSeriesId: 'unscripted_conversations'
+      priceId: '', color: '#000000', colorPalette: [], path: '', displayOrder: 0,
+      isDemo: false, isActive: true, collectionSeriesId: ''
     })
     loadAdminBoxes()
   }
