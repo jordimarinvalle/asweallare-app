@@ -2879,22 +2879,74 @@ export default function App() {
                   <p className="text-sm text-gray-500">Cards are created via bulk ZIP upload in the Boxes tab</p>
                 </div>
                 
-                {/* Filter */}
-                <div className="mb-4 flex flex-wrap items-center gap-4">
-                  <div>
-                    <Label>Filter by Box:</Label>
-                    <select value={adminBoxFilter} onChange={(e) => setAdminBoxFilter(e.target.value)} className="ml-2 p-2 border rounded-md min-w-[200px]">
-                      <option value="">All Boxes</option>
-                      {adminBoxes.map(box => <option key={box.id} value={box.id}>{box.name}</option>)}
-                    </select>
+                {/* Cascading Filters */}
+                <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex flex-wrap items-end gap-4">
+                    <div>
+                      <Label className="text-xs text-gray-500">Collection Series</Label>
+                      <select 
+                        value={adminSeriesFilter} 
+                        onChange={(e) => {
+                          setAdminSeriesFilter(e.target.value)
+                          setAdminBoxFilter('')
+                          setAdminPileFilter('')
+                        }} 
+                        className="mt-1 block p-2 border rounded-md min-w-[180px]"
+                      >
+                        <option value="">All Series</option>
+                        {adminSeries.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-500">Box</Label>
+                      <select 
+                        value={adminBoxFilter} 
+                        onChange={(e) => {
+                          setAdminBoxFilter(e.target.value)
+                          setAdminPileFilter('')
+                        }} 
+                        className="mt-1 block p-2 border rounded-md min-w-[180px]"
+                      >
+                        <option value="">All Boxes</option>
+                        {adminBoxes
+                          .filter(box => !adminSeriesFilter || box.collectionSeriesId === adminSeriesFilter)
+                          .map(box => <option key={box.id} value={box.id}>{box.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-500">Pile</Label>
+                      <select 
+                        value={adminPileFilter} 
+                        onChange={(e) => setAdminPileFilter(e.target.value)} 
+                        className="mt-1 block p-2 border rounded-md min-w-[120px]"
+                      >
+                        <option value="">All Piles</option>
+                        {adminPiles.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      </select>
+                    </div>
+                    <div className="text-sm text-gray-500 pb-2">
+                      {(() => {
+                        const filtered = adminCards.filter(card => {
+                          if (adminSeriesFilter && card.seriesId !== adminSeriesFilter) return false
+                          if (adminBoxFilter && card.boxId !== adminBoxFilter) return false
+                          if (adminPileFilter && card.pileId !== adminPileFilter) return false
+                          return true
+                        })
+                        return `${filtered.length} cards`
+                      })()}
+                    </div>
                   </div>
-                  <span className="text-sm text-gray-500">
-                    {adminBoxFilter ? adminCards.filter(c => c.boxId === adminBoxFilter).length : adminCards.length} cards
-                  </span>
                 </div>
                 
-                <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {adminCards.filter(card => !adminBoxFilter || card.boxId === adminBoxFilter).map(card => (
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {adminCards
+                    .filter(card => {
+                      if (adminSeriesFilter && card.seriesId !== adminSeriesFilter) return false
+                      if (adminBoxFilter && card.boxId !== adminBoxFilter) return false
+                      if (adminPileFilter && card.pileId !== adminPileFilter) return false
+                      return true
+                    })
+                    .map(card => (
                     <Card key={card.id} className="p-3 overflow-hidden">
                       <div className="aspect-[3/4] mb-2 rounded overflow-hidden bg-gray-100 relative">
                         {card.imagePath ? (
@@ -2915,9 +2967,61 @@ export default function App() {
                           </span>
                           <span className="text-xs text-gray-400 truncate">{card.boxName || 'N/A'}</span>
                         </div>
-                        {card.text && <p className="text-xs text-gray-600 truncate">{card.text}</p>}
-                        <p className="text-[10px] text-gray-400 truncate">ID: {card.id.slice(0, 8)}...</p>
-                        <div className="flex gap-1 mt-1">
+                        
+                        {/* Editable text field */}
+                        {editingCardId === card.id ? (
+                          <div className="space-y-1">
+                            <Input 
+                              value={editingCardText}
+                              onChange={(e) => setEditingCardText(e.target.value)}
+                              placeholder="Enter card text..."
+                              className="text-xs h-7"
+                            />
+                            <div className="flex gap-1">
+                              <Button 
+                                onClick={() => handleSaveCardText(card.id, editingCardText)}
+                                size="sm" 
+                                className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700"
+                              >
+                                Save
+                              </Button>
+                              <Button 
+                                onClick={() => { setEditingCardId(null); setEditingCardText('') }}
+                                size="sm" 
+                                variant="outline"
+                                className="h-6 px-2 text-xs"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div 
+                            onClick={() => { setEditingCardId(card.id); setEditingCardText(card.text || '') }}
+                            className="text-xs text-gray-600 truncate cursor-pointer hover:bg-gray-100 p-1 rounded min-h-[20px]"
+                            title="Click to edit text"
+                          >
+                            {card.text || <span className="text-gray-400 italic">Click to add text...</span>}
+                          </div>
+                        )}
+                        
+                        <div className="flex justify-between items-center mt-1">
+                          <p className="text-[10px] text-gray-400 truncate">ID: {card.id.slice(0, 8)}...</p>
+                          <Button onClick={() => { if(confirm('Delete this card?')) handleDeleteCard(card.id) }} size="sm" variant="ghost" className="text-red-600 h-6 px-1">
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+                
+                {adminCards.length === 0 && (
+                  <div className="text-center py-12 text-gray-500">
+                    <p>No cards yet. Upload cards via the Boxes tab.</p>
+                    <p className="text-sm mt-1">Edit a box → Select pile → Upload ZIP file</p>
+                  </div>
+                )}
                           <Button onClick={() => { if(confirm('Delete this card?')) handleDeleteCard(card.id) }} size="sm" variant="ghost" className="text-red-600 h-7 px-2">
                             <Trash2 className="w-3 h-3" />
                           </Button>
