@@ -781,7 +781,7 @@ export async function POST(request) {
       
       const { 
         name, description, descriptionShort, tagline, topics,
-        price, color, colorPalette, path: boxPath, displayOrder, 
+        priceId, color, colorPalette, path: boxPath, displayOrder, 
         isDemo, isActive, collectionSeriesId 
       } = body
       
@@ -792,7 +792,7 @@ export async function POST(request) {
         description_short: descriptionShort || '',
         tagline: tagline || '',
         topics: topics || [],
-        price: price || 10.00,
+        price_id: priceId || null,
         color: color || '#000000',
         color_palette: colorPalette || [],
         path: boxPath || '',
