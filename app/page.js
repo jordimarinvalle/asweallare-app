@@ -2582,9 +2582,9 @@ export default function App() {
                           </div>
                         )}
                         <p className="text-xs text-gray-500 mt-2">
-                          Upload a ZIP file containing PNG images. Files will be stored at: 
+                          Upload a ZIP file containing PNG/JPG images. Files will be stored at: 
                           <code className="bg-gray-100 px-1 rounded">
-                            /cards/{editingBox.path || 'box-slug'}/{'{'}{'{pile_slug}'}{'}/'}{'{MD5}.png'}
+                            /cards/{editingBox.path || '{box_path}'}/{bulkUploadPileId ? adminPiles.find(p => p.id === bulkUploadPileId)?.slug || '{pile_slug}' : '{pile_slug}'}/{'{MD5}.{ext}'}
                           </code>
                         </p>
                       </div>
