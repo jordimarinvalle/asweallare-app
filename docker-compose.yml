@@ -1,7 +1,10 @@
 version: '3.8'
 
 services:
-  # Production app
+  # ============================================================================
+  # PRODUCTION MODE (with Supabase)
+  # Run: docker-compose --profile prod up
+  # ============================================================================
   app:
     build:
       context: .
@@ -26,29 +29,11 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  # Development mode with hot reload (uses Supabase)
-  app-dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-      - NEXT_PUBLIC_BASE_URL=http://localhost:3000
-    env_file:
-      - .env.local
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
     profiles:
-      - dev
+      - prod
 
   # ============================================================================
-  # LOCAL POSTGRESQL DEVELOPMENT
-  # Use this for local development without Supabase
+  # LOCAL DEVELOPMENT MODE (with local PostgreSQL)
   # Run: docker-compose --profile local up
   # ============================================================================
   
@@ -85,6 +70,8 @@ services:
       - NEXT_PUBLIC_BASE_URL=http://localhost:3000
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/asweallare
       - USE_LOCAL_DB=true
+    env_file:
+      - .env.local
     volumes:
       - .:/app
       - /app/node_modules
