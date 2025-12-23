@@ -261,7 +261,7 @@ export async function GET(request) {
       
       const { data: boxes, error } = await supabase
         .from('boxes')
-        .select('*')
+        .select('*, collection_series(name)')
         .order('display_order', { ascending: true })
       
       if (error) {
@@ -269,6 +269,96 @@ export async function GET(request) {
       }
       
       return handleCORS(NextResponse.json({ boxes: boxes || [] }))
+    }
+
+    // ADMIN ROUTES - Get all collection series
+    if (path === 'admin/collection-series') {
+      const { user, error: authError } = await getAuthenticatedUser()
+      
+      if (authError || !user) {
+        return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
+      }
+      
+      const { data: series, error } = await supabase
+        .from('collection_series')
+        .select('*')
+        .order('display_order', { ascending: true })
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ series: series || [] }))
+    }
+
+    // ADMIN ROUTES - Get all prices
+    if (path === 'admin/prices') {
+      const { user, error: authError } = await getAuthenticatedUser()
+      
+      if (authError || !user) {
+        return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
+      }
+      
+      const { data: prices, error } = await supabase
+        .from('prices')
+        .select('*')
+        .order('display_order', { ascending: true })
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ prices: prices || [] }))
+    }
+
+    // ADMIN ROUTES - Get all bundles
+    if (path === 'admin/bundles') {
+      const { user, error: authError } = await getAuthenticatedUser()
+      
+      if (authError || !user) {
+        return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
+      }
+      
+      const { data: bundles, error } = await supabase
+        .from('bundles')
+        .select('*, prices(label, amount)')
+        .order('display_order', { ascending: true })
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ bundles: bundles || [] }))
+    }
+
+    // PUBLIC ROUTES - Get active prices for store
+    if (path === 'store/prices') {
+      const { data: prices, error } = await supabase
+        .from('prices')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true })
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ prices: prices || [] }))
+    }
+
+    // PUBLIC ROUTES - Get active bundles for store
+    if (path === 'store/bundles') {
+      const { data: bundles, error } = await supabase
+        .from('bundles')
+        .select('*, prices(id, label, amount, currency, is_membership, membership_days)')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true })
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ bundles: bundles || [] }))
     }
 
     return handleCORS(NextResponse.json({ error: 'Route not found' }, { status: 404 }))
