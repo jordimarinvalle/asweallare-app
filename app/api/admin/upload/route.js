@@ -20,8 +20,10 @@ export async function POST(request) {
     
     const formData = await request.formData()
     const file = formData.get('file')
+    const folder = formData.get('folder') // Generic folder path (e.g., collections/unscripted_conversations/piles)
     const boxFolder = formData.get('boxFolder') || 'uploads'
     const cardColor = formData.get('cardColor') || 'black'
+    const customFilename = formData.get('filename') // Optional custom filename
     
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -31,14 +33,31 @@ export async function POST(request) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     
-    // Generate MD5 hash for unique filename
-    const md5Hash = crypto.createHash('md5').update(buffer).digest('hex')
+    // Generate filename
     const extension = path.extname(file.name) || '.png'
-    const filename = `${md5Hash}${extension}`
+    let filename
     
-    // Determine folder path
-    const colorFolder = cardColor === 'black' ? `${boxFolder}-blacks` : `${boxFolder}-whites`
-    const folderPath = path.join(process.cwd(), 'public', 'cards', boxFolder, colorFolder)
+    if (customFilename) {
+      // Use custom filename if provided
+      filename = customFilename.endsWith(extension) ? customFilename : `${customFilename}${extension}`
+    } else {
+      // Generate MD5 hash for unique filename
+      const md5Hash = crypto.createHash('md5').update(buffer).digest('hex')
+      filename = `${md5Hash}${extension}`
+    }
+    
+    let folderPath, imagePath
+    
+    if (folder) {
+      // Generic folder upload (for piles, etc.)
+      folderPath = path.join(process.cwd(), 'public', folder)
+      imagePath = `${folder}/${filename}`
+    } else {
+      // Card-specific upload (legacy behavior)
+      const colorFolder = cardColor === 'black' ? `${boxFolder}-blacks` : `${boxFolder}-whites`
+      folderPath = path.join(process.cwd(), 'public', 'cards', boxFolder, colorFolder)
+      imagePath = `${boxFolder}/${colorFolder}/${filename}`
+    }
     
     // Create directory if it doesn't exist
     await mkdir(folderPath, { recursive: true })
@@ -47,11 +66,11 @@ export async function POST(request) {
     const filePath = path.join(folderPath, filename)
     await writeFile(filePath, buffer)
     
-    // Return the relative path for database storage
-    const imagePath = `${boxFolder}/${colorFolder}/${filename}`
+    console.log(`File uploaded: ${filePath}`)
     
     return NextResponse.json({ 
       success: true, 
+      path: imagePath,
       imagePath,
       filename,
       message: 'Image uploaded successfully'
@@ -68,7 +87,9 @@ export async function GET() {
     message: 'Use POST to upload images',
     fields: {
       file: 'Image file (required)',
-      boxFolder: 'Box folder name (e.g., white-box-108)',
+      folder: 'Generic folder path (e.g., collections/unscripted_conversations/piles)',
+      filename: 'Optional custom filename',
+      boxFolder: 'Box folder name for cards (e.g., white-box-108)',
       cardColor: 'Card color: black or white'
     }
   })
