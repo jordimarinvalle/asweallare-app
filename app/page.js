@@ -1848,6 +1848,7 @@ export default function App() {
     }
     
     setEditingSeries(null)
+    setShowSeriesForm(false)
     setSeriesForm({ id: '', name: '', description: '', displayOrder: 0, isActive: true })
     loadAdminSeries()
   }
@@ -1859,40 +1860,61 @@ export default function App() {
       paymentInfo: priceForm.paymentInfo,
       hookInfo: priceForm.hookInfo,
       amount: priceForm.amount,
+      promoAmount: priceForm.promoAmount,
+      promoEnabled: priceForm.promoEnabled,
       currency: priceForm.currency,
-      isMembership: priceForm.isMembership,
       membershipDays: priceForm.membershipDays,
       displayOrder: priceForm.displayOrder,
       isActive: priceForm.isActive
     }
     
-    if (editingPrice) {
-      await fetch(`/api/admin/prices/${editingPrice.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      toast({ title: 'Price updated successfully!' })
-    } else {
-      await fetch('/api/admin/prices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      toast({ title: 'Price created successfully!' })
+    try {
+      if (editingPrice) {
+        const res = await fetch(`/api/admin/prices/${editingPrice.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        if (!res.ok) throw new Error('Failed to update')
+        toast({ title: 'Price updated successfully!' })
+      } else {
+        const res = await fetch('/api/admin/prices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        if (!res.ok) {
+          const err = await res.json()
+          throw new Error(err.error || 'Failed to create')
+        }
+        toast({ title: 'Price created successfully!' })
+      }
+    } catch (err) {
+      toast({ title: 'Error: ' + err.message, variant: 'destructive' })
+      return
     }
     
     setEditingPrice(null)
+    setShowPriceForm(false)
     setPriceForm({ id: '', label: '', paymentInfo: '', hookInfo: '', amount: 0, promoAmount: null, promoEnabled: false, currency: 'USD', membershipDays: 30, displayOrder: 0, isActive: true })
     loadAdminPrices()
   }
   
   const handleSavePile = async () => {
+    // Auto-generate image path based on collection series
+    let imagePath = pileForm.imagePath
+    if (pileForm.collectionSeriesId && pileForm.slug && !imagePath) {
+      const series = adminSeries.find(s => s.id === pileForm.collectionSeriesId)
+      if (series) {
+        imagePath = `collections/${series.id}/piles/${pileForm.slug}.png`
+      }
+    }
+    
     const payload = {
       id: pileForm.id || undefined,
       slug: pileForm.slug || pileForm.name.toLowerCase().replace(/\s+/g, '_'),
       name: pileForm.name,
-      imagePath: pileForm.imagePath,
+      imagePath: imagePath,
       collectionSeriesId: pileForm.collectionSeriesId || null,
       displayOrder: pileForm.displayOrder,
       isActive: pileForm.isActive
@@ -1915,7 +1937,8 @@ export default function App() {
     }
     
     setEditingPile(null)
-    setPileForm({ id: '', slug: '', name: '', imagePath: '', collectionSeriesId: 'unscripted_conversations', displayOrder: 0, isActive: true })
+    setShowPileForm(false)
+    setPileForm({ id: '', slug: '', name: '', imagePath: '', collectionSeriesId: '', displayOrder: 0, isActive: true })
     loadAdminPiles()
   }
   
