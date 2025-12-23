@@ -142,9 +142,9 @@ export async function GET(request) {
       
       let query = supabase
         .from('cards')
-        .select('*')
-        .eq('isactive', true)
-        .order('createdat', { ascending: false })
+        .select('*, piles(slug, name, image_path)')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
       
       if (boxIds.length > 0) {
         // Filter by requested boxes, but only include accessible ones
@@ -152,16 +152,16 @@ export async function GET(request) {
         if (allowedBoxIds.length > 0) {
           query = query.in('box_id', allowedBoxIds)
         } else {
-          // No accessible boxes requested, return demo cards only
-          query = query.eq('isdemo', true)
+          // No accessible boxes requested, return empty
+          return handleCORS(NextResponse.json({ cards: [], message: 'No accessible boxes' }))
         }
       } else {
         // No specific boxes requested - return cards from all accessible boxes
         if (accessibleBoxIds.length > 0) {
           query = query.in('box_id', accessibleBoxIds)
         } else {
-          // Fallback: only demo cards
-          query = query.eq('isdemo', true)
+          // Fallback: return empty
+          return handleCORS(NextResponse.json({ cards: [], message: 'No accessible boxes' }))
         }
       }
       
@@ -171,7 +171,22 @@ export async function GET(request) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
       }
       
-      return handleCORS(NextResponse.json({ cards: cards || [] }))
+      // Transform cards to include pile info for the frontend
+      const transformedCards = (cards || []).map(card => ({
+        id: card.id,
+        box_id: card.box_id,
+        pile_id: card.pile_id,
+        text: card.text,
+        image_path: card.image_path,
+        is_active: card.is_active,
+        created_at: card.created_at,
+        // Add pile info for card back images
+        color: card.piles?.slug || 'black', // 'black' or 'white' from pile slug
+        pile_name: card.piles?.name,
+        pile_image: card.piles?.image_path
+      }))
+      
+      return handleCORS(NextResponse.json({ cards: transformedCards }))
     }
 
     // SUBSCRIPTION PLANS
