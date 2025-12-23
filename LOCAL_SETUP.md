@@ -44,15 +44,17 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxx
 
 ### Step 3: Start the Application
 
-**Option A: With Supabase (Recommended for production-like setup)**
-```bash
-docker-compose up app
-```
-
-**Option B: With Local PostgreSQL (Fully offline)**
+**Option A: With Local PostgreSQL (Recommended for development)**
 ```bash
 docker-compose --profile local up
 ```
+
+**Option B: With Supabase (Production-like setup)**
+```bash
+docker-compose --profile prod up
+```
+
+> ⚠️ **Important**: Always use `--profile` flag. Don't run `docker-compose up` without a profile.
 
 ### Step 4: Open the App
 
