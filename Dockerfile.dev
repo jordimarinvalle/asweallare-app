@@ -2,11 +2,16 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies
-COPY package.json yarn.lock ./
-RUN yarn install
+# Copy package files
+COPY package.json ./
+COPY package-lock.json* yarn.lock* ./
 
-# Copy source (excluding .next to ensure fresh dev build)
+# Install dependencies (try yarn first, fallback to npm)
+RUN if [ -f yarn.lock ]; then yarn install; \
+    elif [ -f package-lock.json ]; then npm install; \
+    else npm install; fi
+
+# Copy source
 COPY . .
 
 # Remove any pre-built .next folder to ensure dev mode
@@ -18,5 +23,5 @@ EXPOSE 3000
 # Set environment explicitly
 ENV NODE_ENV=development
 
-# Start in development mode with explicit host binding
-CMD ["yarn", "dev", "-H", "0.0.0.0"]
+# Start in development mode
+CMD ["npm", "run", "dev"]
