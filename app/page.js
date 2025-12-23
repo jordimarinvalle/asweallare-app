@@ -1121,15 +1121,15 @@ export default function App() {
     description: '',
     descriptionShort: '',
     tagline: '',
-    topics: [],
+    topicsText: '',  // Store as text, parse on save
     priceId: '',
     color: '#000000',
-    colorPalette: [],
+    colorPaletteText: '',  // Store as text, parse on save
     path: '',
     displayOrder: 0,
     isDemo: false,
     isActive: true,
-    collectionSeriesId: 'unscripted_conversations'
+    collectionSeriesId: ''
   })
   
   const [seriesForm, setSeriesForm] = useState({
