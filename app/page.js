@@ -1617,7 +1617,91 @@ export default function App() {
   const loadAdminBoxes = async () => {
     const response = await fetch('/api/admin/boxes')
     const data = await response.json()
-    if (data.boxes) setAdminBoxes(data.boxes)
+    if (data.boxes) {
+      const normalizedBoxes = data.boxes.map(box => ({
+        id: box.id,
+        name: box.name,
+        description: box.description,
+        descriptionShort: box.description_short,
+        tagline: box.tagline,
+        topics: box.topics || [],
+        price: box.price,
+        color: box.color,
+        colorPalette: box.color_palette || [],
+        path: box.path,
+        displayOrder: box.display_order,
+        isDemo: box.is_demo,
+        isActive: box.is_active,
+        collectionSeriesId: box.collection_series_id,
+        seriesName: box.collection_series?.name
+      }))
+      setAdminBoxes(normalizedBoxes)
+    }
+  }
+  
+  const loadAdminSeries = async () => {
+    const response = await fetch('/api/admin/collection-series')
+    const data = await response.json()
+    if (data.series) {
+      const normalizedSeries = data.series.map(s => ({
+        id: s.id,
+        name: s.name,
+        description: s.description,
+        displayOrder: s.display_order,
+        isActive: s.is_active
+      }))
+      setAdminSeries(normalizedSeries)
+    }
+  }
+  
+  const loadAdminPrices = async () => {
+    const response = await fetch('/api/admin/prices')
+    const data = await response.json()
+    if (data.prices) {
+      const normalizedPrices = data.prices.map(p => ({
+        id: p.id,
+        label: p.label,
+        paymentInfo: p.payment_info,
+        hookInfo: p.hook_info,
+        amount: p.amount,
+        currency: p.currency,
+        isMembership: p.is_membership,
+        membershipDays: p.membership_days,
+        stripePriceId: p.stripe_price_id,
+        displayOrder: p.display_order,
+        isActive: p.is_active
+      }))
+      setAdminPrices(normalizedPrices)
+    }
+  }
+  
+  const loadAdminBundles = async () => {
+    const response = await fetch('/api/admin/bundles')
+    const data = await response.json()
+    if (data.bundles) {
+      const normalizedBundles = data.bundles.map(b => ({
+        id: b.id,
+        name: b.name,
+        description: b.description,
+        priceId: b.price_id,
+        priceLabel: b.prices?.label,
+        priceAmount: b.prices?.amount,
+        boxIds: b.box_ids || [],
+        displayOrder: b.display_order,
+        isActive: b.is_active
+      }))
+      setAdminBundles(normalizedBundles)
+    }
+  }
+  
+  const loadAllAdminData = async () => {
+    await Promise.all([
+      loadAdminCards(),
+      loadAdminBoxes(),
+      loadAdminSeries(),
+      loadAdminPrices(),
+      loadAdminBundles()
+    ])
   }
   
   const handleSaveCard = async () => {
@@ -1638,14 +1722,14 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-      toast.success('Card updated successfully!')
+      toast({ title: 'Card updated successfully!' })
     } else {
       await fetch('/api/admin/cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-      toast.success('Card created successfully!')
+      toast({ title: 'Card created successfully!' })
     }
     
     setEditingCard(null)
@@ -1653,15 +1737,154 @@ export default function App() {
     loadAdminCards()
   }
   
+  const handleSaveBox = async () => {
+    const payload = {
+      name: boxForm.name,
+      description: boxForm.description,
+      descriptionShort: boxForm.descriptionShort,
+      tagline: boxForm.tagline,
+      topics: boxForm.topics,
+      price: boxForm.price,
+      color: boxForm.color,
+      colorPalette: boxForm.colorPalette,
+      path: boxForm.path,
+      displayOrder: boxForm.displayOrder,
+      isDemo: boxForm.isDemo,
+      isActive: boxForm.isActive,
+      collectionSeriesId: boxForm.collectionSeriesId
+    }
+    
+    if (editingBox) {
+      await fetch(`/api/admin/boxes/${editingBox.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      toast({ title: 'Box updated successfully!' })
+    } else {
+      await fetch('/api/admin/boxes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      toast({ title: 'Box created successfully!' })
+    }
+    
+    setEditingBox(null)
+    setBoxForm({
+      name: '', description: '', descriptionShort: '', tagline: '', topics: [],
+      price: 10, color: '#000000', colorPalette: [], path: '', displayOrder: 0,
+      isDemo: false, isActive: true, collectionSeriesId: 'unscripted_conversations'
+    })
+    loadAdminBoxes()
+  }
+  
+  const handleSaveSeries = async () => {
+    const payload = {
+      id: seriesForm.id || undefined,
+      name: seriesForm.name,
+      description: seriesForm.description,
+      displayOrder: seriesForm.displayOrder,
+      isActive: seriesForm.isActive
+    }
+    
+    if (editingSeries) {
+      await fetch(`/api/admin/collection-series/${editingSeries.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      toast({ title: 'Series updated successfully!' })
+    } else {
+      await fetch('/api/admin/collection-series', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      toast({ title: 'Series created successfully!' })
+    }
+    
+    setEditingSeries(null)
+    setSeriesForm({ id: '', name: '', description: '', displayOrder: 0, isActive: true })
+    loadAdminSeries()
+  }
+  
+  const handleSavePrice = async () => {
+    const payload = {
+      id: priceForm.id || undefined,
+      label: priceForm.label,
+      paymentInfo: priceForm.paymentInfo,
+      hookInfo: priceForm.hookInfo,
+      amount: priceForm.amount,
+      currency: priceForm.currency,
+      isMembership: priceForm.isMembership,
+      membershipDays: priceForm.membershipDays,
+      displayOrder: priceForm.displayOrder,
+      isActive: priceForm.isActive
+    }
+    
+    if (editingPrice) {
+      await fetch(`/api/admin/prices/${editingPrice.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      toast({ title: 'Price updated successfully!' })
+    } else {
+      await fetch('/api/admin/prices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      toast({ title: 'Price created successfully!' })
+    }
+    
+    setEditingPrice(null)
+    setPriceForm({ id: '', label: '', paymentInfo: '', hookInfo: '', amount: 0, currency: 'USD', isMembership: true, membershipDays: 30, displayOrder: 0, isActive: true })
+    loadAdminPrices()
+  }
+  
+  const handleSaveBundle = async () => {
+    const payload = {
+      id: bundleForm.id || undefined,
+      name: bundleForm.name,
+      description: bundleForm.description,
+      priceId: bundleForm.priceId || null,
+      boxIds: bundleForm.boxIds,
+      displayOrder: bundleForm.displayOrder,
+      isActive: bundleForm.isActive
+    }
+    
+    if (editingBundle) {
+      await fetch(`/api/admin/bundles/${editingBundle.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      toast({ title: 'Bundle updated successfully!' })
+    } else {
+      await fetch('/api/admin/bundles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      toast({ title: 'Bundle created successfully!' })
+    }
+    
+    setEditingBundle(null)
+    setBundleForm({ id: '', name: '', description: '', priceId: '', boxIds: [], displayOrder: 0, isActive: true })
+    loadAdminBundles()
+  }
+  
   const handleDeleteCard = async (cardId) => {
     await fetch(`/api/admin/cards/${cardId}`, { method: 'DELETE' })
-    toast.success('Card deleted')
+    toast({ title: 'Card deleted' })
     loadAdminCards()
   }
   
   useEffect(() => {
     if (view === 'purchases') loadPurchases()
-    else if (view === 'admin') { loadAdminCards(); loadAdminBoxes() }
+    else if (view === 'admin') { loadAllAdminData() }
   }, [view])
   
   // Navigation handler for mobile menu
