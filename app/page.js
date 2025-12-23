@@ -2040,6 +2040,29 @@ export default function App() {
     loadAdminBundles()
   }
   
+  // Save card text
+  const handleSaveCardText = async (cardId, text) => {
+    try {
+      const response = await fetch(`/api/admin/cards/${cardId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      })
+      
+      if (response.ok) {
+        toast({ title: 'Card text saved!' })
+        setEditingCardId(null)
+        setEditingCardText('')
+        loadAdminCards()
+      } else {
+        toast({ title: 'Failed to save', variant: 'destructive' })
+      }
+    } catch (err) {
+      toast({ title: 'Error: ' + err.message, variant: 'destructive' })
+    }
+  }
+  }
+  
   const handleDeleteCard = async (cardId) => {
     await fetch(`/api/admin/cards/${cardId}`, { method: 'DELETE' })
     toast({ title: 'Card deleted' })
