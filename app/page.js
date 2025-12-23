@@ -1835,6 +1835,54 @@ export default function App() {
     loadAdminBoxes()
   }
   
+  // Bulk upload cards from ZIP
+  const handleBulkUploadCards = async (file) => {
+    if (!editingBox || !bulkUploadPileId) {
+      toast({ title: 'Please select a pile first', variant: 'destructive' })
+      return
+    }
+    
+    const pile = adminPiles.find(p => p.id === bulkUploadPileId)
+    if (!pile) {
+      toast({ title: 'Invalid pile selected', variant: 'destructive' })
+      return
+    }
+    
+    // Use box path or generate from name
+    const boxSlug = editingBox.path || editingBox.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+    
+    setUploadingCards(true)
+    setUploadResult(null)
+    
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('boxId', editingBox.id)
+    formData.append('boxSlug', boxSlug)
+    formData.append('pileId', pile.id)
+    formData.append('pileSlug', pile.slug)
+    
+    try {
+      const response = await fetch('/api/admin/upload-cards', {
+        method: 'POST',
+        body: formData
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setUploadResult(data)
+        toast({ title: `${data.created} cards created successfully!` })
+        loadAdminCards() // Refresh cards list
+      } else {
+        toast({ title: data.error || 'Upload failed', variant: 'destructive' })
+      }
+    } catch (err) {
+      toast({ title: 'Upload failed: ' + err.message, variant: 'destructive' })
+    }
+    
+    setUploadingCards(false)
+  }
+  
   const handleSaveSeries = async () => {
     const payload = {
       id: seriesForm.id || undefined,
