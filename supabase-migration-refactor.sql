@@ -228,32 +228,32 @@ ALTER TABLE bundles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_memberships ENABLE ROW LEVEL SECURITY;
 
 -- Collection series - public read
-CREATE POLICY "collection_series_public_read" ON collection_series
+CREATE POLICY collection_series_public_read ON collection_series
   FOR SELECT USING (is_active = true);
 
 -- Prices - public read
-CREATE POLICY "prices_public_read" ON prices
+CREATE POLICY prices_public_read ON prices
   FOR SELECT USING (is_active = true);
 
 -- Bundles - public read
-CREATE POLICY "bundles_public_read" ON bundles
+CREATE POLICY bundles_public_read ON bundles
   FOR SELECT USING (is_active = true);
 
 -- User memberships - users can read their own
-CREATE POLICY "user_memberships_read_own" ON user_memberships
+CREATE POLICY user_memberships_read_own ON user_memberships
   FOR SELECT USING (auth.uid() = user_id);
 
 -- Service role bypass for admin operations
-CREATE POLICY "collection_series_service_all" ON collection_series
+CREATE POLICY collection_series_service_all ON collection_series
   FOR ALL USING (auth.role() = 'service_role');
 
-CREATE POLICY "prices_service_all" ON prices
+CREATE POLICY prices_service_all ON prices
   FOR ALL USING (auth.role() = 'service_role');
 
-CREATE POLICY "bundles_service_all" ON bundles
+CREATE POLICY bundles_service_all ON bundles
   FOR ALL USING (auth.role() = 'service_role');
 
-CREATE POLICY "user_memberships_service_all" ON user_memberships
+CREATE POLICY user_memberships_service_all ON user_memberships
   FOR ALL USING (auth.role() = 'service_role');
 
 -- 9. CREATE HELPER FUNCTION
