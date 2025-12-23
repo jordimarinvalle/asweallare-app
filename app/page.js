@@ -1780,15 +1780,23 @@ export default function App() {
   }
   
   const handleSaveBox = async () => {
+    // Parse comma-separated text fields into arrays
+    const topics = boxForm.topicsText 
+      ? boxForm.topicsText.split(',').map(t => t.trim()).filter(Boolean)
+      : []
+    const colorPalette = boxForm.colorPaletteText
+      ? boxForm.colorPaletteText.split(',').map(c => c.trim()).filter(Boolean)
+      : []
+    
     const payload = {
       name: boxForm.name,
       description: boxForm.description,
       descriptionShort: boxForm.descriptionShort,
       tagline: boxForm.tagline,
-      topics: boxForm.topics,
+      topics: topics,
       priceId: boxForm.priceId || null,
       color: boxForm.color,
-      colorPalette: boxForm.colorPalette,
+      colorPalette: colorPalette,
       path: boxForm.path,
       displayOrder: boxForm.displayOrder,
       isDemo: boxForm.isDemo,
@@ -1815,8 +1823,8 @@ export default function App() {
     setEditingBox(null)
     setShowBoxForm(false)
     setBoxForm({
-      name: '', description: '', descriptionShort: '', tagline: '', topics: [],
-      priceId: '', color: '#000000', colorPalette: [], path: '', displayOrder: 0,
+      name: '', description: '', descriptionShort: '', tagline: '', topicsText: '',
+      priceId: '', color: '#000000', colorPaletteText: '', path: '', displayOrder: 0,
       isDemo: false, isActive: true, collectionSeriesId: ''
     })
     loadAdminBoxes()
