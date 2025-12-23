@@ -771,7 +771,7 @@ export async function POST(request) {
       return handleCORS(NextResponse.json({ card: data }))
     }
 
-    // ADMIN ROUTES - Create box
+    // ADMIN ROUTES - Create box (enhanced with new fields)
     if (path === 'admin/boxes') {
       const { user, error: authError } = await getAuthenticatedUser()
       
@@ -779,17 +779,27 @@ export async function POST(request) {
         return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
       }
       
-      const { name, description, price, color, displayOrder, isDemo, isActive } = body
+      const { 
+        name, description, descriptionShort, tagline, topics,
+        price, color, colorPalette, path: boxPath, displayOrder, 
+        isDemo, isActive, collectionSeriesId 
+      } = body
       
       const box = {
         id: `box_${uuidv4().slice(0, 8)}`,
         name,
         description: description || '',
+        description_short: descriptionShort || '',
+        tagline: tagline || '',
+        topics: topics || [],
         price: price || 10.00,
         color: color || '#000000',
+        color_palette: colorPalette || [],
+        path: boxPath || '',
         display_order: displayOrder || 0,
         is_demo: isDemo || false,
         is_active: isActive !== false,
+        collection_series_id: collectionSeriesId || 'unscripted_conversations',
         created_at: new Date().toISOString()
       }
       
@@ -804,6 +814,113 @@ export async function POST(request) {
       }
       
       return handleCORS(NextResponse.json({ box: data }))
+    }
+
+    // ADMIN ROUTES - Create collection series
+    if (path === 'admin/collection-series') {
+      const { user, error: authError } = await getAuthenticatedUser()
+      
+      if (authError || !user) {
+        return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
+      }
+      
+      const { id, name, description, displayOrder, isActive } = body
+      
+      const series = {
+        id: id || `series_${uuidv4().slice(0, 8)}`,
+        name,
+        description: description || '',
+        display_order: displayOrder || 0,
+        is_active: isActive !== false,
+        created_at: new Date().toISOString()
+      }
+      
+      const { data, error } = await supabase
+        .from('collection_series')
+        .insert([series])
+        .select()
+        .single()
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ series: data }))
+    }
+
+    // ADMIN ROUTES - Create price
+    if (path === 'admin/prices') {
+      const { user, error: authError } = await getAuthenticatedUser()
+      
+      if (authError || !user) {
+        return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
+      }
+      
+      const { 
+        id, label, paymentInfo, hookInfo, amount, currency,
+        isMembership, membershipDays, stripePriceId, displayOrder, isActive 
+      } = body
+      
+      const price = {
+        id: id || `price_${uuidv4().slice(0, 8)}`,
+        label,
+        payment_info: paymentInfo || '',
+        hook_info: hookInfo || '',
+        amount: amount || 0,
+        currency: currency || 'USD',
+        is_membership: isMembership !== false,
+        membership_days: membershipDays || null,
+        stripe_price_id: stripePriceId || null,
+        display_order: displayOrder || 0,
+        is_active: isActive !== false,
+        created_at: new Date().toISOString()
+      }
+      
+      const { data, error } = await supabase
+        .from('prices')
+        .insert([price])
+        .select()
+        .single()
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ price: data }))
+    }
+
+    // ADMIN ROUTES - Create bundle
+    if (path === 'admin/bundles') {
+      const { user, error: authError } = await getAuthenticatedUser()
+      
+      if (authError || !user) {
+        return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
+      }
+      
+      const { id, name, description, priceId, boxIds, displayOrder, isActive } = body
+      
+      const bundle = {
+        id: id || `bundle_${uuidv4().slice(0, 8)}`,
+        name,
+        description: description || '',
+        price_id: priceId || null,
+        box_ids: boxIds || [],
+        display_order: displayOrder || 0,
+        is_active: isActive !== false,
+        created_at: new Date().toISOString()
+      }
+      
+      const { data, error } = await supabase
+        .from('bundles')
+        .insert([bundle])
+        .select()
+        .single()
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ bundle: data }))
     }
 
     return handleCORS(NextResponse.json({ error: 'Route not found' }, { status: 404 }))
