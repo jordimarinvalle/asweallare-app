@@ -2398,6 +2398,13 @@ export default function App() {
               setBookletTitle("Quick Guide — 30 Second Read")
               setBookletOpen(true)
             }}
+            isPlayingDemo={selectedBoxIds.length === 1 && selectedBoxIds[0] === 'box_demo'}
+            totalCardsInDeck={allCards.length}
+            onGoToStore={() => setView('store')}
+            onResetGame={() => {
+              // Reset the game to start again with all demo cards
+              handleStartGame()
+            }}
           />
         )}
         
