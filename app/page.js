@@ -3335,7 +3335,7 @@ export default function App() {
             {adminTab === 'bundles' && (
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-medium">Bundles</h3>
+                  <h3 className="sr-only">Bundles</h3>
                   <Button onClick={() => {
                     setEditingBundle(null)
                     setBundleForm({ id: '', name: '', description: '', priceId: '', boxIds: [], displayOrder: 0, isActive: true })
