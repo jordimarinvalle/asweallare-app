@@ -2574,7 +2574,7 @@ export default function App() {
             {adminTab === 'boxes' && (
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-medium">Boxes (Decks)</h3>
+                  <h3 className="sr-only">Boxes (Decks)</h3>
                   <Button onClick={() => {
                     setEditingBox(null)
                     setBoxForm({ id: '', name: '', description: '', descriptionShort: '', tagline: '', topicsText: '', priceId: '', color: '#000000', colorPaletteText: '', displayOrder: 0, isDemo: false, isActive: true, collectionSeriesId: '' })
