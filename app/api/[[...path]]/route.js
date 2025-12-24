@@ -447,14 +447,24 @@ export async function GET(request) {
       
       const { data: piles, error } = await supabase
         .from('piles')
-        .select('*, collection_series(name)')
+        .select('*')
         .order('display_order', { ascending: true })
       
       if (error) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
       }
       
-      return handleCORS(NextResponse.json({ piles: piles || [] }))
+      // Enrich with series names
+      const { data: series } = await supabase.from('collection_series').select('*')
+      const seriesMap = {}
+      if (series) series.forEach(s => { seriesMap[s.id] = s })
+      
+      const enrichedPiles = (piles || []).map(p => ({
+        ...p,
+        collection_series: seriesMap[p.collection_series_id] || null
+      }))
+      
+      return handleCORS(NextResponse.json({ piles: enrichedPiles }))
     }
 
     // ADMIN ROUTES - Get all bundles
@@ -467,12 +477,24 @@ export async function GET(request) {
       
       const { data: bundles, error } = await supabase
         .from('bundles')
-        .select('*, prices(label, amount)')
+        .select('*')
         .order('display_order', { ascending: true })
       
       if (error) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
       }
+      
+      // Enrich with price info
+      const { data: prices } = await supabase.from('prices').select('*')
+      const priceMap = {}
+      if (prices) prices.forEach(p => { priceMap[p.id] = p })
+      
+      const enrichedBundles = (bundles || []).map(b => ({
+        ...b,
+        prices: priceMap[b.price_id] || null
+      }))
+      
+      return handleCORS(NextResponse.json({ bundles: enrichedBundles }))
       
       return handleCORS(NextResponse.json({ bundles: bundles || [] }))
     }
