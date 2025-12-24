@@ -1754,9 +1754,14 @@ export default function App() {
         collectionSeriesId: box.collection_series_id,
         collection_series: box.collection_series,
         seriesName: box.collection_series?.name,
-        prices: box.prices
+        prices: box.prices,
+        cardStats: box.cardStats || { total: 0, byPile: {} }
       }))
       setAdminBoxes(normalizedBoxes)
+    }
+    // Also store piles if returned
+    if (data.piles) {
+      setAdminPiles(data.piles)
     }
   }
   
