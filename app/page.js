@@ -3216,7 +3216,7 @@ export default function App() {
             {adminTab === 'prices' && (
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-medium">Prices (Membership Options)</h3>
+                  <h3 className="sr-only">Prices (Membership Options)</h3>
                   <Button onClick={() => {
                     setEditingPrice(null)
                     setPriceForm({ id: '', label: '', paymentInfo: '', hookInfo: '', amount: 0, promoAmount: null, promoEnabled: false, currency: 'USD', membershipDays: 30, displayOrder: 0, isActive: true })
