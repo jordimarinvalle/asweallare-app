@@ -2505,7 +2505,7 @@ export default function App() {
             {adminTab === 'series' && (
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-medium">Collection Series</h3>
+                  <h3 className="sr-only">Collection Series</h3>
                   <Button onClick={() => {
                     setEditingSeries(null)
                     setSeriesForm({ id: '', name: '', description: '', displayOrder: 0, isActive: true })
