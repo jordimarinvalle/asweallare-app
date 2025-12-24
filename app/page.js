@@ -3058,7 +3058,7 @@ export default function App() {
             {adminTab === 'cards' && (
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-medium">Cards</h3>
+                  <h3 className="sr-only">Cards</h3>
                   <p className="text-sm text-gray-500">Cards are created via bulk ZIP upload in the Boxes tab</p>
                 </div>
                 
