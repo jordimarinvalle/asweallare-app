@@ -289,7 +289,7 @@ export async function GET(request) {
         return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
       }
       
-      // Simple query without joins for local mode compatibility
+      // Get cards
       const { data: cards, error } = await supabase
         .from('cards')
         .select('*')
@@ -299,7 +299,41 @@ export async function GET(request) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
       }
       
-      return handleCORS(NextResponse.json({ cards: cards || [] }))
+      // Get boxes and piles for enrichment
+      const { data: boxes } = await supabase.from('boxes').select('*')
+      const { data: piles } = await supabase.from('piles').select('*')
+      const { data: series } = await supabase.from('collection_series').select('*')
+      
+      const boxMap = {}
+      const pileMap = {}
+      const seriesMap = {}
+      
+      if (boxes) boxes.forEach(b => { boxMap[b.id] = b })
+      if (piles) piles.forEach(p => { pileMap[p.id] = p })
+      if (series) series.forEach(s => { seriesMap[s.id] = s })
+      
+      // Enrich cards with box/pile info
+      const enrichedCards = (cards || []).map(card => {
+        const box = boxMap[card.box_id]
+        const pile = pileMap[card.pile_id]
+        const collectionSeries = box ? seriesMap[box.collection_series_id] : null
+        
+        return {
+          ...card,
+          boxes: box ? {
+            name: box.name,
+            color: box.color,
+            collection_series_id: box.collection_series_id,
+            collection_series: collectionSeries ? { name: collectionSeries.name } : null
+          } : null,
+          piles: pile ? {
+            name: pile.name,
+            slug: pile.slug
+          } : null
+        }
+      })
+      
+      return handleCORS(NextResponse.json({ cards: enrichedCards }))
     }
 
     // ADMIN ROUTES - Get all boxes
