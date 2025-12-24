@@ -2867,7 +2867,7 @@ export default function App() {
             {adminTab === 'piles' && (
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-medium">Piles (Card Backs)</h3>
+                  <h3 className="sr-only">Piles (Card Backs)</h3>
                   <Button onClick={() => {
                     setEditingPile(null)
                     setPileForm({ id: '', slug: '', name: '', imagePath: '', collectionSeriesId: '', displayOrder: 0, isActive: true })
