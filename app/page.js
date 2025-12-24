@@ -3136,79 +3136,78 @@ export default function App() {
                       return true
                     })
                     .map(card => {
-                    const imgPath = card.imagePath || card.image_path
-                    const imgSrc = imgPath ? (imgPath.startsWith('/') ? imgPath : `/${imgPath}`) : null
-                    return (
-                    <Card key={card.id} className="p-3 overflow-hidden">
-                      <div className="aspect-[3/4] mb-2 rounded overflow-hidden bg-gray-100 relative">
-                        {imgSrc ? (
-                          <img src={imgSrc} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Image className="w-8 h-8 text-gray-300" />
+                      const imgPath = card.imagePath || card.image_path
+                      const imgSrc = imgPath ? (imgPath.startsWith('/') ? imgPath : `/${imgPath}`) : null
+                      return (
+                        <Card key={card.id} className="p-3 overflow-hidden">
+                          <div className="aspect-[3/4] mb-2 rounded overflow-hidden bg-gray-100 relative">
+                            {imgSrc ? (
+                              <img src={imgSrc} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Image className="w-8 h-8 text-gray-300" />
+                              </div>
+                            )}
+                            {!card.isActive && (
+                              <div className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded">Inactive</div>
+                            )}
                           </div>
-                        )}
-                        {!card.isActive && (
-                          <div className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded">Inactive</div>
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1 flex-wrap">
-                          <span className="px-1.5 py-0.5 text-xs rounded bg-blue-100 text-blue-800 font-medium">
-                            {card.boxName || 'N/A'}
-                          </span>
-                          <span className={`px-1.5 py-0.5 text-xs rounded font-medium ${card.pileName?.toLowerCase() === 'black' ? 'bg-gray-900 text-white' : 'bg-gray-100 border border-gray-300 text-gray-800'}`}>
-                            {card.pileName || 'N/A'}
-                          </span>
-                        </div>
-                        
-                        {/* Editable text field */}
-                        {editingCardId === card.id ? (
                           <div className="space-y-1">
-                            <Input 
-                              value={editingCardText}
-                              onChange={(e) => setEditingCardText(e.target.value)}
-                              placeholder="Enter card text..."
-                              className="text-xs h-7"
-                            />
-                            <div className="flex gap-1">
-                              <Button 
-                                onClick={() => handleSaveCardText(card.id, editingCardText)}
-                                size="sm" 
-                                className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700"
+                            <div className="flex items-center gap-1 flex-wrap">
+                              <span className="px-1.5 py-0.5 text-xs rounded bg-blue-100 text-blue-800 font-medium">
+                                {card.boxName || 'N/A'}
+                              </span>
+                              <span className={`px-1.5 py-0.5 text-xs rounded font-medium ${card.pileName?.toLowerCase() === 'black' ? 'bg-gray-900 text-white' : 'bg-gray-100 border border-gray-300 text-gray-800'}`}>
+                                {card.pileName || 'N/A'}
+                              </span>
+                            </div>
+                            
+                            {editingCardId === card.id ? (
+                              <div className="space-y-1">
+                                <Input 
+                                  value={editingCardText}
+                                  onChange={(e) => setEditingCardText(e.target.value)}
+                                  placeholder="Enter card text..."
+                                  className="text-xs h-7"
+                                />
+                                <div className="flex gap-1">
+                                  <Button 
+                                    onClick={() => handleSaveCardText(card.id, editingCardText)}
+                                    size="sm" 
+                                    className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700"
+                                  >
+                                    Save
+                                  </Button>
+                                  <Button 
+                                    onClick={() => { setEditingCardId(null); setEditingCardText('') }}
+                                    size="sm" 
+                                    variant="outline"
+                                    className="h-6 px-2 text-xs"
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div 
+                                onClick={() => { setEditingCardId(card.id); setEditingCardText(card.text || '') }}
+                                className="text-xs text-gray-600 truncate cursor-pointer hover:bg-gray-100 p-1 rounded min-h-[20px]"
+                                title="Click to edit text"
                               >
-                                Save
-                              </Button>
-                              <Button 
-                                onClick={() => { setEditingCardId(null); setEditingCardText('') }}
-                                size="sm" 
-                                variant="outline"
-                                className="h-6 px-2 text-xs"
-                              >
-                                Cancel
+                                {card.text || <span className="text-gray-400 italic">Click to add text...</span>}
+                              </div>
+                            )}
+                            
+                            <div className="flex justify-between items-center mt-1">
+                              <p className="text-[10px] text-gray-400 truncate">ID: {card.id.slice(0, 8)}...</p>
+                              <Button onClick={() => { if(confirm('Delete this card?')) handleDeleteCard(card.id) }} size="sm" variant="ghost" className="text-red-600 h-6 px-1">
+                                <Trash2 className="w-3 h-3" />
                               </Button>
                             </div>
                           </div>
-                        ) : (
-                          <div 
-                            onClick={() => { setEditingCardId(card.id); setEditingCardText(card.text || '') }}
-                            className="text-xs text-gray-600 truncate cursor-pointer hover:bg-gray-100 p-1 rounded min-h-[20px]"
-                            title="Click to edit text"
-                          >
-                            {card.text || <span className="text-gray-400 italic">Click to add text...</span>}
-                          </div>
-                        )}
-                        
-                        <div className="flex justify-between items-center mt-1">
-                          <p className="text-[10px] text-gray-400 truncate">ID: {card.id.slice(0, 8)}...</p>
-                          <Button onClick={() => { if(confirm('Delete this card?')) handleDeleteCard(card.id) }} size="sm" variant="ghost" className="text-red-600 h-6 px-1">
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                    )
-                  })}
+                        </Card>
+                      )
+                    })}
                 </div>
                 
                 {adminCards.length === 0 && (
