@@ -2950,13 +2950,19 @@ export default function App() {
                                 try {
                                   const response = await fetch('/api/admin/upload', { method: 'POST', body: formData })
                                   const data = await response.json()
-                                  if (data.path) {
-                                    setPileForm({ ...pileForm, imagePath: data.path })
-                                    toast({ title: 'Image uploaded!' })
+                                  console.log('[PILE UPLOAD] Response:', data)
+                                  if (data.path || data.imagePath || data.image_path) {
+                                    const newPath = data.path || data.imagePath || data.image_path
+                                    setPileForm(prev => ({ ...prev, imagePath: newPath }))
+                                    toast({ title: 'Image uploaded! Click Save to persist changes.' })
                                   } else if (data.error) {
                                     toast({ title: data.error, variant: 'destructive' })
+                                  } else {
+                                    console.log('[PILE UPLOAD] Unexpected response:', data)
+                                    toast({ title: 'Upload completed but no path returned', variant: 'destructive' })
                                   }
                                 } catch (err) {
+                                  console.error('[PILE UPLOAD] Error:', err)
                                   toast({ title: 'Upload failed', variant: 'destructive' })
                                 }
                                 setUploadingPileImage(false)
