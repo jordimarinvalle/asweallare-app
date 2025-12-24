@@ -344,7 +344,7 @@ export async function GET(request) {
         return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
       }
       
-      // Simple query without joins for local mode compatibility
+      // Get boxes
       const { data: boxes, error } = await supabase
         .from('boxes')
         .select('*')
@@ -354,7 +354,47 @@ export async function GET(request) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
       }
       
-      return handleCORS(NextResponse.json({ boxes: boxes || [] }))
+      // Get all cards to count per box/pile
+      const { data: cards } = await supabase.from('cards').select('*')
+      const { data: piles } = await supabase.from('piles').select('*')
+      const { data: series } = await supabase.from('collection_series').select('*')
+      const { data: prices } = await supabase.from('prices').select('*')
+      
+      const seriesMap = {}
+      const priceMap = {}
+      const pileMap = {}
+      
+      if (series) series.forEach(s => { seriesMap[s.id] = s })
+      if (prices) prices.forEach(p => { priceMap[p.id] = p })
+      if (piles) piles.forEach(p => { pileMap[p.id] = p })
+      
+      // Count cards per box per pile
+      const cardCounts = {}
+      if (cards) {
+        cards.forEach(card => {
+          const key = `${card.box_id}`
+          if (!cardCounts[key]) {
+            cardCounts[key] = { total: 0, byPile: {} }
+          }
+          cardCounts[key].total++
+          
+          const pileId = card.pile_id
+          if (!cardCounts[key].byPile[pileId]) {
+            cardCounts[key].byPile[pileId] = { count: 0, pileName: pileMap[pileId]?.name || 'Unknown', pileSlug: pileMap[pileId]?.slug || '' }
+          }
+          cardCounts[key].byPile[pileId].count++
+        })
+      }
+      
+      // Enrich boxes with related data
+      const enrichedBoxes = (boxes || []).map(box => ({
+        ...box,
+        collection_series: seriesMap[box.collection_series_id] || null,
+        prices: priceMap[box.price_id] || null,
+        cardStats: cardCounts[box.id] || { total: 0, byPile: {} }
+      }))
+      
+      return handleCORS(NextResponse.json({ boxes: enrichedBoxes, piles: piles || [] }))
     }
 
     // ADMIN ROUTES - Get all collection series
