@@ -3154,10 +3154,13 @@ export default function App() {
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-1 flex-wrap">
-                          <span className={`px-1.5 py-0.5 text-xs rounded ${card.pileName?.toLowerCase() === 'black' ? 'bg-black text-white' : 'bg-white border text-black'}`}>
+                          <span className="px-1.5 py-0.5 text-xs rounded bg-blue-100 text-blue-800 font-medium">
+                            {card.boxName || 'N/A'}
+                          </span>
+                          <span className={`px-1.5 py-0.5 text-xs rounded font-medium ${card.pileName?.toLowerCase() === 'black' ? 'bg-gray-900 text-white' : 'bg-gray-100 border border-gray-300 text-gray-800'}`}>
                             {card.pileName || 'N/A'}
                           </span>
-                          <span className="text-xs text-gray-400 truncate">{card.boxName || 'N/A'}</span>
+                        </div>
                         </div>
                         
                         {/* Editable text field */}
