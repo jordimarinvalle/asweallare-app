@@ -3161,7 +3161,6 @@ export default function App() {
                             {card.pileName || 'N/A'}
                           </span>
                         </div>
-                        </div>
                         
                         {/* Editable text field */}
                         {editingCardId === card.id ? (
