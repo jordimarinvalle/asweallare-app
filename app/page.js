@@ -2768,39 +2768,45 @@ export default function App() {
                               </p>
                               
                               {/* Card Stats per Pile */}
-                              <div className="mt-2 flex flex-wrap gap-2">
-                                <span className="text-xs font-medium text-gray-600">Cards: {cardStats.total}</span>
+                              <div className="mt-2 flex flex-wrap gap-2 items-center">
+                                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-200 text-gray-800">
+                                  Total: {cardStats.total}
+                                </span>
                                 {Object.entries(cardStats.byPile).map(([pileId, pileInfo]) => (
-                                  <div key={pileId} className="flex items-center gap-1 bg-gray-100 rounded px-2 py-0.5">
-                                    <span className="text-xs">{pileInfo.pileName}: {pileInfo.count}</span>
+                                  <div key={pileId} className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                                    <span>{pileInfo.pileName}: {pileInfo.count}</span>
                                     <Button 
                                       onClick={async () => {
-                                        if (confirm(`Download ${pileInfo.count} ${pileInfo.pileName} cards?`)) {
-                                          // Get card image paths
-                                          const res = await fetch('/api/admin/cards/export', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ boxId: box.id, pileId })
-                                          })
-                                          const data = await res.json()
-                                          if (data.imagePaths && data.imagePaths.length > 0) {
-                                            // Create a text file with all paths
-                                            const pathList = data.imagePaths.join('\n')
-                                            const blob = new Blob([pathList], { type: 'text/plain' })
-                                            const url = URL.createObjectURL(blob)
-                                            const a = document.createElement('a')
-                                            a.href = url
-                                            a.download = `${box.id}_${pileInfo.pileSlug}_paths.txt`
-                                            a.click()
-                                            URL.revokeObjectURL(url)
-                                            toast({ title: `Downloaded path list for ${data.imagePaths.length} cards` })
+                                        if (confirm(`Download ${pileInfo.count} ${pileInfo.pileName} cards as ZIP?`)) {
+                                          toast({ title: 'Preparing download...' })
+                                          try {
+                                            const res = await fetch('/api/admin/download-cards', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ boxId: box.id, pileId })
+                                            })
+                                            if (res.ok) {
+                                              const blob = await res.blob()
+                                              const url = URL.createObjectURL(blob)
+                                              const a = document.createElement('a')
+                                              a.href = url
+                                              a.download = `${box.id}_${pileInfo.pileSlug}_cards.zip`
+                                              a.click()
+                                              URL.revokeObjectURL(url)
+                                              toast({ title: `Downloaded ${pileInfo.count} cards as ZIP` })
+                                            } else {
+                                              const data = await res.json()
+                                              toast({ title: data.error || 'Download failed', variant: 'destructive' })
+                                            }
+                                          } catch (err) {
+                                            toast({ title: 'Download failed', variant: 'destructive' })
                                           }
                                         }
                                       }}
                                       size="sm" 
                                       variant="ghost" 
-                                      className="h-5 w-5 p-0"
-                                      title="Download card paths"
+                                      className="h-5 w-5 p-0 hover:bg-blue-200"
+                                      title="Download cards as ZIP"
                                     >
                                       <Download className="w-3 h-3" />
                                     </Button>
@@ -2823,8 +2829,8 @@ export default function App() {
                                       }}
                                       size="sm" 
                                       variant="ghost" 
-                                      className="h-5 w-5 p-0 text-red-600 hover:text-red-700"
-                                      title="Delete all cards for this pile"
+                                      className="h-5 w-5 p-0 text-red-600 hover:bg-red-100"
+                                      title="Delete all cards"
                                     >
                                       <Trash2 className="w-3 h-3" />
                                     </Button>
