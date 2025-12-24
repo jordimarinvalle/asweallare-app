@@ -2481,7 +2481,7 @@ export default function App() {
         {view === 'admin' && isAdmin && (
           <div className="max-w-6xl mx-auto p-8">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-serif text-gray-900">Admin Panel</h2>
+              <h2 className="text-3xl font-serif text-gray-900 sr-only">Admin Panel</h2>
             </div>
             
             {/* Admin Tabs */}
