@@ -2736,6 +2736,8 @@ export default function App() {
                   {adminBoxes.map(box => {
                     const linkedPrice = box.prices
                     const displayPrice = linkedPrice ? (linkedPrice.promo_enabled && linkedPrice.promo_amount ? linkedPrice.promo_amount : linkedPrice.amount) : null
+                    const cardStats = box.cardStats || { total: 0, byPile: {} }
+                    
                     return (
                       <Card key={box.id} className="p-4">
                         <div className="flex justify-between items-start">
@@ -2759,6 +2761,71 @@ export default function App() {
                                 Price: {linkedPrice?.label || 'Free'} | 
                                 ID: {box.id}
                               </p>
+                              
+                              {/* Card Stats per Pile */}
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                <span className="text-xs font-medium text-gray-600">Cards: {cardStats.total}</span>
+                                {Object.entries(cardStats.byPile).map(([pileId, pileInfo]) => (
+                                  <div key={pileId} className="flex items-center gap-1 bg-gray-100 rounded px-2 py-0.5">
+                                    <span className="text-xs">{pileInfo.pileName}: {pileInfo.count}</span>
+                                    <Button 
+                                      onClick={async () => {
+                                        if (confirm(`Download ${pileInfo.count} ${pileInfo.pileName} cards?`)) {
+                                          // Get card image paths
+                                          const res = await fetch('/api/admin/cards/export', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ boxId: box.id, pileId })
+                                          })
+                                          const data = await res.json()
+                                          if (data.imagePaths && data.imagePaths.length > 0) {
+                                            // Create a text file with all paths
+                                            const pathList = data.imagePaths.join('\n')
+                                            const blob = new Blob([pathList], { type: 'text/plain' })
+                                            const url = URL.createObjectURL(blob)
+                                            const a = document.createElement('a')
+                                            a.href = url
+                                            a.download = `${box.id}_${pileInfo.pileSlug}_paths.txt`
+                                            a.click()
+                                            URL.revokeObjectURL(url)
+                                            toast({ title: `Downloaded path list for ${data.imagePaths.length} cards` })
+                                          }
+                                        }
+                                      }}
+                                      size="sm" 
+                                      variant="ghost" 
+                                      className="h-5 w-5 p-0"
+                                      title="Download card paths"
+                                    >
+                                      <Download className="w-3 h-3" />
+                                    </Button>
+                                    <Button 
+                                      onClick={async () => {
+                                        if (confirm(`Delete ALL ${pileInfo.count} ${pileInfo.pileName} cards from ${box.name}?`)) {
+                                          const res = await fetch('/api/admin/cards/bulk-delete', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ boxId: box.id, pileId })
+                                          })
+                                          if (res.ok) {
+                                            toast({ title: `Deleted ${pileInfo.count} cards` })
+                                            loadAdminBoxes()
+                                            loadAdminCards()
+                                          } else {
+                                            toast({ title: 'Delete failed', variant: 'destructive' })
+                                          }
+                                        }
+                                      }}
+                                      size="sm" 
+                                      variant="ghost" 
+                                      className="h-5 w-5 p-0 text-red-600 hover:text-red-700"
+                                      title="Delete all cards for this pile"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </div>
                           <div className="flex gap-1">
