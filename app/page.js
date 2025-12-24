@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/hooks/use-toast'
-import { LogOut, Plus, Edit, Trash2, CreditCard, RotateCw, Smartphone, Lock, Check, Package, Play, ShoppingBag, Sparkles, Crown, Receipt, XCircle, Image, Menu, AlertTriangle, RefreshCcw, BookOpen, Upload } from 'lucide-react'
+import { LogOut, Plus, Edit, Trash2, CreditCard, RotateCw, Smartphone, Lock, Check, Package, Play, ShoppingBag, Sparkles, Crown, Receipt, XCircle, Image, Menu, AlertTriangle, RefreshCcw, BookOpen, Upload, Download } from 'lucide-react'
 import { BookletViewer, GuideSelector, GuideSelectorCompact, BOOKLET_IMAGES, BOOKLET_30SECS } from '@/components/game/BookletViewer'
 import { RotateDeviceScreen } from '@/components/game/RotateDeviceScreen'
 
