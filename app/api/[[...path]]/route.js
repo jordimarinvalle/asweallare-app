@@ -1106,6 +1106,77 @@ export async function POST(request) {
       return handleCORS(NextResponse.json({ bundle: data }))
     }
 
+    // ADMIN ROUTES - Bulk delete cards
+    if (path === 'admin/cards/bulk-delete') {
+      const { user, error: authError } = await getAuthenticatedUser()
+      
+      if (authError || !user) {
+        return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
+      }
+      
+      const { boxId, pileId } = body
+      
+      if (!boxId) {
+        return handleCORS(NextResponse.json({ error: 'boxId required' }, { status: 400 }))
+      }
+      
+      // Build delete query
+      let deleteResult
+      if (pileId) {
+        // Delete cards for specific box and pile
+        const { data: cards } = await supabase.from('cards').select('*').eq('box_id', boxId).eq('pile_id', pileId)
+        if (cards && cards.length > 0) {
+          for (const card of cards) {
+            await supabase.from('cards').delete().eq('id', card.id)
+          }
+        }
+        deleteResult = { deleted: cards?.length || 0 }
+      } else {
+        // Delete all cards for box
+        const { data: cards } = await supabase.from('cards').select('*').eq('box_id', boxId)
+        if (cards && cards.length > 0) {
+          for (const card of cards) {
+            await supabase.from('cards').delete().eq('id', card.id)
+          }
+        }
+        deleteResult = { deleted: cards?.length || 0 }
+      }
+      
+      return handleCORS(NextResponse.json({ success: true, ...deleteResult }))
+    }
+    
+    // ADMIN ROUTES - Export card paths
+    if (path === 'admin/cards/export') {
+      const { user, error: authError } = await getAuthenticatedUser()
+      
+      if (authError || !user) {
+        return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
+      }
+      
+      const { boxId, pileId } = body
+      
+      if (!boxId) {
+        return handleCORS(NextResponse.json({ error: 'boxId required' }, { status: 400 }))
+      }
+      
+      let query = supabase.from('cards').select('*').eq('box_id', boxId)
+      
+      if (pileId) {
+        query = query.eq('pile_id', pileId)
+      }
+      
+      const { data: cards, error } = await query
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ 
+        cards: cards || [],
+        imagePaths: (cards || []).map(c => c.image_path)
+      }))
+    }
+
     return handleCORS(NextResponse.json({ error: 'Route not found' }, { status: 404 }))
     
   } catch (error) {
