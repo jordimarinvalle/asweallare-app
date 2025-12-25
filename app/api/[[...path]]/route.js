@@ -680,7 +680,7 @@ export async function POST(request) {
         return handleCORS(NextResponse.json({ error: 'Box not found' }, { status: 404 }))
       }
       
-      if (box.is_demo) {
+      if (box.is_sample) {
         return handleCORS(NextResponse.json({ error: 'Demo box is free' }, { status: 400 }))
       }
       
