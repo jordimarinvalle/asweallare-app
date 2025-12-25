@@ -934,13 +934,19 @@ export async function POST(request) {
       }
       
       const { 
-        name, description, descriptionShort, tagline, topics,
+        id: boxId, name, description, descriptionShort, tagline, topics,
         priceId, color, colorPalette, path: boxPath, displayOrder, 
-        isDemo, isActive, collectionSeriesId 
+        isSample, level, variant, isActive, collectionSeriesId 
       } = body
       
+      // Enforce data rules
+      let finalIsSample = isSample || false
+      let finalVariant = variant || 'full'
+      if (finalIsSample) finalVariant = 'sample'
+      if (finalVariant === 'sample') finalIsSample = true
+      
       const box = {
-        id: `box_${uuidv4().slice(0, 8)}`,
+        id: boxId || `box_${uuidv4().slice(0, 8)}`,
         name,
         description: description || '',
         description_short: descriptionShort || '',
@@ -951,7 +957,9 @@ export async function POST(request) {
         color_palette: colorPalette || [],
         path: boxPath || '',
         display_order: displayOrder || 0,
-        is_demo: isDemo || false,
+        is_sample: finalIsSample,
+        level: parseInt(level) || 1,
+        variant: finalVariant,
         is_active: isActive !== false,
         collection_series_id: collectionSeriesId || 'unscripted_conversations',
         created_at: new Date().toISOString()
