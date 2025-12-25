@@ -75,11 +75,11 @@ export async function POST(request) {
             title: cardTitle,
             hint: '',
             language: 'en',
-            isdemo: boxId === 'box_demo',
-            isactive: true,
+            is_sample: boxId.includes('sample'),
+            is_active: true,
             box_id: boxId,
             image_path: imagePath,
-            createdat: new Date().toISOString()
+            created_at: new Date().toISOString()
           }
           
           results.scanned.push({
