@@ -936,14 +936,8 @@ export async function POST(request) {
       const { 
         id: boxId, name, description, descriptionShort, tagline, topics,
         priceId, color, colorPalette, path: boxPath, displayOrder, 
-        isSample, level, variant, isActive, collectionSeriesId 
+        isSample, fullBoxId, isActive, collectionSeriesId 
       } = body
-      
-      // Enforce data rules
-      let finalIsSample = isSample || false
-      let finalVariant = variant || 'full'
-      if (finalIsSample) finalVariant = 'sample'
-      if (finalVariant === 'sample') finalIsSample = true
       
       const box = {
         id: boxId || `box_${uuidv4().slice(0, 8)}`,
@@ -957,9 +951,8 @@ export async function POST(request) {
         color_palette: colorPalette || [],
         path: boxPath || '',
         display_order: displayOrder || 0,
-        is_sample: finalIsSample,
-        level: parseInt(level) || 1,
-        variant: finalVariant,
+        is_sample: isSample || false,
+        full_box_id: isSample ? (fullBoxId || null) : null,  // Only set if sample
         is_active: isActive !== false,
         collection_series_id: collectionSeriesId || 'unscripted_conversations',
         created_at: new Date().toISOString()
