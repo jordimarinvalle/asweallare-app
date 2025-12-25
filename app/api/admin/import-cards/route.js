@@ -4,13 +4,14 @@ import { v4 as uuidv4 } from 'uuid'
 import fs from 'fs'
 import path from 'path'
 
-// Mapping of folder names to box IDs
+// Mapping of folder names to box IDs (updated for sample terminology)
 const FOLDER_TO_BOX = {
-  'white-box-demo': 'box_demo',
-  'white-box-108': 'box_white',
-  'white-box-216': 'box_white_xl',
-  'black-box-108': 'box_black',
-  'red-box-108': 'box_red'
+  'sample-l1': 'box_sample_l1',
+  'white-full': 'box_white_full',
+  'white-vol1': 'box_white_vol1',
+  'white-vol2': 'box_white_vol2',
+  'red-full': 'box_red_full',
+  'black-full': 'box_black_full'
 }
 
 export async function POST(request) {
