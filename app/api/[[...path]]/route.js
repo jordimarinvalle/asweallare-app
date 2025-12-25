@@ -41,7 +41,10 @@ async function getAuthenticatedUser() {
   return { user, error }
 }
 
-// Helper to get user's accessible boxes
+// Import entitlements helper
+import { getUserEntitledBoxIds, getBoxesWithVisibility } from '../../../lib/entitlements'
+
+// Helper to get user's accessible boxes - uses entitlements as source of truth
 async function getUserAccessibleBoxes(userId) {
   const supabase = createSupabaseServer()
   
@@ -56,48 +59,29 @@ async function getUserAccessibleBoxes(userId) {
     return { boxes: [], accessibleBoxIds: [] }
   }
   
-  // Demo boxes are always accessible
-  const accessibleBoxIds = boxes.filter(b => b.is_demo).map(b => b.id)
+  // Use entitlements helper as the single source of truth
+  const { boxIds: accessibleBoxIds, hasMembership } = await getUserEntitledBoxIds(userId)
   
-  if (userId) {
-    // Get user's purchased products
-    const { data: products } = await supabase
-      .from('user_products')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_active', true)
-    
-    if (products) {
-      for (const product of products) {
-        // All access subscription grants access to all boxes
-        if (product.purchase_type === 'all_access') {
-          // Check if subscription is still valid
-          if (!product.expires_at || new Date(product.expires_at) > new Date()) {
-            return { 
-              boxes, 
-              accessibleBoxIds: boxes.map(b => b.id),
-              hasAllAccess: true 
-            }
-          }
-        } else if (product.box_id && !accessibleBoxIds.includes(product.box_id)) {
-          // Check expiry for subscriptions
-          if (!product.expires_at || new Date(product.expires_at) > new Date()) {
-            accessibleBoxIds.push(product.box_id)
-          }
-        }
-      }
-    }
+  return { 
+    boxes, 
+    accessibleBoxIds, 
+    hasAllAccess: hasMembership 
   }
-  
-  return { boxes, accessibleBoxIds, hasAllAccess: false }
 }
 
-// Helper to check if user has paid access (legacy support)
+// Helper to check if user has paid access
 async function checkUserAccess(userId) {
   const { accessibleBoxIds, hasAllAccess } = await getUserAccessibleBoxes(userId)
   
-  // User has paid access if they have access to any non-demo box
-  const hasPaidAccess = hasAllAccess || accessibleBoxIds.some(id => id !== 'box_demo')
+  // User has paid access if they have access to any non-sample box
+  const supabase = createSupabaseServer()
+  const { data: sampleBoxes } = await supabase
+    .from('boxes')
+    .select('id')
+    .eq('is_sample', true)
+  
+  const sampleBoxIds = (sampleBoxes || []).map(b => b.id)
+  const hasPaidAccess = hasAllAccess || accessibleBoxIds.some(id => !sampleBoxIds.includes(id))
   
   return { hasPaidAccess, accessibleBoxIds, hasAllAccess }
 }
