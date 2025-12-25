@@ -2729,9 +2729,55 @@ export default function App() {
                         <Label>Display Order</Label>
                         <Input type="number" value={boxForm.displayOrder} onChange={(e) => setBoxForm({ ...boxForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
                       </div>
+                      <div>
+                        <Label>Level</Label>
+                        <select 
+                          value={boxForm.level} 
+                          onChange={(e) => setBoxForm({ ...boxForm, level: parseInt(e.target.value) })} 
+                          className="w-full mt-1 p-2 border rounded-md"
+                        >
+                          <option value={1}>Level 1 (White Box Family)</option>
+                          <option value={2}>Level 2 (Red Box Family)</option>
+                          <option value={3}>Level 3 (Black Box Family)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label>Variant</Label>
+                        <select 
+                          value={boxForm.variant} 
+                          onChange={(e) => {
+                            const newVariant = e.target.value
+                            // Enforce data rule: if variant='sample', isSample must be true
+                            setBoxForm({ 
+                              ...boxForm, 
+                              variant: newVariant,
+                              isSample: newVariant === 'sample' ? true : boxForm.isSample
+                            })
+                          }} 
+                          className="w-full mt-1 p-2 border rounded-md"
+                        >
+                          <option value="sample">Sample (Free Entry Point)</option>
+                          <option value="vol1">Volume 1</option>
+                          <option value="vol2">Volume 2</option>
+                          <option value="full">Full</option>
+                        </select>
+                      </div>
                       <div className="flex items-center gap-4">
                         <Label>Sample</Label>
-                        <Switch checked={boxForm.isSample} onCheckedChange={(checked) => setBoxForm({ ...boxForm, isSample: checked })} />
+                        <Switch 
+                          checked={boxForm.isSample} 
+                          onCheckedChange={(checked) => {
+                            // Enforce data rule: if isSample=true, variant must be 'sample'
+                            setBoxForm({ 
+                              ...boxForm, 
+                              isSample: checked,
+                              variant: checked ? 'sample' : (boxForm.variant === 'sample' ? 'full' : boxForm.variant)
+                            })
+                          }} 
+                        />
+                        <span className="text-xs text-gray-500">
+                          {boxForm.isSample ? 'Free entry point for this level' : 'Paid content'}
+                        </span>
                       </div>
                       <div className="flex items-center gap-4">
                         <Label>Active</Label>
