@@ -2857,9 +2857,12 @@ export default function App() {
                                 {linkedPrice?.promo_enabled && linkedPrice?.promo_amount && (
                                   <span className="text-xs line-through text-gray-400">${linkedPrice.amount}</span>
                                 )}
-                                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">L{box.level || 1}</span>
-                                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded capitalize">{box.variant || 'full'}</span>
                                 {box.is_sample && <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">Sample</span>}
+                                {box.full_box_id && (
+                                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+                                    → {adminBoxes.find(b => b.id === box.full_box_id)?.name || box.full_box_id}
+                                  </span>
+                                )}
                                 {!box.is_active && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
                               </div>
                               <p className="text-sm text-gray-500">{box.tagline || box.description_short}</p>
