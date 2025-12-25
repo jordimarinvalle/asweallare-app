@@ -1874,11 +1874,12 @@ export default function App() {
         id: p.id,
         slug: p.slug,
         name: p.name,
-        imagePath: p.image_path,
+        imagePath: p.image_path || p.imagePath || '',
+        image_path: p.image_path || p.imagePath || '',  // Keep both formats
         collectionSeriesId: p.collection_series_id,
-        seriesName: p.collection_series?.name,
-        displayOrder: p.display_order,
-        isActive: p.is_active
+        seriesName: p.collection_series?.name || 'N/A',
+        displayOrder: p.display_order ?? 0,
+        isActive: p.is_active !== false
       }))
       setAdminPiles(normalizedPiles)
     }
