@@ -1198,6 +1198,8 @@ export default function App() {
     colorPaletteText: '',  // Store as text, parse on save
     displayOrder: 0,
     isSample: false,
+    level: 1,
+    variant: 'full',
     isActive: true,
     collectionSeriesId: ''
   })
