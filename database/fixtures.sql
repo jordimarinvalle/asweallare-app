@@ -35,12 +35,13 @@ INSERT INTO piles (id, slug, name, image_path, collection_series_id, display_ord
 -- ============================================================================
 -- 4. BOXES (Card Decks)
 -- ============================================================================
-INSERT INTO boxes (id, name, description, description_short, tagline, topics, price_id, color, color_palette, path, display_order, is_sample, level, variant, is_active, collection_series_id) VALUES
--- Sample Box (free entry point for Level 1)
-('box_sample_l1', 'Sample Cards', 'A free starter deck to experience Unscripted Conversations. Perfect for trying out the game.', '12 cards', 'Start Here', ARRAY['Introduction', 'Starter'], 'price_free', '#6B7280', ARRAY['#6B7280', '#9CA3AF'], 'sample-l1', 0, true, 1, 'sample', true, 'unscripted_conversations'),
+-- First insert the full box (no reference)
+INSERT INTO boxes (id, name, description, description_short, tagline, topics, price_id, color, color_palette, path, display_order, is_sample, full_box_id, is_active, collection_series_id) VALUES
+('box_white_full', 'White Box - Full', 'The complete experience with all conversation cards.', '108 cards', 'Full Game', ARRAY['Connection', 'Discovery'], 'price_box_standard', '#FFFFFF', ARRAY['#FFFFFF', '#F3F4F6'], 'white-full', 1, false, NULL, true, 'unscripted_conversations');
 
--- Level 1: White Box Family
-('box_white_full', 'White Box - Full', 'The complete Level 1 experience with all conversation cards.', '108 cards', 'Level 1', ARRAY['Connection', 'Discovery'], 'price_box_standard', '#FFFFFF', ARRAY['#FFFFFF', '#F3F4F6'], 'white-full', 1, false, 1, 'full', true, 'unscripted_conversations');
+-- Then insert the sample box referencing the full box
+INSERT INTO boxes (id, name, description, description_short, tagline, topics, price_id, color, color_palette, path, display_order, is_sample, full_box_id, is_active, collection_series_id) VALUES
+('box_sample', 'Sample Cards', 'A free starter deck to experience Unscripted Conversations. Perfect for trying out the game.', '12 cards', 'Start Here', ARRAY['Introduction', 'Starter'], 'price_free', '#6B7280', ARRAY['#6B7280', '#9CA3AF'], 'sample', 0, true, 'box_white_full', true, 'unscripted_conversations');
 
 -- ============================================================================
 -- Done! Fixtures loaded successfully.
