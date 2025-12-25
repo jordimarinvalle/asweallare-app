@@ -681,7 +681,7 @@ export async function POST(request) {
       }
       
       if (box.is_sample) {
-        return handleCORS(NextResponse.json({ error: 'Demo box is free' }, { status: 400 }))
+        return handleCORS(NextResponse.json({ error: 'Sample box is free' }, { status: 400 }))
       }
       
       const session = await getStripe().checkout.sessions.create({
