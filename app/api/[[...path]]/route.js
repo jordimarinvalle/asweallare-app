@@ -1248,14 +1248,16 @@ export async function PUT(request) {
       if (body.collectionSeriesId !== undefined) updateData.collection_series_id = body.collectionSeriesId
       if (body.isActive !== undefined) updateData.is_active = body.isActive
       
-      // Handle new level/variant/sample fields with data rules enforcement
-      if (body.level !== undefined) updateData.level = parseInt(body.level) || 1
-      if (body.variant !== undefined) updateData.variant = body.variant
+      // Handle is_sample and full_box_id fields
       if (body.isSample !== undefined) updateData.is_sample = body.isSample
-      
-      // Enforce data rules: if is_sample=true, variant must be 'sample' and vice versa
-      if (updateData.is_sample === true) updateData.variant = 'sample'
-      if (updateData.variant === 'sample') updateData.is_sample = true
+      if (body.fullBoxId !== undefined) {
+        // Only set full_box_id if this is a sample box
+        updateData.full_box_id = body.isSample ? body.fullBoxId : null
+      }
+      // If setting isSample to false, clear the full_box_id
+      if (body.isSample === false) {
+        updateData.full_box_id = null
+      }
       
       const { error } = await supabase
         .from('boxes')
