@@ -3137,57 +3137,63 @@ export default function App() {
                 )}
                 
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {adminPiles.map(pile => (
-                    <Card key={pile.id} className="p-4">
-                      <div className="flex gap-4">
-                        <div className="w-20 h-28 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center">
-                          {pile.imagePath ? (
-                            <img 
-                              src={pile.imagePath.startsWith('/') ? pile.imagePath : `/${pile.imagePath}`} 
-                              alt={pile.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => { 
-                                e.target.style.display = 'none'
-                                e.target.parentElement.innerHTML = '<span class="text-xs text-gray-400">No image</span>'
-                              }}
-                            />
-                          ) : (
-                            <span className="text-xs text-gray-400">No image</span>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium">{pile.name}</span>
-                            {!pile.isActive && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
+                  {adminPiles.map(pile => {
+                    // Extra debugging - log what we have
+                    console.log('Rendering pile:', pile.name, 'seriesName:', pile.seriesName, 'imagePath:', pile.imagePath)
+                    
+                    return (
+                      <Card key={pile.id} className="p-4">
+                        <div className="flex gap-4">
+                          <div className="w-20 h-28 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center">
+                            {pile.imagePath ? (
+                              <img 
+                                src={pile.imagePath.startsWith('/') ? pile.imagePath : `/${pile.imagePath}`} 
+                                alt={pile.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => { 
+                                  console.error('Image load failed:', pile.imagePath)
+                                  e.target.style.display = 'none'
+                                  e.target.parentElement.innerHTML = '<span class="text-xs text-gray-400">No image</span>'
+                                }}
+                              />
+                            ) : (
+                              <span className="text-xs text-gray-400">No image</span>
+                            )}
                           </div>
-                          <p className="text-xs text-gray-500 mb-1">Slug: {pile.slug}</p>
-                          <p className="text-xs text-gray-400">Series: {pile.seriesName}</p>
-                          <div className="flex gap-1 mt-2">
-                            <Button 
-                              onClick={() => { 
-                                setEditingPile(pile)
-                                setPileForm({
-                                  id: pile.id,
-                                  slug: pile.slug,
-                                  name: pile.name,
-                                  imagePath: pile.imagePath || '',
-                                  collectionSeriesId: pile.collectionSeriesId || '',
-                                  displayOrder: pile.displayOrder || 0,
-                                  isActive: pile.isActive !== false
-                                })
-                                setShowPileForm(true)
-                              }} 
-                              size="sm" 
-                              variant="ghost"
-                            >
-                              <Edit className="w-4 h-4 mr-1" /> Edit
-                            </Button>
-                            <Button onClick={() => { if(confirm('Delete this pile?')) handleDeletePile(pile.id) }} size="sm" variant="ghost" className="text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium">{pile.name}</span>
+                              {!pile.isActive && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
+                            </div>
+                            <p className="text-xs text-gray-500 mb-1">Slug: {pile.slug}</p>
+                            <p className="text-xs text-gray-400">Series: {pile.seriesName || 'N/A'}</p>
+                            <div className="flex gap-1 mt-2">
+                              <Button 
+                                onClick={() => { 
+                                  setEditingPile(pile)
+                                  setPileForm({
+                                    id: pile.id,
+                                    slug: pile.slug,
+                                    name: pile.name,
+                                    imagePath: pile.imagePath || '',
+                                    collectionSeriesId: pile.collectionSeriesId || '',
+                                    displayOrder: pile.displayOrder || 0,
+                                    isActive: pile.isActive !== false
+                                  })
+                                  setShowPileForm(true)
+                                }} 
+                                size="sm" 
+                                variant="ghost"
+                              >
+                                <Edit className="w-4 h-4 mr-1" /> Edit
+                              </Button>
+                              <Button onClick={() => { if(confirm('Delete this pile?')) handleDeletePile(pile.id) }} size="sm" variant="ghost" className="text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    )
+                  })}
                 </div>
               </div>
             )}
