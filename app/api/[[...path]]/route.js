@@ -438,10 +438,14 @@ export async function GET(request) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
       }
       
-      // Enrich with series names
-      const { data: series } = await supabase.from('collection_series').select('*')
+      // Enrich with series names - with proper error handling
+      const { data: series, error: seriesError } = await supabase.from('collection_series').select('*')
       const seriesMap = {}
-      if (series) series.forEach(s => { seriesMap[s.id] = s })
+      if (!seriesError && series) {
+        series.forEach(s => { seriesMap[s.id] = s })
+      } else if (seriesError) {
+        console.error('Failed to load collection_series for piles:', seriesError)
+      }
       
       const enrichedPiles = (piles || []).map(p => ({
         ...p,
