@@ -1252,9 +1252,17 @@ export async function PUT(request) {
       if (body.colorPalette !== undefined) updateData.color_palette = body.colorPalette
       if (body.path !== undefined) updateData.path = body.path
       if (body.displayOrder !== undefined) updateData.display_order = body.displayOrder
-      if (body.isDemo !== undefined) updateData.is_demo = body.isDemo
-      if (body.isActive !== undefined) updateData.is_active = body.isActive
       if (body.collectionSeriesId !== undefined) updateData.collection_series_id = body.collectionSeriesId
+      if (body.isActive !== undefined) updateData.is_active = body.isActive
+      
+      // Handle new level/variant/sample fields with data rules enforcement
+      if (body.level !== undefined) updateData.level = parseInt(body.level) || 1
+      if (body.variant !== undefined) updateData.variant = body.variant
+      if (body.isSample !== undefined) updateData.is_sample = body.isSample
+      
+      // Enforce data rules: if is_sample=true, variant must be 'sample' and vice versa
+      if (updateData.is_sample === true) updateData.variant = 'sample'
+      if (updateData.variant === 'sample') updateData.is_sample = true
       
       const { error } = await supabase
         .from('boxes')
