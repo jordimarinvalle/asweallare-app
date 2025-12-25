@@ -1957,16 +1957,6 @@ export default function App() {
       ? boxForm.colorPaletteText.split(',').map(c => c.trim()).filter(Boolean)
       : []
     
-    // Enforce data rule: if is_sample=true, variant must be 'sample' and vice versa
-    let finalIsSample = boxForm.isSample
-    let finalVariant = boxForm.variant
-    if (finalIsSample) {
-      finalVariant = 'sample'
-    }
-    if (finalVariant === 'sample') {
-      finalIsSample = true
-    }
-    
     const payload = {
       id: boxForm.id || undefined,  // Include id for new boxes (slug)
       name: boxForm.name,
@@ -1978,9 +1968,8 @@ export default function App() {
       color: boxForm.color,
       colorPalette: colorPalette,
       displayOrder: boxForm.displayOrder,
-      isSample: finalIsSample,
-      level: parseInt(boxForm.level) || 1,
-      variant: finalVariant,
+      isSample: boxForm.isSample,
+      fullBoxId: boxForm.isSample ? (boxForm.fullBoxId || null) : null,  // Only set if sample
       isActive: boxForm.isActive,
       collectionSeriesId: boxForm.collectionSeriesId || null
     }
@@ -2006,9 +1995,9 @@ export default function App() {
     setEditingBox(null)
     setShowBoxForm(false)
     setBoxForm({
-      name: '', description: '', descriptionShort: '', tagline: '', topicsText: '',
-      priceId: '', color: '#000000', colorPaletteText: '', path: '', displayOrder: 0,
-      isSample: false, isActive: true, collectionSeriesId: ''
+      id: '', name: '', description: '', descriptionShort: '', tagline: '', topicsText: '',
+      priceId: '', color: '#000000', colorPaletteText: '', displayOrder: 0,
+      isSample: false, fullBoxId: '', isActive: true, collectionSeriesId: ''
     })
     loadAdminBoxes()
   }
