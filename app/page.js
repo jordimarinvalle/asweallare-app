@@ -1805,6 +1805,8 @@ export default function App() {
         displayOrder: box.display_order,
         is_sample: box.is_sample,
         isSample: box.is_sample,
+        level: box.level || 1,
+        variant: box.variant || 'full',
         is_active: box.is_active,
         isActive: box.is_active,
         collection_series_id: box.collection_series_id,
