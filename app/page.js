@@ -2653,7 +2653,7 @@ export default function App() {
                   <h3 className="sr-only">Boxes (Decks)</h3>
                   <Button onClick={() => {
                     setEditingBox(null)
-                    setBoxForm({ id: '', name: '', description: '', descriptionShort: '', tagline: '', topicsText: '', priceId: '', color: '#000000', colorPaletteText: '', displayOrder: 0, isSample: false, isActive: true, collectionSeriesId: '' })
+                    setBoxForm({ id: '', name: '', description: '', descriptionShort: '', tagline: '', topicsText: '', priceId: '', color: '#000000', colorPaletteText: '', displayOrder: 0, isSample: false, level: 1, variant: 'full', isActive: true, collectionSeriesId: '' })
                     setShowBoxForm(true)
                   }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
                     <Plus className="w-4 h-4 mr-2" />Add Box
