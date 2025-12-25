@@ -1817,10 +1817,8 @@ export default function App() {
       }))
       setAdminBoxes(normalizedBoxes)
     }
-    // Also store piles if returned
-    if (data.piles) {
-      setAdminPiles(data.piles)
-    }
+    // NOTE: Don't overwrite adminPiles here - let loadAdminPiles handle it properly
+    // The piles returned from /api/admin/boxes are not normalized and lack seriesName
   }
   
   const loadAdminSeries = async () => {
