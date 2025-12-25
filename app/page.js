@@ -1870,17 +1870,28 @@ export default function App() {
     const response = await fetch('/api/admin/piles')
     const data = await response.json()
     if (data.piles) {
-      const normalizedPiles = data.piles.map(p => ({
-        id: p.id,
-        slug: p.slug,
-        name: p.name,
-        imagePath: p.image_path || p.imagePath || '',
-        image_path: p.image_path || p.imagePath || '',  // Keep both formats
-        collectionSeriesId: p.collection_series_id,
-        seriesName: p.collection_series?.name || 'N/A',
-        displayOrder: p.display_order ?? 0,
-        isActive: p.is_active !== false
-      }))
+      const normalizedPiles = data.piles.map(p => {
+        // Handle both join format (collection_series object) and manual enrichment format
+        let seriesName = 'N/A'
+        if (p.collection_series) {
+          // Could be an object from join or manual enrichment
+          seriesName = typeof p.collection_series === 'object' 
+            ? (p.collection_series.name || 'N/A')
+            : p.collection_series
+        }
+        
+        return {
+          id: p.id,
+          slug: p.slug,
+          name: p.name,
+          imagePath: p.image_path || p.imagePath || '',
+          image_path: p.image_path || p.imagePath || '',
+          collectionSeriesId: p.collection_series_id,
+          seriesName: seriesName,
+          displayOrder: p.display_order ?? 0,
+          isActive: p.is_active !== false
+        }
+      })
       setAdminPiles(normalizedPiles)
     }
   }
