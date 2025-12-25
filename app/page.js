@@ -3120,14 +3120,19 @@ export default function App() {
                   {adminPiles.map(pile => (
                     <Card key={pile.id} className="p-4">
                       <div className="flex gap-4">
-                        <div className="w-20 h-28 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                          {pile.imagePath && (
+                        <div className="w-20 h-28 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center">
+                          {pile.imagePath ? (
                             <img 
                               src={pile.imagePath.startsWith('/') ? pile.imagePath : `/${pile.imagePath}`} 
                               alt={pile.name}
                               className="w-full h-full object-cover"
-                              onError={(e) => { e.target.style.display = 'none' }}
+                              onError={(e) => { 
+                                e.target.style.display = 'none'
+                                e.target.parentElement.innerHTML = '<span class="text-xs text-gray-400">No image</span>'
+                              }}
                             />
+                          ) : (
+                            <span className="text-xs text-gray-400">No image</span>
                           )}
                         </div>
                         <div className="flex-1">
@@ -3136,7 +3141,7 @@ export default function App() {
                             {!pile.isActive && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
                           </div>
                           <p className="text-xs text-gray-500 mb-1">Slug: {pile.slug}</p>
-                          <p className="text-xs text-gray-400">Series: {pile.seriesName || 'N/A'}</p>
+                          <p className="text-xs text-gray-400">Series: {pile.seriesName}</p>
                           <div className="flex gap-1 mt-2">
                             <Button 
                               onClick={() => { 
@@ -3145,10 +3150,10 @@ export default function App() {
                                   id: pile.id,
                                   slug: pile.slug,
                                   name: pile.name,
-                                  imagePath: pile.imagePath,
+                                  imagePath: pile.imagePath || '',
                                   collectionSeriesId: pile.collectionSeriesId || '',
-                                  displayOrder: pile.displayOrder,
-                                  isActive: pile.isActive
+                                  displayOrder: pile.displayOrder || 0,
+                                  isActive: pile.isActive !== false
                                 })
                                 setShowPileForm(true)
                               }} 
