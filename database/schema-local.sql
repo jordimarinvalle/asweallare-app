@@ -80,13 +80,11 @@ CREATE TABLE boxes (
   path TEXT,
   display_order INTEGER DEFAULT 0,
   is_sample BOOLEAN DEFAULT false,
-  level INTEGER DEFAULT 1,
-  variant TEXT DEFAULT 'full',
+  full_box_id TEXT REFERENCES boxes(id),  -- Links sample box to its full version
   is_active BOOLEAN DEFAULT true,
   collection_series_id TEXT REFERENCES collection_series(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  CONSTRAINT boxes_variant_check CHECK (variant IN ('sample', 'vol1', 'vol2', 'full'))
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- ============================================================================
