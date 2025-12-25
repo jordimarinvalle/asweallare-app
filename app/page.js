@@ -1198,8 +1198,7 @@ export default function App() {
     colorPaletteText: '',  // Store as text, parse on save
     displayOrder: 0,
     isSample: false,
-    level: 1,
-    variant: 'full',
+    fullBoxId: '',  // Reference to the full version box (only for sample boxes)
     isActive: true,
     collectionSeriesId: ''
   })
