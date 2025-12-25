@@ -2930,6 +2930,8 @@ export default function App() {
                                 color: box.color || '#000000',
                                 colorPaletteText: (box.color_palette || []).join(', '),
                                 isSample: box.is_sample || false,
+                                level: box.level || 1,
+                                variant: box.variant || 'full',
                                 isActive: box.is_active !== false,
                                 displayOrder: box.display_order || 0
                               })
