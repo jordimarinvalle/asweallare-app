@@ -110,10 +110,18 @@ The database comes pre-loaded with:
 | `pile_white` | white | White Pile |
 
 ### Boxes
-| ID | Name | Demo? |
-|----|------|-------|
-| `box_demo` | Demo Box | Yes |
-| `box_placeholder` | Your First Box | No |
+| ID | Name | Sample? | Related Full Box |
+|----|------|---------|------------------|
+| `box_white_full` | White Box - Full | No | - |
+| `box_sample` | Sample Cards | Yes | box_white_full |
+
+### Box Data Model
+
+The box system uses a simple relationship:
+- **`is_sample`** (boolean): True for free sample boxes
+- **`full_box_id`** (foreign key): Links a sample box to its full version
+
+**Visibility Rule**: When a user owns the "full box", the linked sample box is automatically hidden from the game setup screen.
 
 ---
 
