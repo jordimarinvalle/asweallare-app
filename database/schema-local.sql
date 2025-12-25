@@ -79,11 +79,14 @@ CREATE TABLE boxes (
   color_palette TEXT[],
   path TEXT,
   display_order INTEGER DEFAULT 0,
-  is_demo BOOLEAN DEFAULT false,
+  is_sample BOOLEAN DEFAULT false,
+  level INTEGER DEFAULT 1,
+  variant TEXT DEFAULT 'full',
   is_active BOOLEAN DEFAULT true,
   collection_series_id TEXT REFERENCES collection_series(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT boxes_variant_check CHECK (variant IN ('sample', 'vol1', 'vol2', 'full'))
 );
 
 -- ============================================================================
