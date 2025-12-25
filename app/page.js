@@ -2462,7 +2462,7 @@ export default function App() {
             onGoToStore={() => setView('store')}
             onResetGame={() => {
               // Reset the game to start again with all sample cards
-              handleStartGame()
+              handleStartPlaying()
             }}
           />
         )}
