@@ -429,47 +429,47 @@ export async function GET(request) {
         return handleCORS(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }))
       }
       
-      // First try to get piles with collection_series joined
-      let piles = []
-      let enrichedPiles = []
+      // Get piles first
+      const { data: piles, error: pilesError } = await supabase
+        .from('piles')
+        .select('*')
+        .order('display_order', { ascending: true })
       
-      try {
-        // Try Supabase-style join first (works with Supabase)
-        const { data, error } = await supabase
-          .from('piles')
-          .select('*, collection_series:collection_series_id(id, name, description)')
-          .order('display_order', { ascending: true })
-        
-        if (!error && data) {
-          enrichedPiles = data
-        } else {
-          throw new Error('Join query failed, falling back')
-        }
-      } catch (e) {
-        // Fallback: Get piles and series separately (works with local DB)
-        const { data: pilesData, error: pilesError } = await supabase
-          .from('piles')
-          .select('*')
-          .order('display_order', { ascending: true })
-        
-        if (pilesError) {
-          return handleCORS(NextResponse.json({ error: pilesError.message }, { status: 500 }))
-        }
-        
-        piles = pilesData || []
-        
-        // Get all series for mapping
-        const { data: series } = await supabase.from('collection_series').select('*')
-        const seriesMap = {}
-        if (series) {
-          series.forEach(s => { seriesMap[s.id] = s })
-        }
-        
-        enrichedPiles = piles.map(p => ({
-          ...p,
-          collection_series: seriesMap[p.collection_series_id] || null
-        }))
+      if (pilesError) {
+        console.error('Failed to load piles:', pilesError)
+        return handleCORS(NextResponse.json({ error: pilesError.message }, { status: 500 }))
       }
+      
+      // Get all series for mapping - do this as a separate guaranteed query
+      const { data: series, error: seriesError } = await supabase
+        .from('collection_series')
+        .select('*')
+      
+      if (seriesError) {
+        console.error('Failed to load collection_series:', seriesError)
+      }
+      
+      // Build series lookup map
+      const seriesMap = {}
+      if (series && Array.isArray(series)) {
+        series.forEach(s => { 
+          if (s && s.id) {
+            seriesMap[s.id] = s 
+          }
+        })
+      }
+      
+      // Log for debugging
+      console.log(`[admin/piles] Loaded ${(piles || []).length} piles, ${Object.keys(seriesMap).length} series`)
+      
+      // Enrich piles with series data
+      const enrichedPiles = (piles || []).map(p => {
+        const seriesData = p.collection_series_id ? seriesMap[p.collection_series_id] : null
+        return {
+          ...p,
+          collection_series: seriesData || null
+        }
+      })
       
       return handleCORS(NextResponse.json({ piles: enrichedPiles }))
     }
