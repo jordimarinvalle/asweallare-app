@@ -563,7 +563,7 @@ function GamePlayView({
   onNextPlayer,
   onOpenCompleteGuide,
   onOpenQuickGuide,
-  isPlayingDemo = false,
+  isPlayingSample = false,
   totalCardsInDeck = 0,
   onGoToStore,
   onResetGame
@@ -601,26 +601,26 @@ function GamePlayView({
     resetTimer()
   }
   
-  // Calculate remaining cards for demo mode
+  // Calculate remaining cards for sample mode
   const remainingBlack = blackDeck.length
   const remainingWhite = whiteDeck.length
   const totalRemaining = remainingBlack + remainingWhite
   const cardsPlayed = totalCardsInDeck - totalRemaining - (currentBlack ? 1 : 0) - (currentWhite ? 1 : 0)
   
-  // Check if demo is finished (no more cards to draw)
-  const isDemoFinished = isPlayingDemo && blackDeck.length === 0 && whiteDeck.length === 0 && !currentBlack && !currentWhite
+  // Check if sample is finished (no more cards to draw)
+  const isSampleFinished = isPlayingSample && blackDeck.length === 0 && whiteDeck.length === 0 && !currentBlack && !currentWhite
   
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 sm:p-8">
-      {/* Demo Finished Modal */}
-      {isDemoFinished && (
+      {/* Sample Finished Modal */}
+      {isSampleFinished && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl">
             <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <Sparkles className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-2xl font-serif text-gray-900 mb-3">
-              You've played all the demo cards!
+              You've played all the sample cards!
             </h2>
             <p className="text-gray-600 mb-8">
               Enjoyed the experience? Unlock the full game with 108+ conversation cards for deeper, more meaningful connections.
@@ -639,7 +639,7 @@ function GamePlayView({
                 className="w-full py-4"
               >
                 <RefreshCcw className="w-4 h-4 mr-2" />
-                Play Demo Again
+                Play Sample Again
               </Button>
             </div>
           </div>
@@ -652,8 +652,8 @@ function GamePlayView({
           ← Change Boxes
         </Button>
         
-        {/* Remaining cards counter for demo */}
-        {isPlayingDemo && !isDemoFinished && (
+        {/* Remaining cards counter for sample */}
+        {isPlayingSample && !isSampleFinished && (
           <div className="bg-amber-100 text-amber-800 px-3 py-1.5 rounded-full text-sm font-medium">
             {totalRemaining + (currentBlack ? 1 : 0) + (currentWhite ? 1 : 0)} cards left
           </div>
