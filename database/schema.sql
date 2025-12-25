@@ -1,6 +1,6 @@
 -- ============================================================================
 -- AS WE ALL ARE - Database Schema
--- Run this file to create/recreate the database structure
+-- Clean setup script - run this for a fresh database
 -- ============================================================================
 
 -- Drop existing tables (in correct order due to foreign keys)
@@ -16,7 +16,7 @@ DROP TABLE IF EXISTS subscription_plans CASCADE;
 
 -- ============================================================================
 -- 1. COLLECTION_SERIES TABLE
--- Represents a family of games that can be combined together
+-- Groups of related card boxes (e.g., "Unscripted Conversations")
 -- ============================================================================
 CREATE TABLE collection_series (
   id TEXT PRIMARY KEY,
@@ -29,8 +29,8 @@ CREATE TABLE collection_series (
 );
 
 -- ============================================================================
--- 2. PRICES TABLE (now defined BEFORE boxes since boxes reference it)
--- Membership/access pricing options - reusable across boxes and bundles
+-- 2. PRICES TABLE
+-- Pricing options for boxes and memberships
 -- ============================================================================
 CREATE TABLE prices (
   id TEXT PRIMARY KEY,
@@ -51,8 +51,7 @@ CREATE TABLE prices (
 
 -- ============================================================================
 -- 3. BOXES TABLE
--- Card collections/decks with metadata
--- NOTE: price_id links to a Price entity (no direct price value on box)
+-- Card decks/boxes that users can purchase or sample
 -- ============================================================================
 CREATE TABLE boxes (
   id TEXT PRIMARY KEY,
@@ -64,11 +63,9 @@ CREATE TABLE boxes (
   price_id TEXT REFERENCES prices(id),
   color TEXT DEFAULT '#000000',
   color_palette TEXT[],
-  path TEXT,
   display_order INTEGER DEFAULT 0,
   is_sample BOOLEAN DEFAULT false,
-  level INTEGER DEFAULT 1,
-  variant TEXT DEFAULT 'full',
+  full_box_id TEXT REFERENCES boxes(id),  -- Links sample box to its full version
   is_active BOOLEAN DEFAULT true,
   collection_series_id TEXT REFERENCES collection_series(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -77,8 +74,7 @@ CREATE TABLE boxes (
 
 -- ============================================================================
 -- 4. PILES TABLE
--- Represents card back designs (black pile, white pile)
--- Default fallback images for card backs within a collection series
+-- Card back designs (e.g., "Black Pile", "White Pile")
 -- ============================================================================
 CREATE TABLE piles (
   id TEXT PRIMARY KEY,
@@ -94,7 +90,7 @@ CREATE TABLE piles (
 
 -- ============================================================================
 -- 5. CARDS TABLE
--- Individual cards linked to a box and pile
+-- Individual cards belonging to boxes
 -- ============================================================================
 CREATE TABLE cards (
   id TEXT PRIMARY KEY,
@@ -108,8 +104,7 @@ CREATE TABLE cards (
 
 -- ============================================================================
 -- 6. BUNDLES TABLE
--- Groups of boxes with a shared price
--- NOTE: price_id links to a Price entity
+-- Groups of boxes sold together
 -- ============================================================================
 CREATE TABLE bundles (
   id TEXT PRIMARY KEY,
@@ -124,8 +119,8 @@ CREATE TABLE bundles (
 );
 
 -- ============================================================================
--- 6. USER_PRODUCTS TABLE (Legacy - backwards compatibility)
--- Box purchases and subscriptions
+-- 7. USER_PRODUCTS TABLE
+-- Tracks individual box purchases per user
 -- ============================================================================
 CREATE TABLE user_products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -141,8 +136,8 @@ CREATE TABLE user_products (
 );
 
 -- ============================================================================
--- 7. USER_MEMBERSHIPS TABLE
--- Time-based membership tracking
+-- 8. USER_MEMBERSHIPS TABLE
+-- Tracks membership/bundle purchases per user
 -- ============================================================================
 CREATE TABLE user_memberships (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -158,8 +153,8 @@ CREATE TABLE user_memberships (
 );
 
 -- ============================================================================
--- 8. SUBSCRIPTION_PLANS TABLE (Legacy)
--- Pricing configuration
+-- 9. SUBSCRIPTION_PLANS TABLE
+-- Available subscription tiers
 -- ============================================================================
 CREATE TABLE subscription_plans (
   id TEXT PRIMARY KEY,
@@ -176,13 +171,15 @@ CREATE TABLE subscription_plans (
 -- INDEXES
 -- ============================================================================
 CREATE INDEX idx_cards_box_id ON cards(box_id);
-CREATE INDEX idx_cards_pile ON cards(pile_id);
+CREATE INDEX idx_cards_pile_id ON cards(pile_id);
 CREATE INDEX idx_cards_active ON cards(is_active);
 CREATE INDEX idx_piles_series ON piles(collection_series_id);
 CREATE INDEX idx_piles_slug ON piles(slug);
 CREATE INDEX idx_boxes_series ON boxes(collection_series_id);
 CREATE INDEX idx_boxes_price ON boxes(price_id);
 CREATE INDEX idx_boxes_display_order ON boxes(display_order);
+CREATE INDEX idx_boxes_is_sample ON boxes(is_sample);
+CREATE INDEX idx_boxes_full_box ON boxes(full_box_id);
 CREATE INDEX idx_bundles_price ON bundles(price_id);
 CREATE INDEX idx_user_products_user_id ON user_products(user_id);
 CREATE INDEX idx_user_memberships_user_id ON user_memberships(user_id);
@@ -223,72 +220,6 @@ CREATE TRIGGER update_bundles_updated_at
 CREATE TRIGGER update_user_memberships_updated_at
   BEFORE UPDATE ON user_memberships
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- ============================================================================
--- ROW LEVEL SECURITY (for Supabase)
--- Note: For local PostgreSQL without Supabase, you can skip RLS
--- ============================================================================
-
--- Enable RLS
-ALTER TABLE collection_series ENABLE ROW LEVEL SECURITY;
-ALTER TABLE prices ENABLE ROW LEVEL SECURITY;
-ALTER TABLE boxes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE piles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE cards ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bundles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_products ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_memberships ENABLE ROW LEVEL SECURITY;
-
--- Public read policies (anyone can read active items)
-CREATE POLICY collection_series_public_read ON collection_series
-  FOR SELECT USING (true);
-
-CREATE POLICY prices_public_read ON prices
-  FOR SELECT USING (true);
-
-CREATE POLICY boxes_public_read ON boxes
-  FOR SELECT USING (true);
-
-CREATE POLICY piles_public_read ON piles
-  FOR SELECT USING (true);
-
-CREATE POLICY cards_public_read ON cards
-  FOR SELECT USING (true);
-
-CREATE POLICY bundles_public_read ON bundles
-  FOR SELECT USING (true);
-
--- User can read their own data
-CREATE POLICY user_products_read_own ON user_products
-  FOR SELECT USING (true);
-
-CREATE POLICY user_memberships_read_own ON user_memberships
-  FOR SELECT USING (true);
-
--- Allow all operations for authenticated users (admin check in app)
-CREATE POLICY collection_series_authenticated_all ON collection_series
-  FOR ALL USING (true) WITH CHECK (true);
-
-CREATE POLICY prices_authenticated_all ON prices
-  FOR ALL USING (true) WITH CHECK (true);
-
-CREATE POLICY boxes_authenticated_all ON boxes
-  FOR ALL USING (true) WITH CHECK (true);
-
-CREATE POLICY piles_authenticated_all ON piles
-  FOR ALL USING (true) WITH CHECK (true);
-
-CREATE POLICY cards_authenticated_all ON cards
-  FOR ALL USING (true) WITH CHECK (true);
-
-CREATE POLICY bundles_authenticated_all ON bundles
-  FOR ALL USING (true) WITH CHECK (true);
-
-CREATE POLICY user_products_authenticated_all ON user_products
-  FOR ALL USING (true) WITH CHECK (true);
-
-CREATE POLICY user_memberships_authenticated_all ON user_memberships
-  FOR ALL USING (true) WITH CHECK (true);
 
 -- ============================================================================
 -- Done! Schema created successfully.
