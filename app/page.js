@@ -2467,7 +2467,7 @@ export default function App() {
               setBookletTitle("Quick Guide — 30 Second Read")
               setBookletOpen(true)
             }}
-            isPlayingSample={selectedBoxIds.length === 1 && selectedBoxIds[0] === 'box_sample'}
+            isPlayingSample={selectedBoxIds.length > 0 && boxes.filter(b => selectedBoxIds.includes(b.id)).every(b => b.is_sample)}
             totalCardsInDeck={allCards.length}
             onGoToStore={() => setView('store')}
             onResetGame={() => {
