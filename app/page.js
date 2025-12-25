@@ -723,15 +723,15 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
   }
   
   // Smart box filtering logic:
-  // - Hide demo box if white box (108) is owned
+  // - Hide sample box if white box (108) is owned
   // - Hide white box (108) if white box XL (216) is owned
   const hasWhiteBox = boxes.some(b => b.id === 'box_white' && b.hasAccess)
   const hasWhiteBoxXL = boxes.some(b => b.id === 'box_white_xl' && b.hasAccess)
   
   const filterAccessibleBoxes = (box) => {
     if (!box.hasAccess) return false
-    // Hide demo if user has white box or white box XL
-    if (box.id === 'box_demo' && (hasWhiteBox || hasWhiteBoxXL)) return false
+    // Hide sample if user has white box or white box XL
+    if (box.id === 'box_sample' && (hasWhiteBox || hasWhiteBoxXL)) return false
     // Hide white box 108 if user has white box XL (216)
     if (box.id === 'box_white' && hasWhiteBoxXL) return false
     return true
@@ -739,8 +739,8 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
   
   const filterLockedBoxes = (box) => {
     if (box.hasAccess) return false
-    // Don't show demo box in purchasable list
-    if (box.is_demo) return false
+    // Don't show sample box in purchasable list
+    if (box.is_sample) return false
     // Hide white box 108 from purchase if user already has XL
     if (box.id === 'box_white' && hasWhiteBoxXL) return false
     return true
@@ -801,7 +801,7 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
                   <h4 className="font-medium text-gray-900">{box.name}</h4>
                   <p className="text-xs text-gray-500 mt-1">{box.description}</p>
                   
-                  {box.is_demo && (
+                  {box.is_sample && (
                     <span className="inline-block mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                       Free
                     </span>
@@ -851,8 +851,8 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
 // ============================================================================
 function StoreScreen({ boxes, plans, onPurchaseBox, onSubscribe, onBack, user, hasAllAccess }) {
   const [selectedTab, setSelectedTab] = useState('boxes')
-  const lockedBoxes = boxes.filter(b => !b.hasAccess && !b.is_demo)
-  const ownedBoxes = boxes.filter(b => b.hasAccess && !b.is_demo)
+  const lockedBoxes = boxes.filter(b => !b.hasAccess && !b.is_sample)
+  const ownedBoxes = boxes.filter(b => b.hasAccess && !b.is_sample)
   
   return (
     <div className="min-h-[calc(100vh-4rem)] p-4 sm:p-8">
@@ -988,7 +988,7 @@ function StoreScreen({ boxes, plans, onPurchaseBox, onSubscribe, onBack, user, h
                 <h3 className="text-2xl font-serif text-gray-900 mb-2">You have All Access!</h3>
                 <p className="text-gray-600 mb-6">Enjoy unlimited access to all current and future boxes.</p>
                 <div className="flex flex-wrap justify-center gap-3">
-                  {boxes.filter(b => !b.is_demo).map(box => (
+                  {boxes.filter(b => !b.is_sample).map(box => (
                     <span 
                       key={box.id}
                       className="px-3 py-1 rounded-full text-sm border"
@@ -1015,14 +1015,14 @@ function StoreScreen({ boxes, plans, onPurchaseBox, onSubscribe, onBack, user, h
                       </div>
                       <h3 className="text-3xl font-serif mb-3">All Access Pass</h3>
                       <p className="text-gray-300 mb-6 max-w-md">
-                        Get unlimited access to all {boxes.filter(b => !b.is_demo).length} card boxes, 
+                        Get unlimited access to all {boxes.filter(b => !b.is_sample).length} card boxes, 
                         plus any new boxes we release in the future.
                       </p>
                       
                       <ul className="space-y-2 mb-6">
                         <li className="flex items-center gap-2">
                           <Check className="w-5 h-5 text-green-400" />
-                          <span>Access to all {boxes.filter(b => !b.is_demo).length} premium boxes</span>
+                          <span>Access to all {boxes.filter(b => !b.is_sample).length} premium boxes</span>
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-5 h-5 text-green-400" />
@@ -1180,7 +1180,7 @@ export default function App() {
     title: '',
     hint: '',
     language: 'en',
-    isDemo: false,
+    isSample: false,
     isActive: true,
     boxId: '',
     imagePath: ''
@@ -1197,7 +1197,7 @@ export default function App() {
     color: '#000000',
     colorPaletteText: '',  // Store as text, parse on save
     displayOrder: 0,
-    isDemo: false,
+    isSample: false,
     isActive: true,
     collectionSeriesId: ''
   })
@@ -1364,9 +1364,9 @@ export default function App() {
       if (data.boxes) {
         setBoxes(data.boxes)
         setHasAllAccess(data.hasAllAccess || false)
-        // Auto-select demo boxes
-        const demoBoxIds = data.boxes.filter(b => b.is_demo && b.hasAccess).map(b => b.id)
-        setSelectedBoxIds(demoBoxIds)
+        // Auto-select sample boxes
+        const sampleBoxIds = data.boxes.filter(b => b.is_sample && b.hasAccess).map(b => b.id)
+        setSelectedBoxIds(sampleBoxIds)
       }
     }
     
@@ -1405,7 +1405,7 @@ export default function App() {
         title: card.title,
         hint: card.hint,
         language: card.language,
-        isDemo: card.isdemo,
+        isSample: card.issample,
         isActive: card.isactive,
         boxId: card.box_id,
         imagePath: card.image_path,
@@ -1565,7 +1565,7 @@ export default function App() {
             setBoxes(boxData.boxes)
             setHasAllAccess(boxData.hasAllAccess || false)
             const accessibleBoxIds = boxData.boxes.filter(b => b.hasAccess).map(b => b.id)
-            setSelectedBoxIds(accessibleBoxIds.length > 0 ? accessibleBoxIds : boxData.boxes.filter(b => b.is_demo && b.hasAccess).map(b => b.id))
+            setSelectedBoxIds(accessibleBoxIds.length > 0 ? accessibleBoxIds : boxData.boxes.filter(b => b.is_sample && b.hasAccess).map(b => b.id))
           }
         } else if (authMode === 'signup') {
           // Supabase signup - needs email confirmation
@@ -1591,7 +1591,7 @@ export default function App() {
             setBoxes(boxData.boxes)
             setHasAllAccess(boxData.hasAllAccess || false)
             const accessibleBoxIds = boxData.boxes.filter(b => b.hasAccess).map(b => b.id)
-            setSelectedBoxIds(accessibleBoxIds.length > 0 ? accessibleBoxIds : boxData.boxes.filter(b => b.is_demo && b.hasAccess).map(b => b.id))
+            setSelectedBoxIds(accessibleBoxIds.length > 0 ? accessibleBoxIds : boxData.boxes.filter(b => b.is_sample && b.hasAccess).map(b => b.id))
           }
         }
       }
@@ -1664,9 +1664,9 @@ export default function App() {
       const data = await response.json()
       if (data.boxes) {
         setBoxes(data.boxes)
-        // Auto-select only demo boxes for non-authenticated user
-        const demoBoxIds = data.boxes.filter(b => b.is_demo && b.hasAccess).map(b => b.id)
-        setSelectedBoxIds(demoBoxIds)
+        // Auto-select only sample boxes for non-authenticated user
+        const sampleBoxIds = data.boxes.filter(b => b.is_sample && b.hasAccess).map(b => b.id)
+        setSelectedBoxIds(sampleBoxIds)
       }
     } catch (error) {
       console.error('Failed to reload boxes:', error)
@@ -1725,7 +1725,7 @@ export default function App() {
     // Get box folder from selected box
     let boxFolder = 'uploads'
     
-    if (cardForm.boxId === 'box_demo') boxFolder = 'white-box-demo'
+    if (cardForm.boxId === 'box_sample') boxFolder = 'white-box-sample'
     else if (cardForm.boxId === 'box_white') boxFolder = 'white-box-108'
     else if (cardForm.boxId === 'box_white_xl') boxFolder = 'white-box-216'
     else if (cardForm.boxId === 'box_black') boxFolder = 'black-box-108'
@@ -1801,8 +1801,8 @@ export default function App() {
         path: box.path,
         display_order: box.display_order,
         displayOrder: box.display_order,
-        is_demo: box.is_demo,
-        isDemo: box.is_demo,
+        is_sample: box.is_sample,
+        isSample: box.is_sample,
         is_active: box.is_active,
         isActive: box.is_active,
         collection_series_id: box.collection_series_id,
@@ -1917,7 +1917,7 @@ export default function App() {
       title: cardForm.title,
       hint: cardForm.hint,
       language: cardForm.language,
-      isDemo: cardForm.isDemo,
+      isSample: cardForm.isSample,
       isActive: cardForm.isActive,
       boxId: cardForm.boxId || null,
       imagePath: cardForm.imagePath || null
@@ -1941,7 +1941,7 @@ export default function App() {
     
     setEditingCard(null)
     setShowCardForm(false)
-    setCardForm({ color: 'black', title: '', hint: '', language: 'en', isDemo: false, isActive: true, boxId: '', imagePath: '' })
+    setCardForm({ color: 'black', title: '', hint: '', language: 'en', isSample: false, isActive: true, boxId: '', imagePath: '' })
     loadAdminCards()
   }
   
@@ -1965,7 +1965,7 @@ export default function App() {
       color: boxForm.color,
       colorPalette: colorPalette,
       displayOrder: boxForm.displayOrder,
-      isDemo: boxForm.isDemo,
+      isSample: boxForm.isSample,
       isActive: boxForm.isActive,
       collectionSeriesId: boxForm.collectionSeriesId || null
     }
@@ -1993,7 +1993,7 @@ export default function App() {
     setBoxForm({
       name: '', description: '', descriptionShort: '', tagline: '', topicsText: '',
       priceId: '', color: '#000000', colorPaletteText: '', path: '', displayOrder: 0,
-      isDemo: false, isActive: true, collectionSeriesId: ''
+      isSample: false, isActive: true, collectionSeriesId: ''
     })
     loadAdminBoxes()
   }
@@ -2453,11 +2453,11 @@ export default function App() {
               setBookletTitle("Quick Guide — 30 Second Read")
               setBookletOpen(true)
             }}
-            isPlayingDemo={selectedBoxIds.length === 1 && selectedBoxIds[0] === 'box_demo'}
+            isPlayingSample={selectedBoxIds.length === 1 && selectedBoxIds[0] === 'box_sample'}
             totalCardsInDeck={allCards.length}
             onGoToStore={() => setView('store')}
             onResetGame={() => {
-              // Reset the game to start again with all demo cards
+              // Reset the game to start again with all sample cards
               handleStartGame()
             }}
           />
@@ -2639,7 +2639,7 @@ export default function App() {
                   <h3 className="sr-only">Boxes (Decks)</h3>
                   <Button onClick={() => {
                     setEditingBox(null)
-                    setBoxForm({ id: '', name: '', description: '', descriptionShort: '', tagline: '', topicsText: '', priceId: '', color: '#000000', colorPaletteText: '', displayOrder: 0, isDemo: false, isActive: true, collectionSeriesId: '' })
+                    setBoxForm({ id: '', name: '', description: '', descriptionShort: '', tagline: '', topicsText: '', priceId: '', color: '#000000', colorPaletteText: '', displayOrder: 0, isSample: false, isActive: true, collectionSeriesId: '' })
                     setShowBoxForm(true)
                   }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
                     <Plus className="w-4 h-4 mr-2" />Add Box
@@ -2675,7 +2675,7 @@ export default function App() {
                       <div>
                         <Label>Price</Label>
                         <select value={boxForm.priceId || ''} onChange={(e) => setBoxForm({ ...boxForm, priceId: e.target.value || null })} className="w-full mt-1 p-2 border rounded-md">
-                          <option value="">-- No Price (Free/Demo) --</option>
+                          <option value="">-- No Price (Free/Sample) --</option>
                           {adminPrices.map(p => (
                             <option key={p.id} value={p.id}>
                               {p.label} - ${p.promo_enabled && p.promo_amount ? p.promo_amount : p.amount}
@@ -2716,8 +2716,8 @@ export default function App() {
                         <Input type="number" value={boxForm.displayOrder} onChange={(e) => setBoxForm({ ...boxForm, displayOrder: parseInt(e.target.value) || 0 })} className="mt-1" />
                       </div>
                       <div className="flex items-center gap-4">
-                        <Label>Demo</Label>
-                        <Switch checked={boxForm.isDemo} onCheckedChange={(checked) => setBoxForm({ ...boxForm, isDemo: checked })} />
+                        <Label>Sample</Label>
+                        <Switch checked={boxForm.isSample} onCheckedChange={(checked) => setBoxForm({ ...boxForm, isSample: checked })} />
                       </div>
                       <div className="flex items-center gap-4">
                         <Label>Active</Label>
@@ -2819,7 +2819,7 @@ export default function App() {
                                 {linkedPrice?.promo_enabled && linkedPrice?.promo_amount && (
                                   <span className="text-xs line-through text-gray-400">${linkedPrice.amount}</span>
                                 )}
-                                {box.is_demo && <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">Demo</span>}
+                                {box.is_sample && <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">Sample</span>}
                                 {!box.is_active && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Inactive</span>}
                               </div>
                               <p className="text-sm text-gray-500">{box.tagline || box.description_short}</p>
@@ -2915,7 +2915,7 @@ export default function App() {
                                 priceId: box.price_id || '',
                                 color: box.color || '#000000',
                                 colorPaletteText: (box.color_palette || []).join(', '),
-                                isDemo: box.is_demo || false,
+                                isSample: box.is_sample || false,
                                 isActive: box.is_active !== false,
                                 displayOrder: box.display_order || 0
                               })
