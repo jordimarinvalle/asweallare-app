@@ -3001,13 +3001,18 @@ export default function App() {
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="sr-only">Piles (Card Backs)</h3>
-                  <Button onClick={() => {
-                    setEditingPile(null)
-                    setPileForm({ id: '', slug: '', name: '', imagePath: '', collectionSeriesId: '', displayOrder: 0, isActive: true })
-                    setShowPileForm(true)
-                  }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
-                    <Plus className="w-4 h-4 mr-2" />Add Pile
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={loadAdminPiles} variant="outline" size="sm">
+                      <RefreshCcw className="w-4 h-4 mr-2" />Refresh
+                    </Button>
+                    <Button onClick={() => {
+                      setEditingPile(null)
+                      setPileForm({ id: '', slug: '', name: '', imagePath: '', collectionSeriesId: '', displayOrder: 0, isActive: true })
+                      setShowPileForm(true)
+                    }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
+                      <Plus className="w-4 h-4 mr-2" />Add Pile
+                    </Button>
+                  </div>
                 </div>
                 
                 {showPileForm && (
