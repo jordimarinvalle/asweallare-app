@@ -283,18 +283,24 @@ export async function GET(request) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
       }
       
-      // Get boxes and piles for enrichment
-      const { data: boxes } = await supabase.from('boxes').select('*')
-      const { data: piles } = await supabase.from('piles').select('*')
-      const { data: series } = await supabase.from('collection_series').select('*')
+      // Get boxes, piles and series for enrichment - use Promise.all for reliability
+      const [boxesResult, pilesResult, seriesResult] = await Promise.all([
+        supabase.from('boxes').select('*'),
+        supabase.from('piles').select('*'),
+        supabase.from('collection_series').select('*')
+      ])
+      
+      const boxes = boxesResult.data || []
+      const piles = pilesResult.data || []
+      const series = seriesResult.data || []
       
       const boxMap = {}
       const pileMap = {}
       const seriesMap = {}
       
-      if (boxes) boxes.forEach(b => { boxMap[b.id] = b })
-      if (piles) piles.forEach(p => { pileMap[p.id] = p })
-      if (series) series.forEach(s => { seriesMap[s.id] = s })
+      boxes.forEach(b => { if (b && b.id) boxMap[b.id] = b })
+      piles.forEach(p => { if (p && p.id) pileMap[p.id] = p })
+      series.forEach(s => { if (s && s.id) seriesMap[s.id] = s })
       
       // Enrich cards with box/pile info
       const enrichedCards = (cards || []).map(card => {
