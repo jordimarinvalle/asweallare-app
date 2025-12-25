@@ -1956,6 +1956,16 @@ export default function App() {
       ? boxForm.colorPaletteText.split(',').map(c => c.trim()).filter(Boolean)
       : []
     
+    // Enforce data rule: if is_sample=true, variant must be 'sample' and vice versa
+    let finalIsSample = boxForm.isSample
+    let finalVariant = boxForm.variant
+    if (finalIsSample) {
+      finalVariant = 'sample'
+    }
+    if (finalVariant === 'sample') {
+      finalIsSample = true
+    }
+    
     const payload = {
       id: boxForm.id || undefined,  // Include id for new boxes (slug)
       name: boxForm.name,
@@ -1967,7 +1977,9 @@ export default function App() {
       color: boxForm.color,
       colorPalette: colorPalette,
       displayOrder: boxForm.displayOrder,
-      isSample: boxForm.isSample,
+      isSample: finalIsSample,
+      level: parseInt(boxForm.level) || 1,
+      variant: finalVariant,
       isActive: boxForm.isActive,
       collectionSeriesId: boxForm.collectionSeriesId || null
     }
