@@ -13,7 +13,7 @@ INSERT INTO collection_series (id, name, description, display_order, is_active) 
 -- 2. PRICES
 -- ============================================================================
 INSERT INTO prices (id, label, payment_info, hook_info, amount, promo_amount, promo_enabled, currency, membership_days, stripe_price_id, display_order, is_active) VALUES
--- Free/Demo pricing (no charge)
+-- Free pricing (no charge)
 ('price_free', 'Free', 'No payment required', 'Try it free!', 0.00, NULL, false, 'USD', NULL, NULL, 0, true),
 
 -- Individual box prices
