@@ -338,19 +338,29 @@ export async function GET(request) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
       }
       
-      // Get all cards to count per box/pile
-      const { data: cards } = await supabase.from('cards').select('*')
-      const { data: piles } = await supabase.from('piles').select('*')
-      const { data: series } = await supabase.from('collection_series').select('*')
-      const { data: prices } = await supabase.from('prices').select('*')
+      // Get all related data - use Promise.all for parallel fetching
+      const [cardsResult, pilesResult, seriesResult, pricesResult] = await Promise.all([
+        supabase.from('cards').select('*'),
+        supabase.from('piles').select('*'),
+        supabase.from('collection_series').select('*'),
+        supabase.from('prices').select('*')
+      ])
+      
+      const cards = cardsResult.data || []
+      const piles = pilesResult.data || []
+      const series = seriesResult.data || []
+      const prices = pricesResult.data || []
+      
+      // Log for debugging
+      console.log(`[admin/boxes] Loaded ${boxes?.length || 0} boxes, ${series.length} series, ${piles.length} piles, ${prices.length} prices`)
       
       const seriesMap = {}
       const priceMap = {}
       const pileMap = {}
       
-      if (series) series.forEach(s => { seriesMap[s.id] = s })
-      if (prices) prices.forEach(p => { priceMap[p.id] = p })
-      if (piles) piles.forEach(p => { pileMap[p.id] = p })
+      series.forEach(s => { if (s && s.id) seriesMap[s.id] = s })
+      prices.forEach(p => { if (p && p.id) priceMap[p.id] = p })
+      piles.forEach(p => { if (p && p.id) pileMap[p.id] = p })
       
       // Count cards per box per pile
       const cardCounts = {}
