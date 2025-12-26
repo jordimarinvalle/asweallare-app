@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseServer } from '../../../../lib/supabase-server'
+import { createSupabaseServer } from '@/lib/supabase-server'
 
 // GET - Fetch mockup images for a box (public endpoint)
 export async function GET(request, { params }) {
