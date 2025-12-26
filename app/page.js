@@ -3330,6 +3330,270 @@ export default function App() {
               </div>
             )}
 
+            {/* MOCKUPS TAB */}
+            {adminTab === 'mockups' && (
+              <div>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                  <div className="flex-1 w-full sm:w-auto">
+                    <Label className="mb-2 block">Select Box</Label>
+                    <select 
+                      value={mockupsBoxId} 
+                      onChange={(e) => {
+                        setMockupsBoxId(e.target.value)
+                        loadMockups(e.target.value)
+                      }}
+                      className="w-full sm:w-64 p-2 border rounded-md"
+                    >
+                      <option value="">-- Select a box --</option>
+                      {adminBoxes.map(box => (
+                        <option key={box.id} value={box.id}>{box.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {mockupsBoxId && (
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => loadMockups(mockupsBoxId)} 
+                        variant="outline" 
+                        size="sm"
+                        disabled={mockupsLoading}
+                      >
+                        <RefreshCcw className={`w-4 h-4 mr-2 ${mockupsLoading ? 'animate-spin' : ''}`} />
+                        Refresh
+                      </Button>
+                      <Button 
+                        onClick={handleDownloadMockups} 
+                        variant="outline" 
+                        size="sm"
+                        disabled={!mockupsData.mainImage && !mockupsData.secondaryImage && mockupsData.cardMockups.length === 0}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download All
+                      </Button>
+                      <Button 
+                        onClick={() => handleDeleteMockup('all')} 
+                        variant="outline" 
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                        disabled={!mockupsData.mainImage && !mockupsData.secondaryImage && mockupsData.cardMockups.length === 0}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete All
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                
+                {!mockupsBoxId && (
+                  <Card className="p-8 text-center text-gray-500">
+                    <Image className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>Select a box to manage its mockup images</p>
+                  </Card>
+                )}
+                
+                {mockupsBoxId && mockupsLoading && (
+                  <Card className="p-8 text-center text-gray-500">
+                    <RefreshCcw className="w-8 h-8 mx-auto mb-4 animate-spin text-gray-400" />
+                    <p>Loading mockups...</p>
+                  </Card>
+                )}
+                
+                {mockupsBoxId && !mockupsLoading && (
+                  <div className="space-y-6">
+                    {/* Main & Secondary Images */}
+                    <div className="grid sm:grid-cols-2 gap-6">
+                      {/* Main Image */}
+                      <Card className="p-4">
+                        <div className="flex justify-between items-center mb-3">
+                          <h4 className="font-medium">Main Image (Hero)</h4>
+                          {mockupsData.mainImage && (
+                            <Button 
+                              onClick={() => handleDeleteMockup('main')} 
+                              size="sm" 
+                              variant="ghost"
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                        
+                        {mockupsData.mainImage ? (
+                          <div className="relative">
+                            <img 
+                              src={mockupsData.mainImage.image_path} 
+                              alt="Main mockup" 
+                              className="w-full h-48 object-contain bg-gray-50 rounded-lg"
+                            />
+                            <p className="text-xs text-gray-400 mt-2 truncate">{mockupsData.mainImage.image_path}</p>
+                          </div>
+                        ) : (
+                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center">
+                            <Image className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                            <p className="text-sm text-gray-500 mb-3">No main image</p>
+                          </div>
+                        )}
+                        
+                        <div className="mt-3">
+                          <input 
+                            type="file" 
+                            accept=".png,.jpg,.jpeg,.webp"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                handleMockupUpload(e.target.files[0], 'BOX_MAIN')
+                                e.target.value = ''
+                              }
+                            }}
+                            className="hidden"
+                            id="mockup-main-upload"
+                          />
+                          <label htmlFor="mockup-main-upload">
+                            <Button asChild size="sm" variant="outline" className="w-full cursor-pointer">
+                              <span><Upload className="w-4 h-4 mr-2" />{mockupsData.mainImage ? 'Replace' : 'Upload'} Main Image</span>
+                            </Button>
+                          </label>
+                        </div>
+                      </Card>
+                      
+                      {/* Secondary Image */}
+                      <Card className="p-4">
+                        <div className="flex justify-between items-center mb-3">
+                          <h4 className="font-medium">Secondary Image</h4>
+                          {mockupsData.secondaryImage && (
+                            <Button 
+                              onClick={() => handleDeleteMockup('secondary')} 
+                              size="sm" 
+                              variant="ghost"
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                        
+                        {mockupsData.secondaryImage ? (
+                          <div className="relative">
+                            <img 
+                              src={mockupsData.secondaryImage.image_path} 
+                              alt="Secondary mockup" 
+                              className="w-full h-48 object-contain bg-gray-50 rounded-lg"
+                            />
+                            <p className="text-xs text-gray-400 mt-2 truncate">{mockupsData.secondaryImage.image_path}</p>
+                          </div>
+                        ) : (
+                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center">
+                            <Image className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                            <p className="text-sm text-gray-500 mb-3">No secondary image</p>
+                          </div>
+                        )}
+                        
+                        <div className="mt-3">
+                          <input 
+                            type="file" 
+                            accept=".png,.jpg,.jpeg,.webp"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                handleMockupUpload(e.target.files[0], 'BOX_SECONDARY')
+                                e.target.value = ''
+                              }
+                            }}
+                            className="hidden"
+                            id="mockup-secondary-upload"
+                          />
+                          <label htmlFor="mockup-secondary-upload">
+                            <Button asChild size="sm" variant="outline" className="w-full cursor-pointer">
+                              <span><Upload className="w-4 h-4 mr-2" />{mockupsData.secondaryImage ? 'Replace' : 'Upload'} Secondary Image</span>
+                            </Button>
+                          </label>
+                        </div>
+                      </Card>
+                    </div>
+                    
+                    {/* Card Mockups */}
+                    <Card className="p-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <div>
+                          <h4 className="font-medium">Card Mockups</h4>
+                          <p className="text-sm text-gray-500">{mockupsData.cardMockups.length} images</p>
+                        </div>
+                        <div className="flex gap-2">
+                          {mockupsData.cardMockups.length > 0 && (
+                            <Button 
+                              onClick={() => handleDeleteMockup('cards')} 
+                              size="sm" 
+                              variant="ghost"
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Delete All Cards
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Upload ZIP */}
+                      <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                        <p className="text-sm text-gray-600 mb-2">
+                          Upload a ZIP file containing card mockup images. This will <strong>replace all existing</strong> card mockups.
+                        </p>
+                        <input 
+                          type="file" 
+                          accept=".zip"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              handleMockupUpload(e.target.files[0], 'CARD_ZIP')
+                              e.target.value = ''
+                            }
+                          }}
+                          className="hidden"
+                          id="mockup-cards-zip-upload"
+                        />
+                        <label htmlFor="mockup-cards-zip-upload">
+                          <Button asChild size="sm" className="bg-red-600 hover:bg-red-700 text-white cursor-pointer">
+                            <span><Upload className="w-4 h-4 mr-2" />Upload ZIP of Card Mockups</span>
+                          </Button>
+                        </label>
+                      </div>
+                      
+                      {/* Card Mockups Grid */}
+                      {mockupsData.cardMockups.length > 0 ? (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                          {mockupsData.cardMockups.map((mockup, index) => (
+                            <div 
+                              key={mockup.id} 
+                              className="relative group"
+                              title={mockup.image_path}
+                            >
+                              <img 
+                                src={mockup.image_path} 
+                                alt={`Card mockup ${index + 1}`}
+                                className="w-full aspect-[3/4] object-cover rounded border bg-gray-50"
+                              />
+                              <div className="absolute top-1 left-1 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded">
+                                {index + 1}
+                              </div>
+                              <button
+                                onClick={() => handleDeleteMockup(null, mockup.id)}
+                                className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-gray-400">
+                          <Image className="w-12 h-12 mx-auto mb-2" />
+                          <p>No card mockups uploaded yet</p>
+                        </div>
+                      )}
+                    </Card>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* CARDS TAB */}
             {adminTab === 'cards' && (
               <div>
