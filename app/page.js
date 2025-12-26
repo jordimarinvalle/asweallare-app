@@ -708,12 +708,56 @@ function GamePlayView({
 }
 
 // ============================================================================
-// BOX SELECTION COMPONENT
+// BOX SELECTION COMPONENT - Premium Deck Selection UI
 // ============================================================================
-function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartPlaying, onGoToStore, user, onOpenCompleteGuide, onOpenQuickGuide }) {
+function BoxSelectionScreen({ 
+  boxes, 
+  selectedBoxIds, 
+  setSelectedBoxIds, 
+  onStartPlaying, 
+  onGoToStore, 
+  user, 
+  onOpenCompleteGuide, 
+  onOpenQuickGuide,
+  collectionSeries = []
+}) {
+  const [boxMockups, setBoxMockups] = useState({})  // { boxId: { mainImage, secondaryImage, cardMockups } }
+  const [selectedSeries, setSelectedSeries] = useState(null)
+  const [seeMoreBox, setSeeMoreBox] = useState(null)  // Box for "See more" modal
+  const [mockupsLoading, setMockupsLoading] = useState({})
+  
+  // Load mockups for all visible boxes
+  useEffect(() => {
+    const loadMockupsForBoxes = async () => {
+      const boxesToLoad = boxes.filter(b => !boxMockups[b.id])
+      
+      for (const box of boxesToLoad) {
+        if (mockupsLoading[box.id]) continue
+        
+        setMockupsLoading(prev => ({ ...prev, [box.id]: true }))
+        
+        try {
+          const res = await fetch(`/api/boxes/${box.id}/mockups`)
+          if (res.ok) {
+            const data = await res.json()
+            setBoxMockups(prev => ({ ...prev, [box.id]: data }))
+          }
+        } catch (err) {
+          console.error('Failed to load mockups for', box.id, err)
+        }
+        
+        setMockupsLoading(prev => ({ ...prev, [box.id]: false }))
+      }
+    }
+    
+    if (boxes.length > 0) {
+      loadMockupsForBoxes()
+    }
+  }, [boxes])
+  
   const toggleBox = (boxId) => {
     const box = boxes.find(b => b.id === boxId)
-    if (!box?.hasAccess) return // Can't select locked boxes
+    if (!box?.hasAccess) return
     
     setSelectedBoxIds(prev => 
       prev.includes(boxId) 
@@ -722,123 +766,337 @@ function BoxSelectionScreen({ boxes, selectedBoxIds, setSelectedBoxIds, onStartP
     )
   }
   
-  // Smart box filtering logic:
-  // - Hide sample box if white box (108) is owned
-  // - Hide white box (108) if white box XL (216) is owned
-  const hasWhiteBox = boxes.some(b => b.id === 'box_white' && b.hasAccess)
-  const hasWhiteBoxXL = boxes.some(b => b.id === 'box_white_xl' && b.hasAccess)
+  // Get unique series from boxes
+  const uniqueSeries = [...new Set(boxes.map(b => b.collection_series_id).filter(Boolean))]
+  const hasMultipleSeries = uniqueSeries.length > 1
+  
+  // Auto-select series if only one
+  useEffect(() => {
+    if (!hasMultipleSeries && uniqueSeries.length === 1 && !selectedSeries) {
+      setSelectedSeries(uniqueSeries[0])
+    }
+  }, [uniqueSeries, hasMultipleSeries, selectedSeries])
+  
+  // Sample hiding logic using full_box_id
+  const ownedFullBoxIds = new Set(
+    boxes.filter(b => !b.is_sample && b.hasAccess).map(b => b.id)
+  )
   
   const filterAccessibleBoxes = (box) => {
     if (!box.hasAccess) return false
-    // Hide sample if user has white box or white box XL
-    if (box.id === 'box_sample' && (hasWhiteBox || hasWhiteBoxXL)) return false
-    // Hide white box 108 if user has white box XL (216)
-    if (box.id === 'box_white' && hasWhiteBoxXL) return false
+    // Filter by selected series (if any)
+    if (selectedSeries && box.collection_series_id !== selectedSeries) return false
+    // Hide sample if user owns the related full box
+    if (box.is_sample && box.full_box_id && ownedFullBoxIds.has(box.full_box_id)) return false
     return true
   }
   
   const filterLockedBoxes = (box) => {
     if (box.hasAccess) return false
-    // Don't show sample box in purchasable list
     if (box.is_sample) return false
-    // Hide white box 108 from purchase if user already has XL
-    if (box.id === 'box_white' && hasWhiteBoxXL) return false
+    if (selectedSeries && box.collection_series_id !== selectedSeries) return false
     return true
   }
   
-  const accessibleBoxes = boxes.filter(filterAccessibleBoxes)
-  const lockedBoxes = boxes.filter(filterLockedBoxes)
+  const accessibleBoxes = boxes
+    .filter(filterAccessibleBoxes)
+    .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+  
+  const lockedBoxes = boxes
+    .filter(filterLockedBoxes)
+    .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+  
   const canStart = selectedBoxIds.length > 0
   
-  return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 sm:p-8">
-      <div className="max-w-4xl w-full">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-serif text-gray-900 mb-2">Choose Your Boxes</h2>
-          <p className="text-gray-600">Select which card collections you want to play with</p>
-        </div>
-        
-        {/* Experience Guide Button */}
-        <div className="flex justify-center mb-6">
-          <GuideSelector
-            onSelectComplete={onOpenCompleteGuide}
-            onSelectQuick={onOpenQuickGuide}
-            variant="outline"
-            className="text-gray-700 border-gray-300 hover:bg-gray-50"
-          />
-        </div>
-        
-        {/* Accessible Boxes */}
-        {accessibleBoxes.length > 0 && (
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">Your Boxes</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {accessibleBoxes.map(box => (
-                <div
-                  key={box.id}
-                  onClick={() => toggleBox(box.id)}
-                  className={`relative cursor-pointer rounded-xl p-4 border-2 transition-all ${
-                    selectedBoxIds.includes(box.id)
-                      ? 'border-red-500 bg-red-50 shadow-lg scale-105'
-                      : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow'
-                  }`}
+  // If user has only one accessible box, auto-select it
+  useEffect(() => {
+    if (accessibleBoxes.length === 1 && selectedBoxIds.length === 0) {
+      setSelectedBoxIds([accessibleBoxes[0].id])
+    }
+  }, [accessibleBoxes, selectedBoxIds.length, setSelectedBoxIds])
+  
+  // Series selection UI (only if multiple series)
+  if (hasMultipleSeries && !selectedSeries) {
+    const seriesData = collectionSeries.length > 0 
+      ? collectionSeries 
+      : uniqueSeries.map(id => ({ id, name: id, description: '' }))
+    
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12">
+          <div className="max-w-2xl w-full text-center">
+            <h1 className="text-sm font-medium tracking-[0.3em] text-gray-400 uppercase mb-4">
+              AS WE ALL ARE
+            </h1>
+            <h2 className="text-3xl sm:text-4xl font-serif text-gray-900 mb-6">
+              Choose Your Experience
+            </h2>
+            <p className="text-gray-600 mb-12 max-w-md mx-auto">
+              Select a collection to explore its conversation decks.
+            </p>
+            
+            <div className="grid gap-4 sm:grid-cols-2">
+              {seriesData.map(series => (
+                <button
+                  key={series.id}
+                  onClick={() => setSelectedSeries(series.id)}
+                  className="group p-8 border border-gray-200 rounded-2xl hover:border-gray-400 hover:shadow-lg transition-all text-left"
                 >
-                  {/* Selection indicator */}
-                  {selectedBoxIds.includes(box.id) && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                      <Check className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                  
-                  {/* Box color indicator */}
-                  <div 
-                    className="w-12 h-12 rounded-lg mb-3 border border-gray-200 flex items-center justify-center"
-                    style={{ backgroundColor: box.color === '#FFFFFF' ? '#F9FAFB' : box.color }}
-                  >
-                    <Package className={`w-6 h-6 ${box.color === '#000000' || box.color === '#D12128' ? 'text-white' : 'text-gray-600'}`} />
-                  </div>
-                  
-                  <h4 className="font-medium text-gray-900">{box.name}</h4>
-                  <p className="text-xs text-gray-500 mt-1">{box.description}</p>
-                  
-                  {box.is_sample && (
-                    <span className="inline-block mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                      Free
-                    </span>
-                  )}
-                </div>
+                  <h3 className="text-xl font-medium text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
+                    {series.name}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {series.description || 'Explore this collection'}
+                  </p>
+                </button>
               ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  
+  // Get current series name
+  const currentSeriesName = collectionSeries.find(s => s.id === selectedSeries)?.name || 'Unscripted Conversations'
+  
+  return (
+    <div className="min-h-screen bg-white">
+      {/* See More Modal */}
+      {seeMoreBox && (
+        <Dialog open={true} onOpenChange={() => setSeeMoreBox(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-serif">{seeMoreBox.name}</DialogTitle>
+              <DialogDescription>{seeMoreBox.description_short || seeMoreBox.description}</DialogDescription>
+            </DialogHeader>
+            
+            <div className="mt-4">
+              {boxMockups[seeMoreBox.id]?.cardMockups?.length > 0 ? (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {boxMockups[seeMoreBox.id].cardMockups.map((mockup, idx) => (
+                    <div key={mockup.id || idx} className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100">
+                      <img 
+                        src={mockup.imagePath} 
+                        alt={`Card ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-gray-400">
+                  <Image className="w-12 h-12 mx-auto mb-4" />
+                  <p>No card preview images available</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+      
+      {/* Header */}
+      <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-gray-100 z-40">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between">
+            {hasMultipleSeries && (
+              <button 
+                onClick={() => setSelectedSeries(null)}
+                className="text-sm text-gray-500 hover:text-gray-900"
+              >
+                ← All Collections
+              </button>
+            )}
+            <div className="flex-1" />
+            <GuideSelector
+              onSelectComplete={onOpenCompleteGuide}
+              onSelectQuick={onOpenQuickGuide}
+              variant="ghost"
+              className="text-gray-600"
+            />
+          </div>
+        </div>
+      </div>
+      
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {/* Title Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-sm font-medium tracking-[0.3em] text-gray-400 uppercase mb-3">
+            {currentSeriesName}
+          </h1>
+          <h2 className="text-3xl sm:text-4xl font-serif text-gray-900 mb-4">
+            Select Your Decks
+          </h2>
+          <p className="text-gray-600 max-w-xl mx-auto leading-relaxed">
+            AS WE ALL ARE presents a therapeutic conversational card game to know more about each other without the need to ask any question.
+          </p>
+        </div>
+        
+        {/* Deck Cards Grid */}
+        {accessibleBoxes.length > 0 && (
+          <div className="mb-12">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {accessibleBoxes.map(box => {
+                const mockup = boxMockups[box.id]
+                const isSelected = selectedBoxIds.includes(box.id)
+                const heroImage = mockup?.mainImage?.imagePath
+                const secondaryImage = mockup?.secondaryImage?.imagePath
+                
+                return (
+                  <div
+                    key={box.id}
+                    className={`group relative bg-white rounded-2xl border-2 overflow-hidden transition-all duration-300 ${
+                      isSelected 
+                        ? 'border-red-500 shadow-xl ring-4 ring-red-100' 
+                        : 'border-gray-200 hover:border-gray-300 hover:shadow-lg'
+                    }`}
+                  >
+                    {/* Selection Badge */}
+                    {isSelected && (
+                      <div className="absolute top-4 right-4 z-10 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
+                        <Check className="w-5 h-5 text-white" />
+                      </div>
+                    )}
+                    
+                    {/* Hero Image */}
+                    <div 
+                      className="aspect-[4/3] bg-gray-100 cursor-pointer relative overflow-hidden"
+                      onClick={() => toggleBox(box.id)}
+                    >
+                      {heroImage ? (
+                        <img 
+                          src={heroImage} 
+                          alt={box.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div 
+                          className="w-full h-full flex items-center justify-center"
+                          style={{ backgroundColor: box.color === '#FFFFFF' ? '#F3F4F6' : (box.color || '#F3F4F6') }}
+                        >
+                          <Package className={`w-16 h-16 ${
+                            box.color === '#000000' || box.color === '#D12128' ? 'text-white/50' : 'text-gray-400'
+                          }`} />
+                        </div>
+                      )}
+                      
+                      {/* Secondary Image Thumbnail */}
+                      {secondaryImage && (
+                        <div className="absolute bottom-3 right-3 w-16 h-16 rounded-lg overflow-hidden border-2 border-white shadow-lg">
+                          <img 
+                            src={secondaryImage} 
+                            alt={`${box.name} preview`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Free Badge */}
+                      {box.is_sample && (
+                        <div className="absolute top-4 left-4 bg-green-500 text-white text-xs font-medium px-3 py-1 rounded-full shadow">
+                          Free Sample
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="p-5">
+                      <div 
+                        className="cursor-pointer"
+                        onClick={() => toggleBox(box.id)}
+                      >
+                        <h3 className="text-lg font-medium text-gray-900 mb-1">{box.name}</h3>
+                        <p className="text-sm text-gray-500 mb-3 line-clamp-2">
+                          {box.description_short || box.tagline || box.description}
+                        </p>
+                      </div>
+                      
+                      {/* Topics */}
+                      {box.topics && box.topics.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-4">
+                          {box.topics.slice(0, 4).map((topic, idx) => (
+                            <span 
+                              key={idx}
+                              className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded"
+                            >
+                              {topic}
+                            </span>
+                          ))}
+                          {box.topics.length > 4 && (
+                            <span className="text-xs px-2 py-0.5 text-gray-400">
+                              +{box.topics.length - 4}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* Actions */}
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <button
+                          onClick={() => setSeeMoreBox(box)}
+                          className="text-sm text-gray-500 hover:text-red-600 transition-colors"
+                        >
+                          See more →
+                        </button>
+                        
+                        <button
+                          onClick={() => toggleBox(box.id)}
+                          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                            isSelected
+                              ? 'bg-red-500 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {isSelected ? 'Selected' : 'Select'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}
         
-        {/* Start Playing Button */}
-        <div className="flex flex-col items-center gap-4 mt-8">
+        {/* Multi-selection hint */}
+        {selectedBoxIds.length > 1 && (
+          <div className="text-center mb-8">
+            <p className="text-sm text-gray-500 bg-gray-50 inline-block px-4 py-2 rounded-full">
+              ✨ You can combine multiple decks to shape the experience
+            </p>
+          </div>
+        )}
+        
+        {/* Start Playing Section */}
+        <div className="flex flex-col items-center gap-4">
           <Button 
             size="lg" 
-            className="bg-red-600 hover:bg-red-700 text-white px-8"
+            className={`px-12 py-6 text-lg rounded-full transition-all ${
+              canStart 
+                ? 'bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl' 
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
             disabled={!canStart}
             onClick={onStartPlaying}
           >
             <Play className="w-5 h-5 mr-2" />
             Start Playing
-            {selectedBoxIds.length > 0 && (
-              <span className="ml-2 bg-white/20 px-2 py-0.5 rounded text-sm">
-                {selectedBoxIds.length} box{selectedBoxIds.length > 1 ? 'es' : ''}
-              </span>
-            )}
           </Button>
           
           {!canStart && (
-            <p className="text-sm text-gray-500">Select at least one box to start</p>
+            <p className="text-sm text-gray-400">Select at least one deck to begin</p>
           )}
           
-          {/* Simplified "More Boxes Available" - Compact button instead of large section */}
           {lockedBoxes.length > 0 && (
-            <Button variant="outline" onClick={onGoToStore} className="mt-4">
-              <ShoppingBag className="w-4 h-4 mr-2" />
-              {lockedBoxes.length} more box{lockedBoxes.length > 1 ? 'es' : ''} available in Store
-            </Button>
+            <button 
+              onClick={onGoToStore}
+              className="mt-4 text-sm text-gray-500 hover:text-red-600 transition-colors"
+            >
+              <ShoppingBag className="w-4 h-4 inline mr-1" />
+              {lockedBoxes.length} more deck{lockedBoxes.length > 1 ? 's' : ''} available
+            </button>
           )}
         </div>
       </div>
