@@ -864,6 +864,59 @@ function BoxSelectionScreen({
   
   return (
     <div className="min-h-screen bg-white">
+      {/* Lightbox Modal */}
+      {lightboxImage && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+          <div className="relative max-w-4xl max-h-full">
+            {/* Close button */}
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-colors"
+            >
+              <XCircle className="w-6 h-6" />
+            </button>
+            
+            {/* Navigation buttons */}
+            {lightboxImage.images.length > 1 && (
+              <>
+                <button
+                  onClick={() => setLightboxImage(prev => ({
+                    ...prev,
+                    index: prev.index > 0 ? prev.index - 1 : prev.images.length - 1
+                  }))}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  ←
+                </button>
+                <button
+                  onClick={() => setLightboxImage(prev => ({
+                    ...prev,
+                    index: prev.index < prev.images.length - 1 ? prev.index + 1 : 0
+                  }))}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  →
+                </button>
+              </>
+            )}
+            
+            {/* Image */}
+            <img
+              src={lightboxImage.images[lightboxImage.index]?.imagePath}
+              alt={`Card ${lightboxImage.index + 1}`}
+              className="max-w-full max-h-full object-contain rounded-lg"
+            />
+            
+            {/* Image counter */}
+            {lightboxImage.images.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/20 text-white px-3 py-1 rounded-full text-sm">
+                {lightboxImage.index + 1} / {lightboxImage.images.length}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* See More Modal */}
       {seeMoreBox && (
         <Dialog open={true} onOpenChange={() => setSeeMoreBox(null)}>
@@ -875,18 +928,40 @@ function BoxSelectionScreen({
             
             <div className="mt-4">
               {boxMockups[seeMoreBox.id]?.cardMockups?.length > 0 ? (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                  {boxMockups[seeMoreBox.id].cardMockups.map((mockup, idx) => (
-                    <div key={mockup.id || idx} className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100">
-                      <img 
-                        src={mockup.imagePath} 
-                        alt={`Card ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
+                <>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                    {boxMockups[seeMoreBox.id].cardMockups.slice(0, visibleMockups).map((mockup, idx) => (
+                      <div 
+                        key={mockup.id || idx} 
+                        className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:ring-2 hover:ring-red-500 transition-all"
+                        onClick={() => setLightboxImage({
+                          index: idx,
+                          images: boxMockups[seeMoreBox.id].cardMockups
+                        })}
+                      >
+                        <img 
+                          src={mockup.imagePath} 
+                          alt={`Card ${idx + 1}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform"
+                          loading="lazy"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Load More Button */}
+                  {boxMockups[seeMoreBox.id].cardMockups.length > visibleMockups && (
+                    <div className="text-center mt-6">
+                      <Button
+                        onClick={() => setVisibleMockups(prev => prev + 24)}
+                        variant="outline"
+                        className="px-6 py-2"
+                      >
+                        Load More Cards ({boxMockups[seeMoreBox.id].cardMockups.length - visibleMockups} remaining)
+                      </Button>
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-12 text-gray-400">
                   <Image className="w-12 h-12 mx-auto mb-4" />
