@@ -728,6 +728,11 @@ function BoxSelectionScreen({
   const [lightboxImage, setLightboxImage] = useState(null)  // { index, images } for lightbox
   const [visibleMockups, setVisibleMockups] = useState(24)  // Pagination for mockups
   
+  // See More Modal State
+  const [seeMoreMainImage, setSeeMoreMainImage] = useState(null)  // Current main image URL
+  const [seeMoreShowSecondary, setSeeMoreShowSecondary] = useState(false)  // Is showing secondary (flipped)
+  const [seeMoreIsFlipping, setSeeMoreIsFlipping] = useState(false)  // Animation state
+  
   // Load mockups for all visible boxes
   useEffect(() => {
     const loadMockupsForBoxes = async () => {
