@@ -57,12 +57,12 @@ export async function GET(request) {
       return NextResponse.json({ error: 'boxId required' }, { status: 400 })
     }
     
-    // Get all mockup images for this box, ordered by image_path then created_at
+    // Get all mockup images for this box, ordered by display_order then created_at
     const { data: mockups, error } = await supabase
       .from('mockup_images')
       .select('*')
       .eq('box_id', boxId)
-      .order('image_path', { ascending: true })
+      .order('display_order', { ascending: true })
       .order('created_at', { ascending: true })
     
     if (error) {
@@ -74,7 +74,6 @@ export async function GET(request) {
     const secondaryImage = mockups?.find(m => m.image_type === 'BOX_SECONDARY') || null
     const cardMockups = (mockups || [])
       .filter(m => m.image_type === 'CARD')
-      .map((m, index) => ({ ...m, display_order: index + 1 }))
     
     return NextResponse.json({
       boxId,
