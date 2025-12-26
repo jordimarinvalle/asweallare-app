@@ -3357,26 +3357,46 @@ export default function App() {
             {/* MOCKUPS TAB */}
             {adminTab === 'mockups' && (
               <div>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                  <div className="flex-1 w-full sm:w-auto">
-                    <Label className="mb-2 block">Select Box</Label>
+                {/* Filters */}
+                <div className="flex flex-wrap gap-4 mb-6">
+                  <div>
+                    <Label className="mb-2 block text-sm">Collection Series</Label>
+                    <select 
+                      value={mockupsSeriesFilter} 
+                      onChange={(e) => {
+                        setMockupsSeriesFilter(e.target.value)
+                        setMockupsBoxId('')  // Reset box selection when series changes
+                        setMockupsData({ mainImage: null, secondaryImage: null, cardMockups: [] })
+                      }}
+                      className="w-48 p-2 border rounded-md text-sm"
+                    >
+                      <option value="">All Series</option>
+                      {adminSeries.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="mb-2 block text-sm">Box</Label>
                     <select 
                       value={mockupsBoxId} 
                       onChange={(e) => {
                         setMockupsBoxId(e.target.value)
                         loadMockups(e.target.value)
                       }}
-                      className="w-full sm:w-64 p-2 border rounded-md"
+                      className="w-64 p-2 border rounded-md text-sm"
                     >
                       <option value="">-- Select a box --</option>
-                      {adminBoxes.map(box => (
-                        <option key={box.id} value={box.id}>{box.name}</option>
-                      ))}
+                      {adminBoxes
+                        .filter(box => !mockupsSeriesFilter || box.collection_series_id === mockupsSeriesFilter)
+                        .map(box => (
+                          <option key={box.id} value={box.id}>{box.name}</option>
+                        ))}
                     </select>
                   </div>
                   
                   {mockupsBoxId && (
-                    <div className="flex gap-2">
+                    <div className="flex items-end gap-2">
                       <Button 
                         onClick={() => loadMockups(mockupsBoxId)} 
                         variant="outline" 
@@ -3559,7 +3579,7 @@ export default function App() {
                       {/* Upload ZIP */}
                       <div className="mb-4 p-4 bg-gray-50 rounded-lg">
                         <p className="text-sm text-gray-600 mb-2">
-                          Upload a ZIP file containing card mockup images. This will <strong>replace all existing</strong> card mockups.
+                          Upload a ZIP file containing card mockup images. This will <strong>replace all existing</strong> card mockups. Order is determined by filename sorting.
                         </p>
                         <input 
                           type="file" 
@@ -3582,27 +3602,67 @@ export default function App() {
                       
                       {/* Card Mockups Grid */}
                       {mockupsData.cardMockups.length > 0 ? (
-                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                          {mockupsData.cardMockups.map((mockup, index) => (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                          {mockupsData.cardMockups.map((mockup) => (
                             <div 
                               key={mockup.id} 
-                              className="relative group"
+                              className="relative group border rounded-lg overflow-hidden bg-gray-50"
                               title={mockup.image_path}
                             >
                               <img 
                                 src={mockup.image_path} 
-                                alt={`Card mockup ${index + 1}`}
-                                className="w-full aspect-[3/4] object-cover rounded border bg-gray-50"
+                                alt={`Card mockup ${mockup.display_order}`}
+                                className="w-full aspect-[3/4] object-cover"
                               />
-                              <div className="absolute top-1 left-1 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded">
-                                {index + 1}
-                              </div>
+                              {/* Order badge - click to edit */}
+                              {editingMockupOrder === mockup.id ? (
+                                <input
+                                  type="number"
+                                  autoFocus
+                                  defaultValue={mockup.display_order}
+                                  onBlur={(e) => {
+                                    const newOrder = parseInt(e.target.value)
+                                    if (!isNaN(newOrder) && newOrder !== mockup.display_order) {
+                                      handleUpdateMockupOrder(mockup.id, newOrder)
+                                    } else {
+                                      setEditingMockupOrder(null)
+                                    }
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      const newOrder = parseInt(e.target.value)
+                                      if (!isNaN(newOrder) && newOrder !== mockup.display_order) {
+                                        handleUpdateMockupOrder(mockup.id, newOrder)
+                                      } else {
+                                        setEditingMockupOrder(null)
+                                      }
+                                    } else if (e.key === 'Escape') {
+                                      setEditingMockupOrder(null)
+                                    }
+                                  }}
+                                  className="absolute top-1 left-1 w-12 text-xs p-1 rounded bg-white border shadow-sm text-center"
+                                />
+                              ) : (
+                                <button
+                                  onClick={() => setEditingMockupOrder(mockup.id)}
+                                  className="absolute top-1 left-1 bg-black/70 hover:bg-black text-white text-xs px-2 py-1 rounded cursor-pointer transition-colors"
+                                  title="Click to edit order"
+                                >
+                                  #{mockup.display_order}
+                                </button>
+                              )}
+                              {/* Delete button */}
                               <button
                                 onClick={() => handleDeleteMockup(null, mockup.id)}
                                 className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Delete"
                               >
                                 <Trash2 className="w-3 h-3" />
                               </button>
+                              {/* Filename */}
+                              <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 truncate">
+                                {mockup.image_path.split('/').pop()}
+                              </div>
                             </div>
                           ))}
                         </div>
