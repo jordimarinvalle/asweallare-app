@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS mockup_images (
   box_id TEXT REFERENCES boxes(id) ON DELETE CASCADE,
   image_path TEXT NOT NULL,
   image_type TEXT NOT NULL,
+  display_order INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   CONSTRAINT mockup_images_type_check CHECK (image_type IN ('BOX_MAIN', 'BOX_SECONDARY', 'CARD'))
 );
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS mockup_images (
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_mockup_images_box_id ON mockup_images(box_id);
 CREATE INDEX IF NOT EXISTS idx_mockup_images_type ON mockup_images(image_type);
+CREATE INDEX IF NOT EXISTS idx_mockup_images_order ON mockup_images(display_order);
 
 -- Enable RLS (if using Supabase)
 ALTER TABLE mockup_images ENABLE ROW LEVEL SECURITY;
