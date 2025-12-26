@@ -331,18 +331,21 @@ async function handleCardMockupsZip(supabase, zipFile, boxId) {
   }
   await mkdir(targetDir, { recursive: true })
   
-  // Sort entries by filename (natural sort)
+  // Sort entries by filename (natural sort) - this determines display_order
   imageEntries.sort((a, b) => {
     const nameA = path.basename(a.entryName).toLowerCase()
     const nameB = path.basename(b.entryName).toLowerCase()
     return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' })
   })
   
-  // Process each image
+  // Process each image with display_order based on sorted position
   const createdMockups = []
   const errors = []
   
-  for (const entry of imageEntries) {
+  for (let i = 0; i < imageEntries.length; i++) {
+    const entry = imageEntries[i]
+    const displayOrder = i + 1  // 1-based display order
+    
     try {
       const fileBuffer = entry.getData()
       const md5Hash = crypto.createHash('md5').update(fileBuffer).digest('hex')
@@ -355,7 +358,7 @@ async function handleCardMockupsZip(supabase, zipFile, boxId) {
       // Write file
       await writeFile(targetPath, fileBuffer)
       
-      // Create DB record
+      // Create DB record with display_order
       const { error: dbError } = await supabase
         .from('mockup_images')
         .insert({
@@ -363,6 +366,7 @@ async function handleCardMockupsZip(supabase, zipFile, boxId) {
           box_id: boxId,
           image_path: relativePath,
           image_type: 'CARD',
+          display_order: displayOrder,
           created_at: new Date().toISOString()
         })
       
@@ -372,7 +376,8 @@ async function handleCardMockupsZip(supabase, zipFile, boxId) {
         createdMockups.push({
           id: `${boxId}_card_${md5Hash}`,
           originalFile: path.basename(entry.entryName),
-          imagePath: relativePath
+          imagePath: relativePath,
+          displayOrder: displayOrder
         })
       }
     } catch (err) {
