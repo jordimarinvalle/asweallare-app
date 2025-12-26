@@ -197,6 +197,48 @@ export async function DELETE(request) {
   }
 }
 
+// PUT - Update mockup image (display_order)
+export async function PUT(request) {
+  const supabase = createSupabaseServer()
+  
+  try {
+    const { user, error: authError } = await getAuthenticatedUser()
+    
+    if (authError || !isAuthorized(user)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    
+    const body = await request.json()
+    const { id, displayOrder } = body
+    
+    if (!id) {
+      return NextResponse.json({ error: 'id required' }, { status: 400 })
+    }
+    
+    if (displayOrder === undefined || displayOrder === null) {
+      return NextResponse.json({ error: 'displayOrder required' }, { status: 400 })
+    }
+    
+    // Update the display_order
+    const { error } = await supabase
+      .from('mockup_images')
+      .update({ display_order: parseInt(displayOrder) })
+      .eq('id', id)
+    
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+    
+    console.log('[MOCKUPS PUT] Updated display_order for', id, 'to', displayOrder)
+    
+    return NextResponse.json({ success: true })
+    
+  } catch (error) {
+    console.error('[MOCKUPS PUT] Error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
+
 // Helper: Handle single image upload (BOX_MAIN or BOX_SECONDARY)
 async function handleSingleImageUpload(supabase, file, boxId, imageType) {
   // Validate file type
