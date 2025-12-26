@@ -1645,8 +1645,21 @@ export default function App() {
       }
     }
     
+    const loadCollectionSeries = async () => {
+      try {
+        const response = await fetch('/api/collection-series')
+        const data = await response.json()
+        if (data.series) {
+          setCollectionSeries(data.series)
+        }
+      } catch (err) {
+        console.error('Failed to load collection series:', err)
+      }
+    }
+    
     loadBoxes()
     loadPlans()
+    loadCollectionSeries()
   }, [user])
   
   // Shuffle deck helper
