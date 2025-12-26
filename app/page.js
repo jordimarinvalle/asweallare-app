@@ -1974,6 +1974,19 @@ export default function App() {
         method: 'POST',
         body: formData
       })
+      
+      // Check if response is OK before parsing JSON
+      if (!response.ok) {
+        const errorText = await response.text()
+        try {
+          const errorData = JSON.parse(errorText)
+          toast({ title: 'Upload failed', description: errorData.error || 'Unknown error', variant: 'destructive' })
+        } catch {
+          toast({ title: 'Upload failed', description: `Server error: ${response.status}`, variant: 'destructive' })
+        }
+        return
+      }
+      
       const data = await response.json()
       
       if (data.error) {
