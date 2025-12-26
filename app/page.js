@@ -1929,6 +1929,128 @@ export default function App() {
     }
   }
   
+  // Load mockups for a specific box
+  const loadMockups = async (boxId) => {
+    if (!boxId) {
+      setMockupsData({ mainImage: null, secondaryImage: null, cardMockups: [] })
+      return
+    }
+    
+    setMockupsLoading(true)
+    try {
+      const response = await fetch(`/api/admin/mockups?boxId=${boxId}`)
+      const data = await response.json()
+      
+      if (data.error) {
+        console.error('Failed to load mockups:', data.error)
+        setMockupsData({ mainImage: null, secondaryImage: null, cardMockups: [] })
+      } else {
+        setMockupsData({
+          mainImage: data.mainImage,
+          secondaryImage: data.secondaryImage,
+          cardMockups: data.cardMockups || []
+        })
+      }
+    } catch (err) {
+      console.error('Error loading mockups:', err)
+      setMockupsData({ mainImage: null, secondaryImage: null, cardMockups: [] })
+    }
+    setMockupsLoading(false)
+  }
+  
+  // Upload mockup image
+  const handleMockupUpload = async (file, imageType) => {
+    if (!mockupsBoxId || !file) return
+    
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('boxId', mockupsBoxId)
+    formData.append('imageType', imageType)
+    
+    try {
+      const response = await fetch('/api/admin/mockups', {
+        method: 'POST',
+        body: formData
+      })
+      const data = await response.json()
+      
+      if (data.error) {
+        toast({ title: 'Upload failed', description: data.error, variant: 'destructive' })
+      } else {
+        toast({ title: 'Upload successful', description: data.message })
+        loadMockups(mockupsBoxId)
+      }
+    } catch (err) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' })
+    }
+  }
+  
+  // Delete mockup(s)
+  const handleDeleteMockup = async (deleteType, imageId = null) => {
+    if (!mockupsBoxId) return
+    
+    const confirmMsg = deleteType === 'all' 
+      ? 'Delete ALL mockup images for this box?' 
+      : `Delete ${deleteType} mockup image(s)?`
+    
+    if (!confirm(confirmMsg)) return
+    
+    try {
+      let url = `/api/admin/mockups?boxId=${mockupsBoxId}`
+      if (imageId) {
+        url += `&imageId=${imageId}`
+      } else {
+        url += `&type=${deleteType}`
+      }
+      
+      const response = await fetch(url, { method: 'DELETE' })
+      const data = await response.json()
+      
+      if (data.error) {
+        toast({ title: 'Delete failed', description: data.error, variant: 'destructive' })
+      } else {
+        toast({ title: 'Deleted', description: `Removed ${data.deleted} image(s)` })
+        loadMockups(mockupsBoxId)
+      }
+    } catch (err) {
+      toast({ title: 'Delete failed', description: err.message, variant: 'destructive' })
+    }
+  }
+  
+  // Download all mockups as ZIP
+  const handleDownloadMockups = async () => {
+    if (!mockupsBoxId) return
+    
+    try {
+      const response = await fetch('/api/admin/mockups/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ boxId: mockupsBoxId })
+      })
+      
+      if (!response.ok) {
+        const data = await response.json()
+        toast({ title: 'Download failed', description: data.error, variant: 'destructive' })
+        return
+      }
+      
+      // Download the ZIP file
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `mockups_${mockupsBoxId}.zip`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      
+      toast({ title: 'Download started' })
+    } catch (err) {
+      toast({ title: 'Download failed', description: err.message, variant: 'destructive' })
+    }
+  }
+  
   const loadAllAdminData = async () => {
     await Promise.all([
       loadAdminCards(),
