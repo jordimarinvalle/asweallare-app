@@ -1007,60 +1007,180 @@ function BoxSelectionScreen({
         </div>
       )}
 
-      {/* See More Modal */}
+      {/* See More Modal - BookletViewer Style */}
       {seeMoreBox && (
-        <Dialog open={true} onOpenChange={() => setSeeMoreBox(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-serif">{seeMoreBox.name}</DialogTitle>
-              <DialogDescription>{seeMoreBox.description_short || seeMoreBox.description}</DialogDescription>
-            </DialogHeader>
-            
-            <div className="mt-4">
-              {boxMockups[seeMoreBox.id]?.cardMockups?.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                    {boxMockups[seeMoreBox.id].cardMockups.slice(0, visibleMockups).map((mockup, idx) => (
-                      <div 
-                        key={mockup.id || idx} 
-                        className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:ring-2 hover:ring-red-500 transition-all"
-                        onClick={() => setLightboxImage({
-                          index: idx,
-                          images: boxMockups[seeMoreBox.id].cardMockups
-                        })}
+        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col">
+          {/* Header - matching BookletViewer */}
+          <div className="flex items-center justify-between px-4 py-3 bg-black/50">
+            <div className="flex items-center gap-2 text-white">
+              <Image className="w-5 h-5" />
+              <span className="text-sm font-medium">{seeMoreBox.name}</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-white/70 text-sm">
+                {boxMockups[seeMoreBox.id]?.cardMockups?.length || 0} cards
+              </span>
+              <button
+                onClick={closeSeeMoreModal}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col items-center justify-start overflow-y-auto p-4 sm:p-6">
+            {/* Main Image Viewer - Large Centered Square */}
+            <div className="w-full max-w-lg mb-6">
+              <div className="relative aspect-square bg-gray-900 rounded-lg overflow-hidden shadow-2xl">
+                {seeMoreMainImage ? (
+                  <>
+                    <img
+                      src={seeMoreMainImage}
+                      alt="Preview"
+                      className={`w-full h-full object-cover transition-all duration-300 ${
+                        seeMoreIsFlipping ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+                      }`}
+                    />
+                    
+                    {/* Flip Icon - Only show if secondary image exists */}
+                    {boxMockups[seeMoreBox.id]?.secondaryImage?.imagePath && (
+                      <button
+                        onClick={handleFlipMainImage}
+                        className="absolute bottom-3 right-3 p-2 bg-black/60 hover:bg-black/80 rounded-lg transition-colors group"
+                        title={seeMoreShowSecondary ? 'Show front' : 'Show back'}
                       >
-                        <img 
-                          src={mockup.imagePath} 
-                          alt={`Card ${idx + 1}`}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform"
-                          loading="lazy"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Load More Button */}
-                  {boxMockups[seeMoreBox.id].cardMockups.length > visibleMockups && (
-                    <div className="text-center mt-6">
-                      <Button
-                        onClick={() => setVisibleMockups(prev => prev + 24)}
-                        variant="outline"
-                        className="px-6 py-2"
-                      >
-                        Load More Cards ({boxMockups[seeMoreBox.id].cardMockups.length - visibleMockups} remaining)
-                      </Button>
+                        <RotateCcw className={`w-5 h-5 text-white transition-transform group-hover:rotate-180 ${
+                          seeMoreShowSecondary ? 'rotate-180' : ''
+                        }`} />
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-500">
+                    <div className="text-center">
+                      <Image className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No hero image</p>
                     </div>
-                  )}
-                </>
-              ) : (
-                <div className="text-center py-12 text-gray-400">
-                  <Image className="w-12 h-12 mx-auto mb-4" />
-                  <p>No card preview images available</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Hero/Secondary indicator */}
+              {boxMockups[seeMoreBox.id]?.secondaryImage?.imagePath && seeMoreMainImage && (
+                <div className="text-center mt-2 text-white/50 text-xs">
+                  {seeMoreShowSecondary ? 'Back of box' : 'Front of box'} • Click ↻ to flip
                 </div>
               )}
             </div>
-          </DialogContent>
-        </Dialog>
+
+            {/* Thumbnails Grid - Centered rows of squares */}
+            {boxMockups[seeMoreBox.id]?.cardMockups?.length > 0 && (
+              <div className="w-full max-w-2xl">
+                <div className="text-white/70 text-sm mb-3 text-center font-medium">
+                  Card Previews
+                </div>
+                <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+                  {/* Hero thumbnail */}
+                  {boxMockups[seeMoreBox.id]?.mainImage?.imagePath && (
+                    <button
+                      onClick={() => {
+                        setSeeMoreMainImage(boxMockups[seeMoreBox.id].mainImage.imagePath)
+                        setSeeMoreShowSecondary(false)
+                      }}
+                      className={`w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
+                        seeMoreMainImage === boxMockups[seeMoreBox.id].mainImage.imagePath && !seeMoreShowSecondary
+                          ? 'border-white ring-2 ring-white/30'
+                          : 'border-transparent hover:border-white/50'
+                      }`}
+                    >
+                      <img
+                        src={boxMockups[seeMoreBox.id].mainImage.imagePath}
+                        alt="Box front"
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  )}
+                  
+                  {/* Secondary thumbnail */}
+                  {boxMockups[seeMoreBox.id]?.secondaryImage?.imagePath && (
+                    <button
+                      onClick={() => {
+                        setSeeMoreMainImage(boxMockups[seeMoreBox.id].secondaryImage.imagePath)
+                        setSeeMoreShowSecondary(true)
+                      }}
+                      className={`w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
+                        seeMoreMainImage === boxMockups[seeMoreBox.id].secondaryImage.imagePath
+                          ? 'border-white ring-2 ring-white/30'
+                          : 'border-transparent hover:border-white/50'
+                      }`}
+                    >
+                      <img
+                        src={boxMockups[seeMoreBox.id].secondaryImage.imagePath}
+                        alt="Box back"
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  )}
+                  
+                  {/* Divider */}
+                  {(boxMockups[seeMoreBox.id]?.mainImage?.imagePath || boxMockups[seeMoreBox.id]?.secondaryImage?.imagePath) && (
+                    <div className="w-px h-16 sm:h-20 bg-white/20 mx-1" />
+                  )}
+                  
+                  {/* Card mockup thumbnails */}
+                  {boxMockups[seeMoreBox.id].cardMockups.slice(0, visibleMockups).map((mockup, idx) => (
+                    <button
+                      key={mockup.id || idx}
+                      onClick={() => setThumbnailAsMain(mockup.imagePath)}
+                      className={`w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
+                        seeMoreMainImage === mockup.imagePath
+                          ? 'border-white ring-2 ring-white/30'
+                          : 'border-transparent hover:border-white/50'
+                      }`}
+                    >
+                      <img
+                        src={mockup.imagePath}
+                        alt={`Card ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Load More Button */}
+                {boxMockups[seeMoreBox.id].cardMockups.length > visibleMockups && (
+                  <div className="text-center mt-4">
+                    <button
+                      onClick={() => setVisibleMockups(prev => prev + 24)}
+                      className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-full transition-colors"
+                    >
+                      Load More ({boxMockups[seeMoreBox.id].cardMockups.length - visibleMockups} more)
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Empty state for no mockups */}
+            {!boxMockups[seeMoreBox.id]?.cardMockups?.length && !boxMockups[seeMoreBox.id]?.mainImage?.imagePath && (
+              <div className="text-center text-white/50 py-8">
+                <Image className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p>No preview images available for this box</p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer with box info */}
+          <div className="bg-black/50 px-4 py-3 text-center">
+            <p className="text-white/70 text-sm">
+              {seeMoreBox.description_short || seeMoreBox.description || 'Explore the card previews above'}
+            </p>
+          </div>
+        </div>
       )}
       
       {/* Header */}
