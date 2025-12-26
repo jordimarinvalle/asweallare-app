@@ -20,8 +20,16 @@ export async function GET(request, { params }) {
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: true })
     
+    // If table doesn't exist or other error, return empty result gracefully
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.warn('[BOX MOCKUPS] Query error (table may not exist):', error.message)
+      return NextResponse.json({
+        boxId,
+        mainImage: null,
+        secondaryImage: null,
+        cardMockups: [],
+        totalMockups: 0
+      })
     }
     
     // Separate by type
@@ -51,6 +59,13 @@ export async function GET(request, { params }) {
     
   } catch (error) {
     console.error('[BOX MOCKUPS] Error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    // Return empty result on error instead of 500
+    return NextResponse.json({
+      boxId: params.boxId,
+      mainImage: null,
+      secondaryImage: null,
+      cardMockups: [],
+      totalMockups: 0
+    })
   }
 }
