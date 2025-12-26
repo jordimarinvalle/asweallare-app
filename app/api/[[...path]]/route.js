@@ -223,6 +223,21 @@ export async function GET(request) {
       return handleCORS(NextResponse.json({ plans: plans || [] }))
     }
 
+    // COLLECTION SERIES - Public endpoint
+    if (path === 'collection-series') {
+      const { data: series, error } = await supabase
+        .from('collection_series')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true })
+      
+      if (error) {
+        return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
+      }
+      
+      return handleCORS(NextResponse.json({ series: series || [] }))
+    }
+
     // USER PURCHASES - Get user's purchase history
     if (path === 'purchases') {
       const { user, error: authError } = await getAuthenticatedUser()
