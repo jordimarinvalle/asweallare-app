@@ -1387,6 +1387,7 @@ export default function App() {
   // Box selection state
   const [boxes, setBoxes] = useState([])
   const [plans, setPlans] = useState([])
+  const [collectionSeries, setCollectionSeries] = useState([])
   const [selectedBoxIds, setSelectedBoxIds] = useState([])
   const [gameStarted, setGameStarted] = useState(false)
   const [hasAllAccess, setHasAllAccess] = useState(false)
