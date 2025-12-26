@@ -1780,9 +1780,12 @@ export default function App() {
 
   // Load cards for selected boxes
   const loadCards = async (boxIds) => {
+    console.log('[loadCards] Loading cards for boxes:', boxIds)
     const queryParam = boxIds.length > 0 ? `?box_ids=${boxIds.join(',')}` : ''
     const response = await fetch(`/api/cards${queryParam}`)
     const data = await response.json()
+    
+    console.log('[loadCards] Received cards:', data.cards?.length || 0)
     
     if (data.cards) {
       const normalizedCards = data.cards.map(card => ({
@@ -1801,6 +1804,7 @@ export default function App() {
       setAllCards(normalizedCards)
       const blacks = normalizedCards.filter(c => c.color === 'black')
       const whites = normalizedCards.filter(c => c.color === 'white')
+      console.log('[loadCards] Black cards:', blacks.length, 'White cards:', whites.length)
       setBlackDeck(shuffleDeck([...blacks]))
       setWhiteDeck(shuffleDeck([...whites]))
     }
