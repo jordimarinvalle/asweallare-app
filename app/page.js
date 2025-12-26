@@ -817,6 +817,30 @@ function BoxSelectionScreen({
     }
   }, [accessibleBoxes, selectedBoxIds.length, setSelectedBoxIds])
   
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (!lightboxImage) return
+    
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setLightboxImage(null)
+      } else if (e.key === 'ArrowLeft' && lightboxImage.images.length > 1) {
+        setLightboxImage(prev => ({
+          ...prev,
+          index: prev.index > 0 ? prev.index - 1 : prev.images.length - 1
+        }))
+      } else if (e.key === 'ArrowRight' && lightboxImage.images.length > 1) {
+        setLightboxImage(prev => ({
+          ...prev,
+          index: prev.index < prev.images.length - 1 ? prev.index + 1 : 0
+        }))
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [lightboxImage])
+  
   // Series selection UI (only if multiple series)
   if (hasMultipleSeries && !selectedSeries) {
     const seriesData = collectionSeries.length > 0 
