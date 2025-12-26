@@ -2064,6 +2064,28 @@ export default function App() {
     ])
   }
   
+  // Update mockup display_order
+  const handleUpdateMockupOrder = async (mockupId, newOrder) => {
+    try {
+      const response = await fetch('/api/admin/mockups', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: mockupId, displayOrder: newOrder })
+      })
+      const data = await response.json()
+      
+      if (data.error) {
+        toast({ title: 'Update failed', description: data.error, variant: 'destructive' })
+      } else {
+        toast({ title: 'Order updated' })
+        loadMockups(mockupsBoxId)
+      }
+    } catch (err) {
+      toast({ title: 'Update failed', description: err.message, variant: 'destructive' })
+    }
+    setEditingMockupOrder(null)
+  }
+  
   const handleSaveCard = async () => {
     const payload = {
       color: cardForm.color,
