@@ -1161,9 +1161,11 @@ export default function App() {
   const [adminTab, setAdminTab] = useState('cards')
   
   // Mockups state
+  const [mockupsSeriesFilter, setMockupsSeriesFilter] = useState('')
   const [mockupsBoxId, setMockupsBoxId] = useState('')
   const [mockupsData, setMockupsData] = useState({ mainImage: null, secondaryImage: null, cardMockups: [] })
   const [mockupsLoading, setMockupsLoading] = useState(false)
+  const [editingMockupOrder, setEditingMockupOrder] = useState(null)  // ID of mockup being edited
   
   // Show/hide forms (forms hidden by default)
   const [showCardForm, setShowCardForm] = useState(false)
