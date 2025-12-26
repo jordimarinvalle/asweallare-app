@@ -285,17 +285,18 @@ async function handleSingleImageUpload(supabase, file, boxId, imageType) {
   await writeFile(targetPath, buffer)
   
   // Create DB record
-  const { data: newImage, error } = await supabase
+  const newImageData = {
+    id: md5Hash,
+    box_id: boxId,
+    image_path: relativePath,
+    image_type: imageType,
+    display_order: imageType === 'BOX_MAIN' ? 1 : 2,  // Main=1, Secondary=2
+    created_at: new Date().toISOString()
+  }
+  
+  const { error } = await supabase
     .from('mockup_images')
-    .insert({
-      id: md5Hash,
-      box_id: boxId,
-      image_path: relativePath,
-      image_type: imageType,
-      created_at: new Date().toISOString()
-    })
-    .select()
-    .single()
+    .insert(newImageData)
   
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -305,7 +306,7 @@ async function handleSingleImageUpload(supabase, file, boxId, imageType) {
   
   return NextResponse.json({
     success: true,
-    image: newImage,
+    image: newImageData,
     message: `${imageType} image uploaded successfully`
   })
 }
