@@ -888,19 +888,19 @@ function BoxSelectionScreen({
   
   return (
     <div className="min-h-screen bg-white">
-      {/* Lightbox Modal */}
+      {/* Lightbox Modal - Higher z-index than Dialog (z-[100]) */}
       {lightboxImage && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-          <div className="relative max-w-4xl max-h-full">
-            {/* Close button */}
+        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-[100] p-4">
+          <div className="relative max-w-4xl max-h-full w-full">
+            {/* Close button - dark gray background for visibility */}
             <button
               onClick={() => setLightboxImage(null)}
-              className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-colors"
+              className="absolute top-4 right-4 z-10 w-12 h-12 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center text-white transition-colors shadow-lg"
             >
-              <XCircle className="w-6 h-6" />
+              <XCircle className="w-7 h-7" />
             </button>
             
-            {/* Navigation buttons */}
+            {/* Navigation buttons - dark gray background for visibility */}
             {lightboxImage.images.length > 1 && (
               <>
                 <button
@@ -908,7 +908,7 @@ function BoxSelectionScreen({
                     ...prev,
                     index: prev.index > 0 ? prev.index - 1 : prev.images.length - 1
                   }))}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-14 h-14 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-colors shadow-lg"
                 >
                   ←
                 </button>
@@ -917,7 +917,7 @@ function BoxSelectionScreen({
                     ...prev,
                     index: prev.index < prev.images.length - 1 ? prev.index + 1 : 0
                   }))}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-14 h-14 bg-gray-800 hover:bg-gray-700 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-colors shadow-lg"
                 >
                   →
                 </button>
@@ -925,15 +925,17 @@ function BoxSelectionScreen({
             )}
             
             {/* Image */}
-            <img
-              src={lightboxImage.images[lightboxImage.index]?.imagePath}
-              alt={`Card ${lightboxImage.index + 1}`}
-              className="max-w-full max-h-full object-contain rounded-lg"
-            />
+            <div className="flex items-center justify-center h-[80vh]">
+              <img
+                src={lightboxImage.images[lightboxImage.index]?.imagePath}
+                alt={`Card ${lightboxImage.index + 1}`}
+                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              />
+            </div>
             
-            {/* Image counter */}
+            {/* Image counter - dark gray background */}
             {lightboxImage.images.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/20 text-white px-3 py-1 rounded-full text-sm">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
                 {lightboxImage.index + 1} / {lightboxImage.images.length}
               </div>
             )}
