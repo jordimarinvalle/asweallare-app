@@ -2862,6 +2862,7 @@ export default function App() {
             onStartPlaying={handleStartPlaying}
             onGoToStore={handleGoToStore}
             user={user}
+            collectionSeries={collectionSeries}
             onOpenCompleteGuide={() => {
               setBookletImages(BOOKLET_IMAGES)
               setBookletTitle("Unscripted Conversations Guide")
