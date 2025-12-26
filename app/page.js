@@ -725,6 +725,8 @@ function BoxSelectionScreen({
   const [selectedSeries, setSelectedSeries] = useState(null)
   const [seeMoreBox, setSeeMoreBox] = useState(null)  // Box for "See more" modal
   const [mockupsLoading, setMockupsLoading] = useState({})
+  const [lightboxImage, setLightboxImage] = useState(null)  // { index, images } for lightbox
+  const [visibleMockups, setVisibleMockups] = useState(24)  // Pagination for mockups
   
   // Load mockups for all visible boxes
   useEffect(() => {
