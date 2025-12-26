@@ -1056,7 +1056,7 @@ function BoxSelectionScreen({
                   >
                     {/* Selection Badge */}
                     {isSelected && (
-                      <div className="absolute top-4 right-4 z-10 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
+                      <div className="absolute top-4 right-4 z-10 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-200">
                         <Check className="w-5 h-5 text-white" />
                       </div>
                     )}
