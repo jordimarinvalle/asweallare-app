@@ -893,7 +893,10 @@ function BoxSelectionScreen({
     
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        closeSeeMoreModal()
+        setSeeMoreBox(null)
+        setSeeMoreMainImage(null)
+        setSeeMoreShowSecondary(false)
+        setSeeMoreIsFlipping(false)
       }
     }
     
