@@ -846,6 +846,65 @@ function BoxSelectionScreen({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [lightboxImage])
   
+  // Open See More modal with hero image as default
+  const openSeeMoreModal = (box) => {
+    const mockups = boxMockups[box.id]
+    const heroImage = mockups?.mainImage?.imagePath || null
+    setSeeMoreBox(box)
+    setSeeMoreMainImage(heroImage)
+    setSeeMoreShowSecondary(false)
+    setVisibleMockups(24)
+  }
+  
+  // Close See More modal
+  const closeSeeMoreModal = () => {
+    setSeeMoreBox(null)
+    setSeeMoreMainImage(null)
+    setSeeMoreShowSecondary(false)
+    setSeeMoreIsFlipping(false)
+  }
+  
+  // Handle flip between hero and secondary
+  const handleFlipMainImage = () => {
+    const mockups = boxMockups[seeMoreBox?.id]
+    if (!mockups?.secondaryImage?.imagePath) return
+    
+    setSeeMoreIsFlipping(true)
+    setTimeout(() => {
+      if (seeMoreShowSecondary) {
+        setSeeMoreMainImage(mockups.mainImage?.imagePath)
+      } else {
+        setSeeMoreMainImage(mockups.secondaryImage?.imagePath)
+      }
+      setSeeMoreShowSecondary(!seeMoreShowSecondary)
+      setSeeMoreIsFlipping(false)
+    }, 150) // Half of transition duration
+  }
+  
+  // Set a thumbnail as main image
+  const setThumbnailAsMain = (imagePath) => {
+    setSeeMoreMainImage(imagePath)
+    setSeeMoreShowSecondary(false) // Reset flip state when selecting thumbnail
+  }
+  
+  // Keyboard navigation for See More modal
+  useEffect(() => {
+    if (!seeMoreBox) return
+    
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        closeSeeMoreModal()
+      }
+    }
+    
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [seeMoreBox])
+  
   // Series selection UI (only if multiple series)
   if (hasMultipleSeries && !selectedSeries) {
     const seriesData = collectionSeries.length > 0 
