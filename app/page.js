@@ -1112,7 +1112,10 @@ function BoxSelectionScreen({
                       {/* Actions */}
                       <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                         <button
-                          onClick={() => setSeeMoreBox(box)}
+                          onClick={() => {
+                            setSeeMoreBox(box)
+                            setVisibleMockups(24)  // Reset pagination when opening new modal
+                          }}
                           className="text-sm text-gray-500 hover:text-red-600 transition-colors"
                         >
                           See more →
