@@ -29,6 +29,10 @@ In a world of constant distraction, we've created a tool to help you:
   footer_text: 'Made with ❤️ for authentic human connection',
   build_version: '1.0.0',
   admin_emails: 'jordi.asweallare@gmail.com',
+  primary_color: '#D12128',
+  secondary_color: '#1F2937',
+  accent_color: '#6B7280',
+  danger_color: '#DC2626',
   socials: []
 }
 
