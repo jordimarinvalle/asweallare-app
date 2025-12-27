@@ -3836,7 +3836,7 @@ function AppContent() {
                   <>
                     {/* Basic Info */}
                     <Card className="p-6">
-                      <h3 className="font-semibold text-gray-900 mb-4">App Information</h3>
+                      <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>App Information</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label className="mb-2 block">App Name</Label>
@@ -3883,7 +3883,7 @@ function AppContent() {
                     
                     {/* Admin Emails */}
                     <Card className="p-6">
-                      <h3 className="font-semibold text-gray-900 mb-2">Admin Users</h3>
+                      <h3 className={`font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Admin Users</h3>
                       <p className="text-sm text-gray-500 mb-4">Email addresses that have admin access to this panel.</p>
                       <div>
                         <Label className="mb-2 block">Admin Emails (one per line)</Label>
@@ -3899,7 +3899,7 @@ function AppContent() {
                     
                     {/* Content Sections */}
                     <Card className="p-6">
-                      <h3 className="font-semibold text-gray-900 mb-4">Content (Markdown Supported)</h3>
+                      <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Content (Markdown Supported)</h3>
                       <div className="space-y-4">
                         <div>
                           <Label className="mb-2 block">Header Text</Label>
@@ -3932,7 +3932,7 @@ function AppContent() {
                     
                     {/* Theme Colors */}
                     <Card className="p-6">
-                      <h3 className="font-semibold text-gray-900 mb-4">Theme Colors</h3>
+                      <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Theme Colors</h3>
                       <p className="text-sm text-gray-500 mb-4">These colors will be used throughout the app for buttons, active states, and highlights.</p>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
