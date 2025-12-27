@@ -4079,7 +4079,7 @@ function AppContent() {
                     
                     {/* Save Button */}
                     <div className="flex justify-end">
-                      <Button onClick={handleSaveAppConfig} className="bg-red-600 hover:bg-red-700 text-white">
+                      <Button onClick={handleSaveAppConfig} className="h-9 px-4 text-sm font-medium bg-red-600 hover:bg-red-700 text-white">
                         Save App Config
                       </Button>
                     </div>
