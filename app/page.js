@@ -3786,7 +3786,15 @@ function AppContent() {
         {view === 'admin' && isAdmin && (
           <div className="max-w-6xl mx-auto p-8">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-serif text-gray-900 sr-only">Admin Panel</h2>
+              <button 
+                onClick={() => setView('home')}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <X className="w-5 h-5" />
+                <span className="font-medium">Close Admin</span>
+              </button>
+              <h2 className="text-xl font-semibold text-gray-900">Admin Panel</h2>
+              <div className="w-24" /> {/* Spacer for alignment */}
             </div>
             
             {/* Admin Tabs */}
