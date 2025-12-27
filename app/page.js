@@ -4008,7 +4008,7 @@ function AppContent() {
                       
                       {/* Add Social Form */}
                       <div className="flex gap-2 mb-4">
-                        <div className="flex items-center gap-2 px-3 h-10 border rounded-md bg-white">
+                        <div className="flex items-center gap-2 px-3 h-9 border rounded-md bg-white">
                           <SocialIcon platform={adminAppSocialForm.platform} size={18} colored />
                           <SocialPlatformSelector
                             value={adminAppSocialForm.platform}
