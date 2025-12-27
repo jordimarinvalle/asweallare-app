@@ -3868,6 +3868,22 @@ function AppContent() {
                       </div>
                     </Card>
                     
+                    {/* Admin Emails */}
+                    <Card className="p-6">
+                      <h3 className="font-semibold text-gray-900 mb-2">Admin Users</h3>
+                      <p className="text-sm text-gray-500 mb-4">Email addresses that have admin access to this panel.</p>
+                      <div>
+                        <Label className="mb-2 block">Admin Emails (one per line)</Label>
+                        <textarea 
+                          className="w-full min-h-[100px] p-3 border rounded-md text-sm font-mono"
+                          value={adminAppConfig.admin_emails || ''} 
+                          onChange={(e) => setAdminAppConfig({...adminAppConfig, admin_emails: e.target.value})}
+                          placeholder="admin@example.com&#10;manager@example.com"
+                        />
+                        <p className="text-xs text-gray-400 mt-1">Enter one email address per line</p>
+                      </div>
+                    </Card>
+                    
                     {/* Content Sections */}
                     <Card className="p-6">
                       <h3 className="font-semibold text-gray-900 mb-4">Content (Markdown Supported)</h3>
