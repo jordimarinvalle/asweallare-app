@@ -2336,22 +2336,30 @@ function AppContent() {
   // Load boxes and plans
   useEffect(() => {
     const loadBoxes = async () => {
-      const response = await fetch('/api/boxes')
-      const data = await response.json()
-      if (data.boxes) {
-        setBoxes(data.boxes)
-        setHasAllAccess(data.hasAllAccess || false)
-        // Auto-select sample boxes
-        const sampleBoxIds = data.boxes.filter(b => b.is_sample && b.hasAccess).map(b => b.id)
-        setSelectedBoxIds(sampleBoxIds)
+      try {
+        const response = await fetch('/api/boxes')
+        const data = await response.json()
+        if (data.boxes) {
+          setBoxes(data.boxes)
+          setHasAllAccess(data.hasAllAccess || false)
+          // Auto-select sample boxes
+          const sampleBoxIds = data.boxes.filter(b => b.is_sample && b.hasAccess).map(b => b.id)
+          setSelectedBoxIds(sampleBoxIds)
+        }
+      } catch (err) {
+        console.error('Failed to load boxes:', err)
       }
     }
     
     const loadPlans = async () => {
-      const response = await fetch('/api/plans')
-      const data = await response.json()
-      if (data.plans) {
-        setPlans(data.plans)
+      try {
+        const response = await fetch('/api/plans')
+        const data = await response.json()
+        if (data.plans) {
+          setPlans(data.plans)
+        }
+      } catch (err) {
+        console.error('Failed to load plans:', err)
       }
     }
     
