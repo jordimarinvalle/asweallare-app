@@ -4038,6 +4038,7 @@ function AppContent() {
                       {adminAppConfig.socials?.length > 0 ? (
                         <ReorderableList
                           items={adminAppConfig.socials}
+                          isDark={isDark}
                           onReorder={async (newItems) => {
                             // Update local state immediately
                             setAdminAppConfig({...adminAppConfig, socials: newItems})
@@ -4057,9 +4058,11 @@ function AppContent() {
                           }}
                           renderItem={(social) => (
                             <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <SocialIcon platform={social.name} size={20} colored />
-                              <span className="font-medium text-sm">{social.name}</span>
-                              <span className="text-gray-500 text-sm truncate flex-1">{social.url}</span>
+                              <div className={`w-7 h-7 rounded-full flex items-center justify-center ${isDark ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                                <SocialIcon platform={social.name} size={16} colored />
+                              </div>
+                              <span className={`font-medium text-sm ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>{social.name}</span>
+                              <span className={`text-sm truncate flex-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{social.url}</span>
                               <button
                                 onClick={() => handleDeleteSocialLink(social.id)}
                                 className="text-red-600 hover:text-red-700 p-1"
@@ -4070,7 +4073,7 @@ function AppContent() {
                           )}
                         />
                       ) : (
-                        <p className="text-gray-500 text-sm">No social links added yet</p>
+                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>No social links added yet</p>
                       )}
                     </Card>
                     
