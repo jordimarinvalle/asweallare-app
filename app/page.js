@@ -4637,8 +4637,8 @@ function AppContent() {
                       </div>
                     </div>
                     <div className="flex gap-2 mt-4">
-                      <Button onClick={handleSavePile} className="bg-red-600 hover:bg-red-700 text-white">{editingPile ? 'Update' : 'Create'}</Button>
-                      <Button onClick={() => { setShowPileForm(false); setEditingPile(null) }} variant="outline">Cancel</Button>
+                      <Button onClick={handleSavePile} className="h-9 px-4 text-sm font-medium bg-red-600 hover:bg-red-700 text-white">{editingPile ? 'Update' : 'Create'}</Button>
+                      <Button onClick={() => { setShowPileForm(false); setEditingPile(null) }} variant="outline" className="h-9 px-4 text-sm font-medium">Cancel</Button>
                     </div>
                   </Card>
                 )}
