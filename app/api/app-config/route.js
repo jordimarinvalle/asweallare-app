@@ -1,6 +1,35 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServer } from '../../../lib/supabase-server'
 
+// Default app config - used when database table doesn't exist
+const DEFAULT_APP_CONFIG = {
+  id: 'app_asweallare',
+  slug: 'asweallare',
+  name: 'AS WE ALL ARE',
+  title: 'Unscripted Conversations',
+  tagline: 'A therapeutic conversational card game',
+  promise: 'Know more about each other without the need to ask any question',
+  header_text: '## Welcome to AS WE ALL ARE\n\nA space for **authentic connection** and meaningful conversations.',
+  body_text: `### How It Works
+
+1. **Select your deck** — Choose from our curated card collections
+2. **Draw a card** — Each card presents a thoughtful prompt
+3. **Share openly** — Take turns sharing your thoughts and experiences
+4. **Listen deeply** — Create space for others to be heard
+
+> "The quality of our lives depends on the quality of our conversations."
+
+### Why This Matters
+
+In a world of constant distraction, we've created a tool to help you:
+- Build deeper connections
+- Practice vulnerability
+- Discover new perspectives
+- Create meaningful memories`,
+  footer_text: 'Made with ❤️ for authentic human connection',
+  socials: []
+}
+
 // GET /api/app-config - Get app config by slug
 export async function GET(request) {
   try {
@@ -16,24 +45,10 @@ export async function GET(request) {
       .eq('slug', slug)
       .single()
     
-    if (configError) {
-      // Table might not exist yet - return default config
-      if (configError.code === '42P01' || configError.message?.includes('does not exist')) {
-        return NextResponse.json({
-          id: 'app_asweallare',
-          slug: 'asweallare',
-          name: 'AS WE ALL ARE',
-          title: 'Unscripted Conversations',
-          tagline: 'A therapeutic conversational card game',
-          promise: 'Know more about each other without the need to ask any question',
-          header_text: '## Welcome to AS WE ALL ARE\n\nA space for **authentic connection** and meaningful conversations.',
-          body_text: '### How It Works\n\n1. **Select your deck** — Choose from our curated card collections\n2. **Draw a card** — Each card presents a thoughtful prompt\n3. **Share openly** — Take turns sharing your thoughts and experiences\n4. **Listen deeply** — Create space for others to be heard\n\n> "The quality of our lives depends on the quality of our conversations."\n\n### Why This Matters\n\nIn a world of constant distraction, we\'ve created a tool to help you:\n- Build deeper connections\n- Practice vulnerability\n- Discover new perspectives\n- Create meaningful memories',
-          footer_text: 'Made with ❤️ for authentic human connection',
-          socials: []
-        })
-      }
-      console.error('[APP CONFIG] Error fetching config:', configError)
-      return NextResponse.json({ error: 'Failed to fetch app config' }, { status: 500 })
+    if (configError || !appConfig) {
+      // Table might not exist yet or no data - return default config
+      console.log('[APP CONFIG] Using default config, error:', configError?.message)
+      return NextResponse.json(DEFAULT_APP_CONFIG)
     }
     
     // Get socials for this app
@@ -61,6 +76,7 @@ export async function GET(request) {
     
   } catch (error) {
     console.error('[APP CONFIG] Unexpected error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    // Return default config on any error
+    return NextResponse.json(DEFAULT_APP_CONFIG)
   }
 }
