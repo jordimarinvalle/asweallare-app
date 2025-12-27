@@ -2110,10 +2110,6 @@ function AppContent() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [purchaseToCancel, setPurchaseToCancel] = useState(null)
   
-  // Admin check - use admin_emails from appConfig or fallback
-  const adminEmails = appConfig?.admin_emails?.split('\n').map(e => e.trim().toLowerCase()).filter(Boolean) || []
-  const isAdmin = user?.is_admin === true || (user?.email && adminEmails.includes(user.email.toLowerCase()))
-  
   // Admin filter state
   const [adminSeriesFilter, setAdminSeriesFilter] = useState('')
   const [adminBoxFilter, setAdminBoxFilter] = useState('')
