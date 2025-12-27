@@ -1816,7 +1816,7 @@ function ProfileScreen({
   isAdmin,
   onGoToAdmin
 }) {
-  const { theme, themeName, toggleTheme, autoDetected, manualOverride, resetToAuto, isApple } = useTheme()
+  const { theme, themeName, toggleTheme, autoDetected, manualOverride, resetToAuto, isApple, colorMode, autoColorMode, colorModeOverride, setColorModePreference, colors } = useTheme()
   const { paddingBottom, paddingLeft } = useBottomNavPadding()
   
   // Group purchases by status
