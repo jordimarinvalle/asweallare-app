@@ -1644,9 +1644,388 @@ function StoreScreen({ boxes, plans, onPurchaseBox, onSubscribe, onBack, user, h
 }
 
 // ============================================================================
+// HOME SCREEN - Landing page with app info
+// ============================================================================
+function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
+  const { theme, isApple } = useTheme()
+  const { paddingBottom, paddingLeft, isLandscape } = useBottomNavPadding()
+  
+  // Social icon mapping
+  const socialIcons = {
+    instagram: Instagram,
+    twitter: Twitter,
+    facebook: Facebook,
+    youtube: Youtube,
+    linkedin: Linkedin,
+    website: Globe,
+    default: ExternalLink
+  }
+  
+  const getSocialIcon = (name) => {
+    const key = name?.toLowerCase()
+    return socialIcons[key] || socialIcons.default
+  }
+  
+  return (
+    <div 
+      className="min-h-screen bg-white"
+      style={{ paddingBottom, paddingLeft }}
+    >
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-20 text-center">
+          {/* Brand Name */}
+          <h1 className="font-brand text-gray-900 text-lg tracking-widest mb-4">
+            {appConfig?.name || 'AS WE ALL ARE'}
+          </h1>
+          
+          {/* Title */}
+          <h2 className="text-3xl sm:text-5xl font-serif text-gray-900 mb-4">
+            {appConfig?.title || 'Unscripted Conversations'}
+          </h2>
+          
+          {/* Tagline */}
+          <p className="text-lg sm:text-xl text-gray-600 mb-2">
+            {appConfig?.tagline || 'A therapeutic conversational card game'}
+          </p>
+          
+          {/* Promise */}
+          <p className="text-base text-gray-500 max-w-xl mx-auto mb-8">
+            {appConfig?.promise || 'Know more about each other without the need to ask any question'}
+          </p>
+          
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button 
+              onClick={onPlay}
+              className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 text-lg"
+              style={{ borderRadius: theme.borderRadius.lg }}
+            >
+              <Play className="w-5 h-5 mr-2" />
+              Start Playing
+            </Button>
+            {!user && (
+              <Button 
+                onClick={onSignIn}
+                variant="outline"
+                className="px-8 py-3 text-lg border-gray-300"
+                style={{ borderRadius: theme.borderRadius.lg }}
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {/* Header Content (Markdown) */}
+      {appConfig?.header_text && (
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+          <div className="prose prose-gray prose-lg max-w-none text-center">
+            <ReactMarkdown>{appConfig.header_text}</ReactMarkdown>
+          </div>
+        </div>
+      )}
+      
+      {/* Body Content (Markdown) */}
+      {appConfig?.body_text && (
+        <div className="bg-gray-50 py-12">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6">
+            <div className="prose prose-gray prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-li:text-gray-600 prose-blockquote:border-red-500 prose-blockquote:text-gray-700">
+              <ReactMarkdown>{appConfig.body_text}</ReactMarkdown>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Socials */}
+      {appConfig?.socials?.length > 0 && (
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+          <div className="flex flex-wrap justify-center gap-4">
+            {appConfig.socials.map((social) => {
+              const Icon = getSocialIcon(social.name)
+              return (
+                <a
+                  key={social.id}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="text-sm font-medium">{social.name}</span>
+                </a>
+              )
+            })}
+          </div>
+        </div>
+      )}
+      
+      {/* Footer Content */}
+      {appConfig?.footer_text && (
+        <div className="border-t border-gray-100 py-8">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+            <p className="text-gray-500">{appConfig.footer_text}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================================
+// PROFILE SCREEN - User info, purchases, memberships
+// ============================================================================
+function ProfileScreen({ 
+  user, 
+  purchases, 
+  onSignOut, 
+  onCancelSubscription,
+  onSignIn,
+  isAdmin,
+  onGoToAdmin
+}) {
+  const { theme, themeName, toggleTheme, autoDetected, manualOverride, resetToAuto, isApple } = useTheme()
+  const { paddingBottom, paddingLeft } = useBottomNavPadding()
+  
+  // Group purchases by status
+  const activeMemberships = purchases.filter(p => 
+    p.membership_days && new Date(p.expires_at) > new Date()
+  )
+  const expiredMemberships = purchases.filter(p => 
+    p.membership_days && new Date(p.expires_at) <= new Date()
+  )
+  const oneTimePurchases = purchases.filter(p => !p.membership_days)
+  
+  // Format date
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A'
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+  
+  // Calculate days until expiry
+  const daysUntilExpiry = (dateStr) => {
+    if (!dateStr) return null
+    const diff = new Date(dateStr) - new Date()
+    return Math.ceil(diff / (1000 * 60 * 60 * 24))
+  }
+  
+  if (!user) {
+    return (
+      <div 
+        className="min-h-screen bg-white flex flex-col items-center justify-center p-4"
+        style={{ paddingBottom, paddingLeft }}
+      >
+        <User className="w-16 h-16 text-gray-300 mb-4" />
+        <h2 className="text-2xl font-serif text-gray-900 mb-2">Welcome</h2>
+        <p className="text-gray-500 mb-6 text-center">Sign in to view your profile and purchases</p>
+        <Button 
+          onClick={onSignIn}
+          className="bg-red-600 hover:bg-red-700 text-white px-8"
+          style={{ borderRadius: theme.borderRadius.lg }}
+        >
+          Sign In
+        </Button>
+      </div>
+    )
+  }
+  
+  return (
+    <div 
+      className="min-h-screen bg-gray-50"
+      style={{ paddingBottom, paddingLeft }}
+    >
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
+        {/* Profile Header */}
+        <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+              <User className="w-8 h-8 text-gray-400" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-gray-500">Signed in as</p>
+              <p className="font-medium text-gray-900 truncate">{user.email}</p>
+            </div>
+          </div>
+          
+          {/* Admin Link */}
+          {isAdmin && (
+            <button
+              onClick={onGoToAdmin}
+              className="mt-4 w-full flex items-center justify-center gap-2 py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+              Admin Panel
+            </button>
+          )}
+        </div>
+        
+        {/* Active Memberships */}
+        {activeMemberships.length > 0 && (
+          <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm">
+            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Crown className="w-5 h-5 text-red-600" />
+              Active Memberships
+            </h3>
+            <div className="space-y-3">
+              {activeMemberships.map((purchase) => {
+                const days = daysUntilExpiry(purchase.expires_at)
+                return (
+                  <div key={purchase.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                        <Crown className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{purchase.box_name || purchase.plan_name || 'Membership'}</p>
+                        <p className="text-sm text-gray-500">
+                          Expires: {formatDate(purchase.expires_at)}
+                          {days && days <= 30 && (
+                            <span className="ml-2 text-orange-600">({days} days left)</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => onCancelSubscription(purchase)}
+                      className="text-sm text-red-600 hover:text-red-700 font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+        
+        {/* Owned Products */}
+        {oneTimePurchases.length > 0 && (
+          <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm">
+            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Package className="w-5 h-5 text-gray-600" />
+              Owned Products
+            </h3>
+            <div className="space-y-3">
+              {oneTimePurchases.map((purchase) => (
+                <div key={purchase.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                    <Package className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">{purchase.box_name || purchase.product_name || 'Product'}</p>
+                    <p className="text-sm text-gray-500">
+                      Purchased: {formatDate(purchase.created_at)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Past Memberships */}
+        {expiredMemberships.length > 0 && (
+          <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm">
+            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-gray-400" />
+              Past Memberships
+            </h3>
+            <div className="space-y-3">
+              {expiredMemberships.map((purchase) => (
+                <div key={purchase.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-60">
+                  <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                    <Crown className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-700">{purchase.box_name || purchase.plan_name || 'Membership'}</p>
+                    <p className="text-sm text-gray-400">
+                      Expired: {formatDate(purchase.expires_at)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Empty State */}
+        {purchases.length === 0 && (
+          <div className="bg-white rounded-2xl p-8 mb-4 shadow-sm text-center">
+            <Receipt className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <h3 className="font-medium text-gray-900 mb-2">No purchases yet</h3>
+            <p className="text-sm text-gray-500">Your purchase history will appear here</p>
+          </div>
+        )}
+        
+        {/* Settings */}
+        <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm">
+          <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Settings className="w-5 h-5 text-gray-600" />
+            Settings
+          </h3>
+          
+          {/* Theme Toggle */}
+          <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div>
+              <p className="font-medium text-gray-900">Theme</p>
+              <p className="text-sm text-gray-500">
+                {manualOverride ? `Manual: ${themeName}` : `Auto-detected: ${autoDetected}`}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {manualOverride && (
+                <button
+                  onClick={resetToAuto}
+                  className="text-xs text-gray-500 hover:text-gray-700 mr-2"
+                >
+                  Reset
+                </button>
+              )}
+              <button
+                onClick={toggleTheme}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  isApple 
+                    ? 'bg-gray-900 text-white' 
+                    : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                {isApple ? 'Apple' : 'Material'}
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Sign Out */}
+        <button
+          onClick={onSignOut}
+          className="w-full py-3 text-red-600 font-medium hover:bg-red-50 rounded-xl transition-colors"
+        >
+          Sign Out
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
 // MAIN APP COMPONENT
 // ============================================================================
 export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  )
+}
+
+function AppContent() {
+  const { theme } = useTheme()
+  const { paddingBottom, paddingLeft, isLandscape: bottomNavLandscape } = useBottomNavPadding()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [authMode, setAuthMode] = useState('signin')
