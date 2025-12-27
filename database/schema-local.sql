@@ -316,5 +316,11 @@ ALTER TABLE app_config ADD COLUMN IF NOT EXISTS build_version TEXT DEFAULT '1.0.
 -- Add admin_emails to app_config if not exists
 ALTER TABLE app_config ADD COLUMN IF NOT EXISTS admin_emails TEXT DEFAULT 'jordi.asweallare@gmail.com';
 
+-- Add theme color columns to app_config
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS primary_color TEXT DEFAULT '#000000';
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS secondary_color TEXT DEFAULT '#F3F4F6';
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS accent_color TEXT DEFAULT '#D12128';
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS danger_color TEXT DEFAULT '#DC2626';
+
 -- Update existing row with default admin email
 UPDATE app_config SET admin_emails = 'jordi.asweallare@gmail.com' WHERE slug = 'asweallare' AND (admin_emails IS NULL OR admin_emails = '');
