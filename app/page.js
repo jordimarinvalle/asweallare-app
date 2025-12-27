@@ -3811,7 +3811,7 @@ function AppContent() {
             </div>
             
             {/* Admin Tabs */}
-            <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto pb-px">
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-px">
               {['app', 'series', 'boxes', 'piles', 'mockups', 'cards', 'prices', 'bundles'].map(tab => (
                 <button
                   key={tab}
@@ -4169,7 +4169,7 @@ function AppContent() {
                 
                 {showBoxForm && (
                   <Card className="p-6 mb-6">
-                    <h4 className="font-medium mb-4">{editingBox ? 'Edit Box' : 'New Box'}</h4>
+                    <h4 className="font-medium mb-4 sr-only">{editingBox ? 'Edit Box' : 'New Box'}</h4>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div>
                         <Label>ID (slug/folder name)</Label>
@@ -4513,7 +4513,7 @@ function AppContent() {
                 
                 {showPileForm && (
                   <Card className="p-6 mb-6">
-                    <h4 className="font-medium mb-4">{editingPile ? 'Edit Pile' : 'New Pile'}</h4>
+                    <h4 className="font-medium mb-4 sr-only">{editingPile ? 'Edit Pile' : 'New Pile'}</h4>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div>
                         <Label>Name</Label>
