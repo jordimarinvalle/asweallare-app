@@ -2140,7 +2140,12 @@ function AppContent() {
   const [adminPrices, setAdminPrices] = useState([])
   const [adminPiles, setAdminPiles] = useState([])
   const [adminBundles, setAdminBundles] = useState([])
-  const [adminTab, setAdminTab] = useState('cards')
+  const [adminTab, setAdminTab] = useState('app')  // Default to 'app' tab
+  
+  // Admin App Config state
+  const [adminAppConfig, setAdminAppConfig] = useState(null)
+  const [adminAppConfigLoading, setAdminAppConfigLoading] = useState(false)
+  const [adminAppSocialForm, setAdminAppSocialForm] = useState({ platform: 'Instagram', url: '' })
   
   // Mockups state
   const [mockupsSeriesFilter, setMockupsSeriesFilter] = useState('')
