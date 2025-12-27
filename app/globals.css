@@ -60,6 +60,23 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Libre Baskerville', serif;
   }
+  
+  /* Dark mode form elements */
+  .dark input,
+  .dark textarea,
+  .dark select {
+    @apply bg-[#1a1a1a] border-[#2a2a2a] text-gray-200;
+  }
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    @apply text-gray-500;
+  }
+  .dark code {
+    @apply bg-[#2a2a2a] text-gray-300;
+  }
+  .dark pre {
+    @apply bg-[#1a1a1a];
+  }
 }
 
 @layer utilities {
