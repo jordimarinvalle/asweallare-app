@@ -15,6 +15,11 @@ CREATE TABLE IF NOT EXISTS app_config (
   body_text TEXT,
   footer_text TEXT,
   build_version TEXT DEFAULT '1.0.0',
+  admin_emails TEXT DEFAULT 'jordi.asweallare@gmail.com',
+  primary_color TEXT DEFAULT '#D12128',
+  secondary_color TEXT DEFAULT '#1F2937',
+  accent_color TEXT DEFAULT '#6B7280',
+  danger_color TEXT DEFAULT '#DC2626',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
