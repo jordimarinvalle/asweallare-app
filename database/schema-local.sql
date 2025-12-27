@@ -308,3 +308,6 @@ In a world of constant distraction, we''ve created a tool to help you:
 - Discover new perspectives
 - Create meaningful memories',
 'Made with ❤️ for authentic human connection');
+
+-- Add build_version to app_config if not exists
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS build_version TEXT DEFAULT '1.0.0';
