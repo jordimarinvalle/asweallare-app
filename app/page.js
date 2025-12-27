@@ -4008,16 +4008,19 @@ function AppContent() {
                     
                     {/* Social Links */}
                     <Card className="p-6">
-                      <h3 className="font-semibold text-gray-900 mb-4">Social Links</h3>
+                      <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Social Links</h3>
                       
                       {/* Add Social Form */}
                       <div className="flex gap-2 mb-4">
-                        <div className="flex items-center gap-2 px-3 h-9 border rounded-md bg-white">
-                          <SocialIcon platform={adminAppSocialForm.platform} size={18} colored />
+                        <div className={`flex items-center gap-2 px-3 h-9 border rounded-md ${isDark ? 'bg-[#2a2a2a] border-[#3a3a3a]' : 'bg-white border-gray-300'}`}>
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}>
+                            <SocialIcon platform={adminAppSocialForm.platform} size={16} colored />
+                          </div>
                           <SocialPlatformSelector
                             value={adminAppSocialForm.platform}
                             onChange={(platform) => setAdminAppSocialForm({...adminAppSocialForm, platform})}
                             className="border-0 p-0 bg-transparent"
+                            isDark={isDark}
                           />
                         </div>
                         <Input 
