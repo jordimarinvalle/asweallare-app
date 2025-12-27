@@ -3888,12 +3888,12 @@ function AppContent() {
                       <div>
                         <Label className="mb-2 block">Admin Emails (one per line)</Label>
                         <textarea 
-                          className="w-full min-h-[100px] p-3 border rounded-md text-sm font-mono"
+                          className={`w-full min-h-[100px] p-3 border rounded-md text-sm font-mono ${isDark ? 'bg-[#1a1a1a] border-[#2a2a2a] text-gray-200' : 'bg-white border-gray-300 text-gray-900'}`}
                           value={adminAppConfig.admin_emails || ''} 
                           onChange={(e) => setAdminAppConfig({...adminAppConfig, admin_emails: e.target.value})}
                           placeholder="admin@example.com&#10;manager@example.com"
                         />
-                        <p className="text-xs text-gray-400 mt-1">Enter one email address per line</p>
+                        <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Enter one email address per line</p>
                       </div>
                     </Card>
                     
@@ -3904,7 +3904,7 @@ function AppContent() {
                         <div>
                           <Label className="mb-2 block">Header Text</Label>
                           <textarea 
-                            className="w-full min-h-[100px] p-3 border rounded-md text-sm font-mono"
+                            className={`w-full min-h-[100px] p-3 border rounded-md text-sm font-mono ${isDark ? 'bg-[#1a1a1a] border-[#2a2a2a] text-gray-200' : 'bg-white border-gray-300 text-gray-900'}`}
                             value={adminAppConfig.header_text || ''} 
                             onChange={(e) => setAdminAppConfig({...adminAppConfig, header_text: e.target.value})}
                             placeholder="## Welcome..."
@@ -3913,7 +3913,7 @@ function AppContent() {
                         <div>
                           <Label className="mb-2 block">Body Text</Label>
                           <textarea 
-                            className="w-full min-h-[200px] p-3 border rounded-md text-sm font-mono"
+                            className={`w-full min-h-[200px] p-3 border rounded-md text-sm font-mono ${isDark ? 'bg-[#1a1a1a] border-[#2a2a2a] text-gray-200' : 'bg-white border-gray-300 text-gray-900'}`}
                             value={adminAppConfig.body_text || ''} 
                             onChange={(e) => setAdminAppConfig({...adminAppConfig, body_text: e.target.value})}
                             placeholder="### How It Works..."
@@ -3933,7 +3933,7 @@ function AppContent() {
                     {/* Theme Colors */}
                     <Card className="p-6">
                       <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Theme Colors</h3>
-                      <p className="text-sm text-gray-500 mb-4">These colors will be used throughout the app for buttons, active states, and highlights.</p>
+                      <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>These colors will be used throughout the app for buttons, active states, and highlights.</p>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
                           <Label className="mb-2 block text-sm">Primary</Label>
@@ -3942,7 +3942,7 @@ function AppContent() {
                               type="color"
                               value={adminAppConfig.primary_color || '#D12128'}
                               onChange={(e) => setAdminAppConfig({...adminAppConfig, primary_color: e.target.value})}
-                              className="w-10 h-10 rounded cursor-pointer border"
+                              className={`w-10 h-10 rounded cursor-pointer border ${isDark ? 'border-[#3a3a3a]' : 'border-gray-300'}`}
                             />
                             <Input 
                               value={adminAppConfig.primary_color || '#D12128'}
