@@ -27,6 +27,7 @@ In a world of constant distraction, we've created a tool to help you:
 - Discover new perspectives
 - Create meaningful memories`,
   footer_text: 'Made with ❤️ for authentic human connection',
+  build_version: '1.0.0',
   socials: []
 }
 
