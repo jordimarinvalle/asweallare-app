@@ -3085,6 +3085,7 @@ function AppContent() {
   
   const loadAllAdminData = async () => {
     await Promise.all([
+      loadAdminAppConfig(),
       loadAdminCards(),
       loadAdminBoxes(),
       loadAdminSeries(),
@@ -3092,6 +3093,88 @@ function AppContent() {
       loadAdminPiles(),
       loadAdminBundles()
     ])
+  }
+  
+  // Load Admin App Config
+  const loadAdminAppConfig = async () => {
+    setAdminAppConfigLoading(true)
+    try {
+      const response = await fetch('/api/admin/app-config')
+      const data = await response.json()
+      if (!data.error) {
+        setAdminAppConfig(data)
+      }
+    } catch (err) {
+      console.error('Failed to load app config:', err)
+    }
+    setAdminAppConfigLoading(false)
+  }
+  
+  // Save Admin App Config
+  const handleSaveAppConfig = async () => {
+    try {
+      const response = await fetch('/api/admin/app-config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(adminAppConfig)
+      })
+      const data = await response.json()
+      if (data.error) {
+        toast({ title: 'Save failed', description: data.error, variant: 'destructive' })
+      } else {
+        toast({ title: 'App config saved' })
+        setAdminAppConfig(data)
+      }
+    } catch (err) {
+      toast({ title: 'Save failed', description: err.message, variant: 'destructive' })
+    }
+  }
+  
+  // Add Social Link
+  const handleAddSocialLink = async () => {
+    if (!adminAppSocialForm.url) {
+      toast({ title: 'URL required', variant: 'destructive' })
+      return
+    }
+    try {
+      const response = await fetch('/api/admin/app-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          app_id: adminAppConfig?.id || 'app_asweallare',
+          platform: adminAppSocialForm.platform,
+          url: adminAppSocialForm.url
+        })
+      })
+      const data = await response.json()
+      if (data.error) {
+        toast({ title: 'Add failed', description: data.error, variant: 'destructive' })
+      } else {
+        toast({ title: 'Social link added' })
+        setAdminAppSocialForm({ platform: 'Instagram', url: '' })
+        loadAdminAppConfig()
+      }
+    } catch (err) {
+      toast({ title: 'Add failed', description: err.message, variant: 'destructive' })
+    }
+  }
+  
+  // Delete Social Link
+  const handleDeleteSocialLink = async (socialId) => {
+    try {
+      const response = await fetch(`/api/admin/app-config/socials?id=${socialId}`, {
+        method: 'DELETE'
+      })
+      const data = await response.json()
+      if (data.error) {
+        toast({ title: 'Delete failed', description: data.error, variant: 'destructive' })
+      } else {
+        toast({ title: 'Social link deleted' })
+        loadAdminAppConfig()
+      }
+    } catch (err) {
+      toast({ title: 'Delete failed', description: err.message, variant: 'destructive' })
+    }
   }
   
   // Update mockup display_order
