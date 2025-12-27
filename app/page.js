@@ -18,7 +18,7 @@ import { RotateDeviceScreen } from '@/components/game/RotateDeviceScreen'
 import { ThemeProvider, useTheme, BottomNav, useBottomNavPadding, SocialIcon, SocialPlatformSelector, SOCIAL_PLATFORMS, getPlatformConfig, ReorderableList } from '@/components/theme'
 
 // Simple Markdown to HTML converter (no external dependencies)
-function SimpleMarkdown({ children }) {
+function SimpleMarkdown({ children, isDark = false }) {
   if (!children) return null
   
   const processMarkdown = (text) => {
@@ -27,17 +27,21 @@ function SimpleMarkdown({ children }) {
     // Escape HTML first
     html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     
-    // Headers
-    html = html.replace(/^### (.+)$/gm, '<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">$1</h3>')
-    html = html.replace(/^## (.+)$/gm, '<h2 class="text-2xl font-semibold text-gray-900 mt-6 mb-4">$1</h2>')
-    html = html.replace(/^# (.+)$/gm, '<h1 class="text-3xl font-bold text-gray-900 mt-6 mb-4">$1</h1>')
+    // Headers - use CSS variables or appropriate classes
+    const headingColor = isDark ? 'text-white' : 'text-gray-900'
+    const textColor = isDark ? 'text-gray-300' : 'text-gray-600'
+    const quoteColor = isDark ? 'text-gray-400' : 'text-gray-700'
+    
+    html = html.replace(/^### (.+)$/gm, `<h3 class="text-xl font-semibold ${headingColor} mt-6 mb-3">$1</h3>`)
+    html = html.replace(/^## (.+)$/gm, `<h2 class="text-2xl font-semibold ${headingColor} mt-6 mb-4">$1</h2>`)
+    html = html.replace(/^# (.+)$/gm, `<h1 class="text-3xl font-bold ${headingColor} mt-6 mb-4">$1</h1>`)
     
     // Bold and italic
     html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>')
     html = html.replace(/\*(.+?)\*/g, '<em>$1</em>')
     
     // Blockquotes
-    html = html.replace(/^&gt; (.+)$/gm, '<blockquote class="border-l-4 border-red-500 pl-4 my-4 italic text-gray-700">$1</blockquote>')
+    html = html.replace(/^&gt; (.+)$/gm, `<blockquote class="border-l-4 border-red-500 pl-4 my-4 italic ${quoteColor}">$1</blockquote>`)
     
     // Ordered lists
     html = html.replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 mb-2"><span class="font-medium">$1.</span> $2</li>')
@@ -53,7 +57,7 @@ function SimpleMarkdown({ children }) {
     html = lines.map(line => {
       if (line.trim() === '') return ''
       if (line.startsWith('<')) return line
-      return `<p class="mb-3 text-gray-600">${line}</p>`
+      return `<p class="mb-3 ${textColor}">${line}</p>`
     }).join('\n')
     
     return html
@@ -61,7 +65,7 @@ function SimpleMarkdown({ children }) {
   
   return (
     <div 
-      className="prose prose-gray max-w-none"
+      className={`prose max-w-none ${isDark ? 'prose-invert' : 'prose-gray'}`}
       dangerouslySetInnerHTML={{ __html: processMarkdown(children) }}
     />
   )
