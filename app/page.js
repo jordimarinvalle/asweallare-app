@@ -4029,7 +4029,7 @@ function AppContent() {
                           onChange={(e) => setAdminAppSocialForm({...adminAppSocialForm, url: e.target.value})}
                           placeholder={getPlatformConfig(adminAppSocialForm.platform)?.placeholder || 'https://...'}
                         />
-                        <Button onClick={handleAddSocialLink} className="bg-red-600 hover:bg-red-700 text-white">
+                        <Button onClick={handleAddSocialLink} className="h-9 w-9 p-0 bg-red-600 hover:bg-red-700 text-white">
                           <Plus className="w-4 h-4" />
                         </Button>
                       </div>
