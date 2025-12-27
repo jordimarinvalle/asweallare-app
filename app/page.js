@@ -3983,46 +3983,49 @@ function AppContent() {
                       
                       {/* Add Social Form */}
                       <div className="flex gap-2 mb-4">
-                        <select 
-                          className="px-3 py-2 border rounded-md text-sm"
-                          value={adminAppSocialForm.platform}
-                          onChange={(e) => setAdminAppSocialForm({...adminAppSocialForm, platform: e.target.value})}
-                        >
-                          <option value="Instagram">📷 Instagram</option>
-                          <option value="TikTok">🎵 TikTok</option>
-                          <option value="WhatsApp">💬 WhatsApp</option>
-                          <option value="Twitter">🐦 Twitter/X</option>
-                          <option value="Facebook">📘 Facebook</option>
-                          <option value="YouTube">▶️ YouTube</option>
-                          <option value="LinkedIn">💼 LinkedIn</option>
-                          <option value="Website">🌐 Website</option>
-                        </select>
+                        <div className="flex items-center gap-2 px-3 py-2 border rounded-md bg-white">
+                          <SocialIcon platform={adminAppSocialForm.platform} size={18} colored />
+                          <SocialPlatformSelector
+                            value={adminAppSocialForm.platform}
+                            onChange={(platform) => setAdminAppSocialForm({...adminAppSocialForm, platform})}
+                            className="border-0 p-0 bg-transparent"
+                          />
+                        </div>
                         <Input 
                           className="flex-1"
                           value={adminAppSocialForm.url}
                           onChange={(e) => setAdminAppSocialForm({...adminAppSocialForm, url: e.target.value})}
-                          placeholder="https://..."
+                          placeholder={getPlatformConfig(adminAppSocialForm.platform)?.placeholder || 'https://...'}
                         />
                         <Button onClick={handleAddSocialLink} className="bg-red-600 hover:bg-red-700 text-white">
                           <Plus className="w-4 h-4" />
                         </Button>
                       </div>
                       
-                      {/* Existing Socials */}
+                      {/* Existing Socials with Reorder */}
                       {adminAppConfig.socials?.length > 0 ? (
-                        <div className="space-y-2">
-                          {adminAppConfig.socials.map((social) => (
-                            <div key={social.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                              <span className="text-lg">
-                                {social.name === 'Instagram' && '📷'}
-                                {social.name === 'TikTok' && '🎵'}
-                                {social.name === 'WhatsApp' && '💬'}
-                                {social.name === 'Twitter' && '🐦'}
-                                {social.name === 'Facebook' && '📘'}
-                                {social.name === 'YouTube' && '▶️'}
-                                {social.name === 'LinkedIn' && '💼'}
-                                {social.name === 'Website' && '🌐'}
-                              </span>
+                        <ReorderableList
+                          items={adminAppConfig.socials}
+                          onReorder={async (newItems) => {
+                            // Update local state immediately
+                            setAdminAppConfig({...adminAppConfig, socials: newItems})
+                            // Update each item's display_order in the database
+                            for (const item of newItems) {
+                              try {
+                                await fetch('/api/admin/app-config/socials', {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ id: item.id, display_order: item.display_order })
+                                })
+                              } catch (err) {
+                                console.error('Failed to update order:', err)
+                              }
+                            }
+                            toast({ title: 'Order updated' })
+                          }}
+                          renderItem={(social) => (
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <SocialIcon platform={social.name} size={20} colored />
                               <span className="font-medium text-sm">{social.name}</span>
                               <span className="text-gray-500 text-sm truncate flex-1">{social.url}</span>
                               <button
@@ -4032,8 +4035,8 @@ function AppContent() {
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
-                          ))}
-                        </div>
+                          )}
+                        />
                       ) : (
                         <p className="text-gray-500 text-sm">No social links added yet</p>
                       )}
