@@ -4168,7 +4168,7 @@ function AppContent() {
                     setEditingBox(null)
                     setBoxForm({ id: '', name: '', description: '', descriptionShort: '', tagline: '', topicsText: '', priceId: '', color: '#000000', colorPaletteText: '', displayOrder: 0, isSample: false, fullBoxId: '', isActive: true, collectionSeriesId: '' })
                     setShowBoxForm(true)
-                  }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
+                  }} className="h-9 px-4 text-sm font-medium bg-red-600 hover:bg-red-700 text-white">
                     <Plus className="w-4 h-4 mr-2" />Add Box
                   </Button>
                 </div>
