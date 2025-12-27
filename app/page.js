@@ -2077,9 +2077,12 @@ function AppContent() {
   const [bookletImages, setBookletImages] = useState(BOOKLET_IMAGES)
   const [bookletTitle, setBookletTitle] = useState("Unscripted Conversations Guide")
   
-  // View state
-  const [view, setView] = useState('game')
+  // View state - default to 'home' now
+  const [view, setView] = useState('home')
   const [purchases, setPurchases] = useState([])
+  
+  // App config state
+  const [appConfig, setAppConfig] = useState(null)
   
   // Admin
   const [adminCards, setAdminCards] = useState([])
