@@ -16,7 +16,56 @@ import { LogOut, Plus, Edit, Trash2, CreditCard, RotateCw, Smartphone, Lock, Che
 import { BookletViewer, GuideSelector, GuideSelectorCompact, BOOKLET_IMAGES, BOOKLET_30SECS } from '@/components/game/BookletViewer'
 import { RotateDeviceScreen } from '@/components/game/RotateDeviceScreen'
 import { ThemeProvider, useTheme, BottomNav, useBottomNavPadding } from '@/components/theme'
-import ReactMarkdown from 'react-markdown'
+
+// Simple Markdown to HTML converter (no external dependencies)
+function SimpleMarkdown({ children }) {
+  if (!children) return null
+  
+  const processMarkdown = (text) => {
+    let html = text
+    
+    // Escape HTML first
+    html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    
+    // Headers
+    html = html.replace(/^### (.+)$/gm, '<h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">$1</h3>')
+    html = html.replace(/^## (.+)$/gm, '<h2 class="text-2xl font-semibold text-gray-900 mt-6 mb-4">$1</h2>')
+    html = html.replace(/^# (.+)$/gm, '<h1 class="text-3xl font-bold text-gray-900 mt-6 mb-4">$1</h1>')
+    
+    // Bold and italic
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>')
+    
+    // Blockquotes
+    html = html.replace(/^&gt; (.+)$/gm, '<blockquote class="border-l-4 border-red-500 pl-4 my-4 italic text-gray-700">$1</blockquote>')
+    
+    // Ordered lists
+    html = html.replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 mb-2"><span class="font-medium">$1.</span> $2</li>')
+    
+    // Unordered lists
+    html = html.replace(/^- (.+)$/gm, '<li class="ml-4 mb-1 list-disc list-inside">$1</li>')
+    
+    // Wrap consecutive list items
+    html = html.replace(/(<li[^>]*>.*<\/li>\n?)+/g, '<ul class="my-4">$&</ul>')
+    
+    // Paragraphs (lines that aren't already wrapped)
+    const lines = html.split('\n')
+    html = lines.map(line => {
+      if (line.trim() === '') return ''
+      if (line.startsWith('<')) return line
+      return `<p class="mb-3 text-gray-600">${line}</p>`
+    }).join('\n')
+    
+    return html
+  }
+  
+  return (
+    <div 
+      className="prose prose-gray max-w-none"
+      dangerouslySetInnerHTML={{ __html: processMarkdown(children) }}
+    />
+  )
+}
 
 // ============================================================================
 // CARD PILE COMPONENT - Isolated state for reliable single-click draws
