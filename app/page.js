@@ -2314,22 +2314,28 @@ function AppContent() {
     let subscription = null
     try {
       const result = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (session?.user) {
-          const response = await fetch('/api/auth/user')
-          const data = await response.json()
-          setUser(data.user)
-        } else {
-          // Check local auth before clearing user
-          const localResponse = await fetch('/api/auth/local/user')
-          const localData = await localResponse.json()
-          if (!localData.user) {
-            setUser(null)
+        try {
+          if (session?.user) {
+            const response = await fetch('/api/auth/user')
+            const data = await response.json()
+            setUser(data.user)
+          } else {
+            // Check local auth before clearing user
+            const localResponse = await fetch('/api/auth/local/user')
+            const localData = await localResponse.json()
+            if (!localData.user) {
+              setUser(null)
+            }
           }
+        } catch (e) {
+          // Auth callback error - ignore
+          console.log('Auth state change error:', e.message)
         }
       })
       subscription = result.data?.subscription
     } catch (e) {
       // Supabase not configured
+      console.log('Supabase auth not available')
     }
     
     return () => subscription?.unsubscribe?.()
