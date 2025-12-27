@@ -3415,16 +3415,27 @@ function AppContent() {
   }
   
   useEffect(() => {
-    if (view === 'purchases') loadPurchases()
+    if (view === 'purchases' || view === 'profile') loadPurchases()
     else if (view === 'admin') { loadAllAdminData() }
   }, [view])
   
-  // Navigation handler for mobile menu
+  // Navigation handler for bottom nav and mobile menu
   const handleNavigation = (newView) => {
-    setView(newView)
+    // Map bottom nav items to actual views
+    const viewMap = {
+      'home': 'home',
+      'play': 'game',
+      'store': 'store',
+      'profile': 'profile'
+    }
+    const mappedView = viewMap[newView] || newView
+    setView(mappedView)
     setGameStarted(false)
     setMobileMenuOpen(false)
   }
+  
+  // Check if we should show the bottom nav (hide during active game)
+  const showBottomNav = !gameStarted && view !== 'admin'
   
   if (loading) {
     return (
