@@ -2331,9 +2331,22 @@ function AppContent() {
       }
     }
     
+    const loadAppConfig = async () => {
+      try {
+        const response = await fetch('/api/app-config?slug=asweallare')
+        const data = await response.json()
+        if (data && !data.error) {
+          setAppConfig(data)
+        }
+      } catch (err) {
+        console.error('Failed to load app config:', err)
+      }
+    }
+    
     loadBoxes()
     loadPlans()
     loadCollectionSeries()
+    loadAppConfig()
   }, [user])
   
   // Shuffle deck helper
