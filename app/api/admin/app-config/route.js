@@ -159,21 +159,30 @@ export async function POST(request) {
       .single()
     
     const newOrder = (maxOrder?.display_order || 0) + 1
+    const newId = `social_${uuidv4().slice(0, 8)}`
     
-    const { data, error } = await supabase
+    // Insert the social link
+    const { error: insertError } = await supabase
       .from('app_socials')
       .insert({
-        id: `social_${uuidv4().slice(0, 8)}`,
+        id: newId,
         app_id: app_id || 'app_asweallare',
         name: platform,
         url,
         display_order: newOrder,
         is_active: true
       })
-      .select()
+    
+    if (insertError) throw insertError
+    
+    // Fetch the inserted record
+    const { data, error: selectError } = await supabase
+      .from('app_socials')
+      .select('*')
+      .eq('id', newId)
       .single()
     
-    if (error) throw error
+    if (selectError) throw selectError
     return NextResponse.json(data)
     
   } catch (error) {
