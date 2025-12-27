@@ -1854,19 +1854,45 @@ function ProfileScreen({
   if (!user) {
     return (
       <div 
-        className={`min-h-screen flex flex-col items-center justify-center p-4 ${isDark ? 'bg-[#0F0F0F]' : 'bg-white'}`}
+        className={`min-h-screen flex flex-col items-center justify-center p-4 ${isDark ? 'bg-[#000000]' : 'bg-white'}`}
         style={{ paddingBottom, paddingLeft }}
       >
-        <User className={`w-16 h-16 mb-4 ${isDark ? 'text-gray-600' : 'text-gray-300'}`} />
-        <h2 className={`text-2xl font-serif mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Welcome</h2>
-        <p className={`mb-6 text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Sign in to view your profile and purchases</p>
+        <User className={`w-16 h-16 mb-4 ${isDark ? 'text-[#636366]' : 'text-[#C7C7CC]'}`} />
+        <h2 className={`text-2xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-[#000000]'}`}>Welcome</h2>
+        <p className={`mb-6 text-center ${isDark ? 'text-[#8E8E93]' : 'text-[#8E8E93]'}`}>Sign in to view your profile and purchases</p>
         <Button 
           onClick={onSignIn}
-          className="text-white px-8"
-          style={{ borderRadius: theme.borderRadius.lg, backgroundColor: colors.primary }}
+          className="ios-btn ios-btn-primary px-8"
         >
           Sign In
         </Button>
+        
+        {/* Appearance toggle for guests */}
+        <div className={`mt-8 p-4 rounded-xl w-full max-w-xs ${isDark ? 'bg-[#1C1C1E]' : 'bg-[#F2F2F7]'}`}>
+          <p className={`text-sm font-medium mb-3 text-center ${isDark ? 'text-[#8E8E93]' : 'text-[#8E8E93]'}`}>Appearance</p>
+          <div className={`flex items-center gap-0.5 rounded-lg p-0.5 ${isDark ? 'bg-[#38383A]' : 'bg-[#E5E5EA]'}`}>
+            <button
+              onClick={() => setColorModePreference('light')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                colorMode === 'light' 
+                  ? (isDark ? 'bg-[#636366] text-white shadow-sm' : 'bg-white text-[#000000] shadow-sm') 
+                  : (isDark ? 'text-[#8E8E93]' : 'text-[#8E8E93]')
+              }`}
+            >
+              Light
+            </button>
+            <button
+              onClick={() => setColorModePreference('dark')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                colorMode === 'dark' 
+                  ? (isDark ? 'bg-[#636366] text-white shadow-sm' : 'bg-white text-[#000000] shadow-sm')
+                  : (isDark ? 'text-[#8E8E93]' : 'text-[#8E8E93]')
+              }`}
+            >
+              Dark
+            </button>
+          </div>
+        </div>
       </div>
     )
   }
