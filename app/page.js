@@ -3804,8 +3804,6 @@ function AppContent() {
                 <X className="w-5 h-5" />
                 <span className="font-medium">Close Admin</span>
               </button>
-              <h2 className="text-xl font-semibold text-gray-900">Admin Panel</h2>
-              <div className="w-24" /> {/* Spacer for alignment */}
             </div>
             
             {/* Admin Tabs */}
