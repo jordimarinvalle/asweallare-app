@@ -143,7 +143,12 @@ export async function PUT(request) {
           header_text,
           body_text,
           footer_text,
-          build_version
+          build_version,
+          admin_emails,
+          primary_color,
+          secondary_color,
+          accent_color,
+          danger_color
         })
       
       if (insertError) throw insertError
