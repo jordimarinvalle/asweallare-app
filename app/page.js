@@ -3893,13 +3893,89 @@ function AppContent() {
                       </div>
                     </Card>
                     
+                    {/* Theme Colors */}
+                    <Card className="p-6">
+                      <h3 className="font-semibold text-gray-900 mb-4">Theme Colors</h3>
+                      <p className="text-sm text-gray-500 mb-4">These colors will be used throughout the app for buttons, active states, and highlights.</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <Label className="mb-2 block text-sm">Primary</Label>
+                          <div className="flex gap-2 items-center">
+                            <input 
+                              type="color"
+                              value={adminAppConfig.primary_color || '#D12128'}
+                              onChange={(e) => setAdminAppConfig({...adminAppConfig, primary_color: e.target.value})}
+                              className="w-10 h-10 rounded cursor-pointer border"
+                            />
+                            <Input 
+                              value={adminAppConfig.primary_color || '#D12128'}
+                              onChange={(e) => setAdminAppConfig({...adminAppConfig, primary_color: e.target.value})}
+                              className="flex-1 font-mono text-sm"
+                              placeholder="#D12128"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="mb-2 block text-sm">Secondary</Label>
+                          <div className="flex gap-2 items-center">
+                            <input 
+                              type="color"
+                              value={adminAppConfig.secondary_color || '#1F2937'}
+                              onChange={(e) => setAdminAppConfig({...adminAppConfig, secondary_color: e.target.value})}
+                              className="w-10 h-10 rounded cursor-pointer border"
+                            />
+                            <Input 
+                              value={adminAppConfig.secondary_color || '#1F2937'}
+                              onChange={(e) => setAdminAppConfig({...adminAppConfig, secondary_color: e.target.value})}
+                              className="flex-1 font-mono text-sm"
+                              placeholder="#1F2937"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="mb-2 block text-sm">Accent</Label>
+                          <div className="flex gap-2 items-center">
+                            <input 
+                              type="color"
+                              value={adminAppConfig.accent_color || '#6B7280'}
+                              onChange={(e) => setAdminAppConfig({...adminAppConfig, accent_color: e.target.value})}
+                              className="w-10 h-10 rounded cursor-pointer border"
+                            />
+                            <Input 
+                              value={adminAppConfig.accent_color || '#6B7280'}
+                              onChange={(e) => setAdminAppConfig({...adminAppConfig, accent_color: e.target.value})}
+                              className="flex-1 font-mono text-sm"
+                              placeholder="#6B7280"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="mb-2 block text-sm">Danger</Label>
+                          <div className="flex gap-2 items-center">
+                            <input 
+                              type="color"
+                              value={adminAppConfig.danger_color || '#DC2626'}
+                              onChange={(e) => setAdminAppConfig({...adminAppConfig, danger_color: e.target.value})}
+                              className="w-10 h-10 rounded cursor-pointer border"
+                            />
+                            <Input 
+                              value={adminAppConfig.danger_color || '#DC2626'}
+                              onChange={(e) => setAdminAppConfig({...adminAppConfig, danger_color: e.target.value})}
+                              className="flex-1 font-mono text-sm"
+                              placeholder="#DC2626"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                    
                     {/* Social Links */}
                     <Card className="p-6">
                       <h3 className="font-semibold text-gray-900 mb-4">Social Links</h3>
                       
                       {/* Add Social Form */}
                       <div className="flex gap-2 mb-4">
-                        <div className="flex items-center gap-2 px-3 py-2 border rounded-md bg-white">
+                        <div className="flex items-center gap-2 px-3 h-10 border rounded-md bg-white">
                           <SocialIcon platform={adminAppSocialForm.platform} size={18} colored />
                           <SocialPlatformSelector
                             value={adminAppSocialForm.platform}
