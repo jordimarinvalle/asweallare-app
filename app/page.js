@@ -5229,6 +5229,14 @@ function AppContent() {
         images={bookletImages}
         title={bookletTitle}
       />
+      
+      {/* Bottom Navigation */}
+      {showBottomNav && (
+        <BottomNav 
+          currentView={view === 'game' ? 'play' : view}
+          onNavigate={handleNavigation}
+        />
+      )}
     </div>
   )
 }
