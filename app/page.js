@@ -2007,29 +2007,31 @@ function ProfileScreen({
             Settings
           </h3>
           
-          {/* Dark Mode Toggle */}
-          <div className={`flex items-center justify-between py-3 border-b ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
+          {/* Dark Mode Toggle - iOS Segmented Control */}
+          <div className={`flex items-center justify-between py-3 border-b ${isDark ? 'border-[#38383A]' : 'border-[#C6C6C8]'}`}>
             <div>
-              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Appearance</p>
-              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                {colorModeOverride ? `Manual: ${colorMode}` : `Auto: ${autoColorMode}`}
+              <p className={`font-medium ${isDark ? 'text-white' : 'text-[#000000]'}`}>Appearance</p>
+              <p className={`text-sm ${isDark ? 'text-[#8E8E93]' : 'text-[#8E8E93]'}`}>
+                {colorModeOverride ? `${colorMode === 'light' ? 'Light' : 'Dark'}` : `System (${autoColorMode})`}
               </p>
             </div>
-            <div className={`flex items-center gap-1 rounded-full p-1 ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-100'}`}>
+            <div className={`flex items-center gap-0.5 rounded-lg p-0.5 ${isDark ? 'bg-[#38383A]' : 'bg-[#E5E5EA]'}`}>
               <button
                 onClick={() => setColorModePreference('light')}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
                   colorMode === 'light' 
-                    ? (isDark ? 'bg-[#3a3a3a] text-white shadow-sm' : 'bg-white text-gray-900 shadow-sm') 
-                    : (isDark ? 'text-gray-400' : 'text-gray-500')
+                    ? (isDark ? 'bg-[#636366] text-white shadow-sm' : 'bg-white text-[#000000] shadow-sm') 
+                    : (isDark ? 'text-[#8E8E93]' : 'text-[#8E8E93]')
                 }`}
               >
                 Light
               </button>
               <button
                 onClick={() => setColorModePreference('dark')}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  colorMode === 'dark' ? 'bg-gray-800 text-white' : (isDark ? 'text-gray-400' : 'text-gray-500')
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                  colorMode === 'dark' 
+                    ? (isDark ? 'bg-[#636366] text-white shadow-sm' : 'bg-white text-[#000000] shadow-sm')
+                    : (isDark ? 'text-[#8E8E93]' : 'text-[#8E8E93]')
                 }`}
               >
                 Dark
