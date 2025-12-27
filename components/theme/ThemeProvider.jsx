@@ -2,124 +2,174 @@
 
 import { createContext, useContext, useState, useEffect } from 'react'
 
-// Default brand colors
-const DEFAULT_COLORS = {
-  primary: '#D12128',      // Brand red
-  secondary: '#1F2937',    // Dark gray
-  accent: '#6B7280',       // Gray
-  danger: '#DC2626',       // Red
-  background: '#FFFFFF',   // White
-  foreground: '#111827',   // Near black
-  muted: '#F3F4F6',        // Light gray
-  border: '#E5E7EB'        // Border gray
+// iOS System Colors - Light Mode
+const IOS_COLORS_LIGHT = {
+  // System Blues
+  blue: '#007AFF',
+  blueLight: 'rgba(0, 122, 255, 0.12)',
+  
+  // System Grays (Light Mode)
+  gray: '#8E8E93',
+  gray2: '#AEAEB2',
+  gray3: '#C7C7CC',
+  gray4: '#D1D1D6',
+  gray5: '#E5E5EA',
+  gray6: '#F2F2F7',
+  
+  // Semantic Colors
+  red: '#FF3B30',
+  orange: '#FF9500',
+  yellow: '#FFCC00',
+  green: '#34C759',
+  teal: '#5AC8FA',
+  indigo: '#5856D6',
+  purple: '#AF52DE',
+  pink: '#FF2D55',
+  
+  // Backgrounds
+  background: '#FFFFFF',
+  backgroundSecondary: '#F2F2F7',
+  backgroundTertiary: '#FFFFFF',
+  backgroundGrouped: '#F2F2F7',
+  backgroundGroupedSecondary: '#FFFFFF',
+  
+  // Text
+  label: '#000000',
+  labelSecondary: '#3C3C43',
+  labelTertiary: 'rgba(60, 60, 67, 0.6)',
+  labelQuaternary: 'rgba(60, 60, 67, 0.3)',
+  
+  // Separators
+  separator: 'rgba(60, 60, 67, 0.29)',
+  separatorOpaque: '#C6C6C8',
+  
+  // Fills
+  fill: 'rgba(120, 120, 128, 0.2)',
+  fillSecondary: 'rgba(120, 120, 128, 0.16)',
+  fillTertiary: 'rgba(118, 118, 128, 0.12)',
+  fillQuaternary: 'rgba(116, 116, 128, 0.08)',
 }
 
-// Dark mode colors
-const DARK_COLORS = {
-  background: '#0F0F0F',
-  foreground: '#F9FAFB',
-  muted: '#1F1F1F',
-  border: '#2D2D2D'
+// iOS System Colors - Dark Mode
+const IOS_COLORS_DARK = {
+  // System Blues
+  blue: '#0A84FF',
+  blueLight: 'rgba(10, 132, 255, 0.15)',
+  
+  // System Grays (Dark Mode)
+  gray: '#8E8E93',
+  gray2: '#636366',
+  gray3: '#48484A',
+  gray4: '#3A3A3C',
+  gray5: '#2C2C2E',
+  gray6: '#1C1C1E',
+  
+  // Semantic Colors
+  red: '#FF453A',
+  orange: '#FF9F0A',
+  yellow: '#FFD60A',
+  green: '#30D158',
+  teal: '#64D2FF',
+  indigo: '#5E5CE6',
+  purple: '#BF5AF2',
+  pink: '#FF375F',
+  
+  // Backgrounds
+  background: '#000000',
+  backgroundSecondary: '#1C1C1E',
+  backgroundTertiary: '#2C2C2E',
+  backgroundGrouped: '#000000',
+  backgroundGroupedSecondary: '#1C1C1E',
+  
+  // Text
+  label: '#FFFFFF',
+  labelSecondary: '#EBEBF5',
+  labelTertiary: 'rgba(235, 235, 245, 0.6)',
+  labelQuaternary: 'rgba(235, 235, 245, 0.3)',
+  
+  // Separators
+  separator: 'rgba(84, 84, 88, 0.65)',
+  separatorOpaque: '#38383A',
+  
+  // Fills
+  fill: 'rgba(120, 120, 128, 0.36)',
+  fillSecondary: 'rgba(120, 120, 128, 0.32)',
+  fillTertiary: 'rgba(118, 118, 128, 0.24)',
+  fillQuaternary: 'rgba(116, 116, 128, 0.18)',
 }
 
-// Theme definitions
-const appleTheme = {
-  name: 'apple',
+// Brand accent color (your red)
+const BRAND_RED = '#D12128'
+
+// iOS Theme definition
+const iosTheme = {
+  name: 'ios',
   fontFamily: {
     sans: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif',
-    brand: '"SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, sans-serif'
+    brand: '"SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+    mono: '"SF Mono", "Menlo", "Monaco", "Courier New", monospace'
   },
   spacing: {
-    xs: '0.25rem',
-    sm: '0.5rem',
-    md: '1rem',
-    lg: '1.5rem',
-    xl: '2rem',
-    '2xl': '3rem'
+    xs: '4px',
+    sm: '8px',
+    md: '16px',
+    lg: '20px',
+    xl: '24px',
+    '2xl': '32px',
+    '3xl': '44px'
   },
   borderRadius: {
-    sm: '0.5rem',
-    md: '0.75rem',
-    lg: '1rem',
-    xl: '1.25rem',
+    xs: '6px',
+    sm: '8px',
+    md: '10px',
+    lg: '12px',
+    xl: '16px',
+    '2xl': '20px',
     full: '9999px'
   },
   button: {
-    height: '2.75rem',
-    padding: '0 1.25rem',
-    fontSize: '0.9375rem',
-    fontWeight: '500',
-    borderRadius: '0.75rem'
+    height: '50px',
+    heightSmall: '36px',
+    heightMini: '28px',
+    padding: '0 20px',
+    paddingSmall: '0 16px',
+    fontSize: '17px',
+    fontSizeSmall: '15px',
+    fontWeight: '600',
+    borderRadius: '12px',
+    borderRadiusSmall: '8px'
+  },
+  input: {
+    height: '44px',
+    padding: '0 16px',
+    fontSize: '17px',
+    borderRadius: '10px',
+    borderWidth: '0.5px'
+  },
+  card: {
+    padding: '16px',
+    borderRadius: '12px',
+    shadow: '0 1px 3px rgba(0, 0, 0, 0.08)'
   },
   nav: {
-    height: '5rem',
-    iconSize: '1.5rem',
-    labelSize: '0.625rem',
-    gap: '0.25rem'
+    height: '56px',
+    iconSize: '22px',
+    pillHeight: '56px',
+    pillRadius: '28px'
   },
   shadow: {
-    sm: '0 1px 2px rgba(0, 0, 0, 0.04)',
+    none: 'none',
+    xs: '0 1px 2px rgba(0, 0, 0, 0.04)',
+    sm: '0 1px 3px rgba(0, 0, 0, 0.06)',
     md: '0 4px 12px rgba(0, 0, 0, 0.08)',
-    lg: '0 8px 24px rgba(0, 0, 0, 0.12)'
+    lg: '0 8px 24px rgba(0, 0, 0, 0.12)',
+    xl: '0 12px 32px rgba(0, 0, 0, 0.16)'
+  },
+  transition: {
+    fast: '0.15s ease',
+    normal: '0.25s ease',
+    slow: '0.35s ease'
   }
-}
-
-const materialTheme = {
-  name: 'material',
-  fontFamily: {
-    sans: '"Roboto", "Google Sans", system-ui, -apple-system, sans-serif',
-    brand: '"Google Sans", "Roboto", system-ui, -apple-system, sans-serif'
-  },
-  spacing: {
-    xs: '0.25rem',
-    sm: '0.5rem',
-    md: '0.875rem',
-    lg: '1.25rem',
-    xl: '1.75rem',
-    '2xl': '2.5rem'
-  },
-  borderRadius: {
-    sm: '0.25rem',
-    md: '0.5rem',
-    lg: '0.75rem',
-    xl: '1rem',
-    full: '9999px'
-  },
-  button: {
-    height: '2.5rem',
-    padding: '0 1rem',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    borderRadius: '0.5rem'
-  },
-  nav: {
-    height: '4.5rem',
-    iconSize: '1.5rem',
-    labelSize: '0.75rem',
-    gap: '0.25rem'
-  },
-  shadow: {
-    sm: '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)',
-    md: '0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12)',
-    lg: '0 10px 20px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.10)'
-  }
-}
-
-// Detect platform
-function detectPlatform() {
-  if (typeof window === 'undefined') return 'material'
-  
-  const ua = navigator.userAgent || navigator.vendor || window.opera
-  
-  if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
-    return 'apple'
-  }
-  
-  if (navigator.platform && navigator.platform.toLowerCase().includes('mac')) {
-    return 'apple'
-  }
-  
-  return 'material'
 }
 
 // Detect preferred color scheme
@@ -132,10 +182,6 @@ function detectColorScheme() {
 const ThemeContext = createContext(null)
 
 export function ThemeProvider({ children, appColors = null }) {
-  const [themeName, setThemeName] = useState('material')
-  const [autoDetected, setAutoDetected] = useState('material')
-  const [manualOverride, setManualOverride] = useState(null)
-  
   // Color mode state
   const [colorMode, setColorMode] = useState('light')
   const [autoColorMode, setAutoColorMode] = useState('light')
@@ -144,23 +190,12 @@ export function ThemeProvider({ children, appColors = null }) {
   // Custom colors from app config
   const [customColors, setCustomColors] = useState(null)
   
-  // Detect platform and color scheme on mount
+  // Detect color scheme on mount
   useEffect(() => {
-    const detected = detectPlatform()
-    setAutoDetected(detected)
-    
     const detectedColorScheme = detectColorScheme()
     setAutoColorMode(detectedColorScheme)
     
     // Check for stored preferences
-    const storedTheme = localStorage.getItem('theme-preference')
-    if (storedTheme === 'apple' || storedTheme === 'material') {
-      setManualOverride(storedTheme)
-      setThemeName(storedTheme)
-    } else {
-      setThemeName(detected)
-    }
-    
     const storedColorMode = localStorage.getItem('color-mode-preference')
     if (storedColorMode === 'light' || storedColorMode === 'dark') {
       setColorModeOverride(storedColorMode)
@@ -192,25 +227,20 @@ export function ThemeProvider({ children, appColors = null }) {
   useEffect(() => {
     if (typeof document !== 'undefined') {
       document.documentElement.classList.toggle('dark', colorMode === 'dark')
+      // Set color-scheme for native elements
+      document.documentElement.style.colorScheme = colorMode
     }
   }, [colorMode])
   
-  // Get current theme object
-  const theme = themeName === 'apple' ? appleTheme : materialTheme
+  // Get iOS colors based on mode
+  const iosColors = colorMode === 'dark' ? IOS_COLORS_DARK : IOS_COLORS_LIGHT
   
-  // Compute colors based on mode and custom colors
+  // Merge with custom colors (brand accent overrides)
   const colors = {
-    ...DEFAULT_COLORS,
-    ...(customColors || {}),
-    ...(colorMode === 'dark' ? DARK_COLORS : {})
-  }
-  
-  // Toggle theme manually
-  const toggleTheme = () => {
-    const newTheme = themeName === 'apple' ? 'material' : 'apple'
-    setThemeName(newTheme)
-    setManualOverride(newTheme)
-    localStorage.setItem('theme-preference', newTheme)
+    ...iosColors,
+    accent: customColors?.accent_color || BRAND_RED,
+    primary: customColors?.primary_color || iosColors.blue,
+    danger: customColors?.danger_color || iosColors.red,
   }
   
   // Toggle color mode
@@ -234,28 +264,16 @@ export function ThemeProvider({ children, appColors = null }) {
     }
   }
   
-  // Reset to auto-detected theme
-  const resetToAuto = () => {
-    setManualOverride(null)
-    setThemeName(autoDetected)
-    localStorage.removeItem('theme-preference')
-  }
-  
   // Update custom colors (called when admin saves new colors)
   const updateColors = (newColors) => {
     setCustomColors(prev => ({ ...prev, ...newColors }))
   }
   
   const value = {
-    // Theme (Apple/Material)
-    theme,
-    themeName,
-    autoDetected,
-    manualOverride,
-    isApple: themeName === 'apple',
-    isMaterial: themeName === 'material',
-    toggleTheme,
-    resetToAuto,
+    // Theme (always iOS now)
+    theme: iosTheme,
+    themeName: 'ios',
+    isApple: true,
     
     // Color mode (Light/Dark)
     colorMode,
@@ -268,6 +286,7 @@ export function ThemeProvider({ children, appColors = null }) {
     
     // Colors
     colors,
+    iosColors,
     updateColors
   }
   
@@ -275,14 +294,28 @@ export function ThemeProvider({ children, appColors = null }) {
     <ThemeContext.Provider value={value}>
       <div 
         style={{
-          '--color-primary': colors.primary,
-          '--color-secondary': colors.secondary,
-          '--color-accent': colors.accent,
-          '--color-danger': colors.danger,
-          '--color-background': colors.background,
-          '--color-foreground': colors.foreground,
-          '--color-muted': colors.muted,
-          '--color-border': colors.border,
+          '--ios-blue': colors.blue,
+          '--ios-blue-light': colors.blueLight,
+          '--ios-gray': colors.gray,
+          '--ios-gray2': colors.gray2,
+          '--ios-gray3': colors.gray3,
+          '--ios-gray4': colors.gray4,
+          '--ios-gray5': colors.gray5,
+          '--ios-gray6': colors.gray6,
+          '--ios-red': colors.red,
+          '--ios-green': colors.green,
+          '--ios-background': colors.background,
+          '--ios-background-secondary': colors.backgroundSecondary,
+          '--ios-background-tertiary': colors.backgroundTertiary,
+          '--ios-label': colors.label,
+          '--ios-label-secondary': colors.labelSecondary,
+          '--ios-label-tertiary': colors.labelTertiary,
+          '--ios-separator': colors.separator,
+          '--ios-fill': colors.fill,
+          '--ios-fill-secondary': colors.fillSecondary,
+          '--brand-accent': colors.accent,
+          '--brand-primary': colors.primary,
+          fontFamily: iosTheme.fontFamily.sans,
         }}
         className={colorMode === 'dark' ? 'dark' : ''}
       >
@@ -300,5 +333,5 @@ export function useTheme() {
   return context
 }
 
-// Export themes and colors for direct access
-export { appleTheme, materialTheme, DEFAULT_COLORS }
+// Export theme and colors for direct access
+export { iosTheme, IOS_COLORS_LIGHT, IOS_COLORS_DARK, BRAND_RED }
