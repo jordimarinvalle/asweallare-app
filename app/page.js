@@ -5198,7 +5198,7 @@ function AppContent() {
                     setEditingPrice(null)
                     setPriceForm({ id: '', label: '', paymentInfo: '', hookInfo: '', amount: 0, promoAmount: null, promoEnabled: false, currency: 'USD', membershipDays: 30, displayOrder: 0, isActive: true })
                     setShowPriceForm(true)
-                  }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
+                  }} className="h-9 px-4 text-sm font-medium bg-red-600 hover:bg-red-700 text-white">
                     <Plus className="w-4 h-4 mr-2" />Add Price
                   </Button>
                 </div>
