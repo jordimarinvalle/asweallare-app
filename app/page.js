@@ -3875,7 +3875,7 @@ function AppContent() {
             
             {/* Admin Tabs */}
             <div className="flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto pb-px">
-              {['series', 'boxes', 'piles', 'mockups', 'cards', 'prices', 'bundles'].map(tab => (
+              {['app', 'series', 'boxes', 'piles', 'mockups', 'cards', 'prices', 'bundles'].map(tab => (
                 <button
                   key={tab}
                   onClick={() => setAdminTab(tab)}
@@ -3889,6 +3889,168 @@ function AppContent() {
                 </button>
               ))}
             </div>
+
+            {/* APP CONFIG TAB */}
+            {adminTab === 'app' && (
+              <div className="space-y-6">
+                {adminAppConfigLoading ? (
+                  <div className="text-center py-8 text-gray-500">Loading app config...</div>
+                ) : adminAppConfig ? (
+                  <>
+                    {/* Basic Info */}
+                    <Card className="p-6">
+                      <h3 className="font-semibold text-gray-900 mb-4">App Information</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label className="mb-2 block">App Name</Label>
+                          <Input 
+                            value={adminAppConfig.name || ''} 
+                            onChange={(e) => setAdminAppConfig({...adminAppConfig, name: e.target.value})}
+                            placeholder="AS WE ALL ARE"
+                          />
+                        </div>
+                        <div>
+                          <Label className="mb-2 block">Build Version</Label>
+                          <Input 
+                            value={adminAppConfig.build_version || ''} 
+                            onChange={(e) => setAdminAppConfig({...adminAppConfig, build_version: e.target.value})}
+                            placeholder="1.0.0"
+                          />
+                        </div>
+                        <div>
+                          <Label className="mb-2 block">Title</Label>
+                          <Input 
+                            value={adminAppConfig.title || ''} 
+                            onChange={(e) => setAdminAppConfig({...adminAppConfig, title: e.target.value})}
+                            placeholder="Unscripted Conversations"
+                          />
+                        </div>
+                        <div>
+                          <Label className="mb-2 block">Tagline</Label>
+                          <Input 
+                            value={adminAppConfig.tagline || ''} 
+                            onChange={(e) => setAdminAppConfig({...adminAppConfig, tagline: e.target.value})}
+                            placeholder="A therapeutic conversational card game"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <Label className="mb-2 block">Promise</Label>
+                          <Input 
+                            value={adminAppConfig.promise || ''} 
+                            onChange={(e) => setAdminAppConfig({...adminAppConfig, promise: e.target.value})}
+                            placeholder="Know more about each other..."
+                          />
+                        </div>
+                      </div>
+                    </Card>
+                    
+                    {/* Content Sections */}
+                    <Card className="p-6">
+                      <h3 className="font-semibold text-gray-900 mb-4">Content (Markdown Supported)</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="mb-2 block">Header Text</Label>
+                          <textarea 
+                            className="w-full min-h-[100px] p-3 border rounded-md text-sm font-mono"
+                            value={adminAppConfig.header_text || ''} 
+                            onChange={(e) => setAdminAppConfig({...adminAppConfig, header_text: e.target.value})}
+                            placeholder="## Welcome..."
+                          />
+                        </div>
+                        <div>
+                          <Label className="mb-2 block">Body Text</Label>
+                          <textarea 
+                            className="w-full min-h-[200px] p-3 border rounded-md text-sm font-mono"
+                            value={adminAppConfig.body_text || ''} 
+                            onChange={(e) => setAdminAppConfig({...adminAppConfig, body_text: e.target.value})}
+                            placeholder="### How It Works..."
+                          />
+                        </div>
+                        <div>
+                          <Label className="mb-2 block">Footer Text</Label>
+                          <Input 
+                            value={adminAppConfig.footer_text || ''} 
+                            onChange={(e) => setAdminAppConfig({...adminAppConfig, footer_text: e.target.value})}
+                            placeholder="Made with ❤️..."
+                          />
+                        </div>
+                      </div>
+                    </Card>
+                    
+                    {/* Social Links */}
+                    <Card className="p-6">
+                      <h3 className="font-semibold text-gray-900 mb-4">Social Links</h3>
+                      
+                      {/* Add Social Form */}
+                      <div className="flex gap-2 mb-4">
+                        <select 
+                          className="px-3 py-2 border rounded-md text-sm"
+                          value={adminAppSocialForm.platform}
+                          onChange={(e) => setAdminAppSocialForm({...adminAppSocialForm, platform: e.target.value})}
+                        >
+                          <option value="Instagram">📷 Instagram</option>
+                          <option value="TikTok">🎵 TikTok</option>
+                          <option value="WhatsApp">💬 WhatsApp</option>
+                          <option value="Twitter">🐦 Twitter/X</option>
+                          <option value="Facebook">📘 Facebook</option>
+                          <option value="YouTube">▶️ YouTube</option>
+                          <option value="LinkedIn">💼 LinkedIn</option>
+                          <option value="Website">🌐 Website</option>
+                        </select>
+                        <Input 
+                          className="flex-1"
+                          value={adminAppSocialForm.url}
+                          onChange={(e) => setAdminAppSocialForm({...adminAppSocialForm, url: e.target.value})}
+                          placeholder="https://..."
+                        />
+                        <Button onClick={handleAddSocialLink} className="bg-red-600 hover:bg-red-700 text-white">
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      {/* Existing Socials */}
+                      {adminAppConfig.socials?.length > 0 ? (
+                        <div className="space-y-2">
+                          {adminAppConfig.socials.map((social) => (
+                            <div key={social.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                              <span className="text-lg">
+                                {social.name === 'Instagram' && '📷'}
+                                {social.name === 'TikTok' && '🎵'}
+                                {social.name === 'WhatsApp' && '💬'}
+                                {social.name === 'Twitter' && '🐦'}
+                                {social.name === 'Facebook' && '📘'}
+                                {social.name === 'YouTube' && '▶️'}
+                                {social.name === 'LinkedIn' && '💼'}
+                                {social.name === 'Website' && '🌐'}
+                              </span>
+                              <span className="font-medium text-sm">{social.name}</span>
+                              <span className="text-gray-500 text-sm truncate flex-1">{social.url}</span>
+                              <button
+                                onClick={() => handleDeleteSocialLink(social.id)}
+                                className="text-red-600 hover:text-red-700 p-1"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 text-sm">No social links added yet</p>
+                      )}
+                    </Card>
+                    
+                    {/* Save Button */}
+                    <div className="flex justify-end">
+                      <Button onClick={handleSaveAppConfig} className="bg-red-600 hover:bg-red-700 text-white">
+                        Save App Config
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">Failed to load app config</div>
+                )}
+              </div>
+            )}
 
             {/* SERIES TAB */}
             {adminTab === 'series' && (
