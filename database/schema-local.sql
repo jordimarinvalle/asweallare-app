@@ -312,3 +312,9 @@ In a world of constant distraction, we''ve created a tool to help you:
 
 -- Add build_version to app_config if not exists
 ALTER TABLE app_config ADD COLUMN IF NOT EXISTS build_version TEXT DEFAULT '1.0.0';
+
+-- Add admin_emails to app_config if not exists
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS admin_emails TEXT DEFAULT 'jordi.asweallare@gmail.com';
+
+-- Update existing row with default admin email
+UPDATE app_config SET admin_emails = 'jordi.asweallare@gmail.com' WHERE slug = 'asweallare' AND (admin_emails IS NULL OR admin_emails = '');
