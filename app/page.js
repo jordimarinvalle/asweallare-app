@@ -4130,8 +4130,8 @@ function AppContent() {
                       </div>
                     </div>
                     <div className="flex gap-2 mt-4">
-                      <Button onClick={handleSaveSeries} className="bg-red-600 hover:bg-red-700 text-white">{editingSeries ? 'Update' : 'Create'}</Button>
-                      <Button onClick={() => { setShowSeriesForm(false); setEditingSeries(null) }} variant="outline">Cancel</Button>
+                      <Button onClick={handleSaveSeries} className="h-9 px-4 text-sm font-medium bg-red-600 hover:bg-red-700 text-white">{editingSeries ? 'Update' : 'Create'}</Button>
+                      <Button onClick={() => { setShowSeriesForm(false); setEditingSeries(null) }} variant="outline" className="h-9 px-4 text-sm font-medium">Cancel</Button>
                     </div>
                   </Card>
                 )}
