@@ -93,7 +93,7 @@ export function SocialPlatformSelector({ value, onChange, className = '' }) {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`px-3 h-10 border border-gray-300 bg-white text-sm font-medium ${className}`}
+      className={`px-3 h-9 border border-gray-300 bg-white text-sm font-medium ${className}`}
       style={{ borderRadius: isApple ? theme.borderRadius.md : theme.borderRadius.sm }}
     >
       {SOCIAL_PLATFORMS.map((platform) => (
