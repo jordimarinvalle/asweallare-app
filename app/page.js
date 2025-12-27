@@ -2106,9 +2106,9 @@ function AppContent() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [purchaseToCancel, setPurchaseToCancel] = useState(null)
   
-  // Admin email restriction - also check is_admin flag from local auth
-  const ADMIN_EMAIL = 'mocasin@gmail.com'
-  const isAdmin = user?.email === ADMIN_EMAIL || user?.is_admin === true
+  // Admin check - use admin_emails from appConfig or fallback
+  const adminEmails = appConfig?.admin_emails?.split('\n').map(e => e.trim().toLowerCase()).filter(Boolean) || []
+  const isAdmin = user?.is_admin === true || (user?.email && adminEmails.includes(user.email.toLowerCase()))
   
   // Admin filter state
   const [adminSeriesFilter, setAdminSeriesFilter] = useState('')
