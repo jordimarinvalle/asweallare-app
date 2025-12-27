@@ -1696,34 +1696,34 @@ function StoreScreen({ boxes, plans, onPurchaseBox, onSubscribe, onBack, user, h
 // HOME SCREEN - Landing page with app info
 // ============================================================================
 function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
-  const { theme, isApple } = useTheme()
+  const { theme, isApple, isDark, colors } = useTheme()
   const { paddingBottom, paddingLeft, isLandscape } = useBottomNavPadding()
   
   return (
     <div 
-      className="min-h-screen bg-white"
+      className={`min-h-screen ${isDark ? 'bg-[#0F0F0F]' : 'bg-white'}`}
       style={{ paddingBottom, paddingLeft }}
     >
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-b from-gray-50 to-white">
+      <div className={`relative overflow-hidden ${isDark ? 'bg-gradient-to-b from-[#1a1a1a] to-[#0F0F0F]' : 'bg-gradient-to-b from-gray-50 to-white'}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-20 text-center">
           {/* Brand Name */}
-          <h1 className="font-brand text-gray-900 text-lg tracking-widest mb-4">
+          <h1 className={`font-brand text-lg tracking-widest mb-4 ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
             {appConfig?.name || 'AS WE ALL ARE'}
           </h1>
           
           {/* Title */}
-          <h2 className="text-3xl sm:text-5xl font-serif text-gray-900 mb-4">
+          <h2 className={`text-3xl sm:text-5xl font-serif mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             {appConfig?.title || 'Unscripted Conversations'}
           </h2>
           
           {/* Tagline */}
-          <p className="text-lg sm:text-xl text-gray-600 mb-2">
+          <p className={`text-lg sm:text-xl mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             {appConfig?.tagline || 'A therapeutic conversational card game'}
           </p>
           
           {/* Promise */}
-          <p className="text-base text-gray-500 max-w-xl mx-auto mb-8">
+          <p className={`text-base max-w-xl mx-auto mb-8 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
             {appConfig?.promise || 'Know more about each other without the need to ask any question'}
           </p>
           
@@ -1732,7 +1732,7 @@ function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
             <Button 
               onClick={onPlay}
               className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 text-lg"
-              style={{ borderRadius: theme.borderRadius.lg }}
+              style={{ borderRadius: theme.borderRadius.lg, backgroundColor: colors.primary }}
             >
               <Play className="w-5 h-5 mr-2" />
               Start Playing
