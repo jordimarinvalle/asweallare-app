@@ -4691,10 +4691,11 @@ function AppContent() {
                                 }} 
                                 size="sm" 
                                 variant="ghost"
+                                className="h-8 px-2 text-sm"
                               >
                                 <Edit className="w-4 h-4 mr-1" /> Edit
                               </Button>
-                              <Button onClick={() => { if(confirm('Delete this pile?')) handleDeletePile(pile.id) }} size="sm" variant="ghost" className="text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                              <Button onClick={() => { if(confirm('Delete this pile?')) handleDeletePile(pile.id) }} size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
                             </div>
                           </div>
                         </div>
