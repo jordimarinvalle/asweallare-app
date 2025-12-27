@@ -45,14 +45,22 @@ export async function PUT(request) {
     if (display_order !== undefined) updateData.display_order = display_order
     if (is_active !== undefined) updateData.is_active = is_active
     
-    const { data, error } = await supabase
+    // Update the record
+    const { error: updateError } = await supabase
       .from('app_socials')
       .update(updateData)
       .eq('id', id)
-      .select()
+    
+    if (updateError) throw updateError
+    
+    // Fetch updated record
+    const { data, error: selectError } = await supabase
+      .from('app_socials')
+      .select('*')
+      .eq('id', id)
       .single()
     
-    if (error) throw error
+    if (selectError) throw selectError
     
     return NextResponse.json(data)
     
