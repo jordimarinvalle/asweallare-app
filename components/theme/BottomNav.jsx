@@ -86,17 +86,6 @@ export function BottomNav({ currentView, onNavigate, className = '' }) {
               >
                 {item.label}
               </span>
-              {isActive && (
-                <div 
-                  className="absolute w-1 h-1 rounded-full"
-                  style={{
-                    backgroundColor: colors.primary,
-                    bottom: isLandscape ? 'auto' : '0.25rem',
-                    left: isLandscape ? '0.25rem' : '50%',
-                    transform: isLandscape ? 'none' : 'translateX(-50%)'
-                  }}
-                />
-              )}
             </button>
           )
         })}
