@@ -86,14 +86,14 @@ export function SocialLink({ platform, url, size = 20, showLabel = false, classN
 }
 
 // Social Platform Selector - dropdown for selecting a platform
-export function SocialPlatformSelector({ value, onChange, className = '' }) {
+export function SocialPlatformSelector({ value, onChange, className = '', isDark = false }) {
   const { theme, isApple } = useTheme()
   
   return (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`px-3 h-9 border border-gray-300 bg-white text-sm font-medium ${className}`}
+      className={`px-3 h-9 border text-sm font-medium ${isDark ? 'bg-[#2a2a2a] border-[#3a3a3a] text-gray-200' : 'border-gray-300 bg-white text-gray-900'} ${className}`}
       style={{ borderRadius: isApple ? theme.borderRadius.md : theme.borderRadius.sm }}
     >
       {SOCIAL_PLATFORMS.map((platform) => (
