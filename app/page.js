@@ -12,10 +12,10 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/hooks/use-toast'
-import { LogOut, Plus, Edit, Trash2, CreditCard, RotateCw, Smartphone, Lock, Check, Package, Play, ShoppingBag, Sparkles, Crown, Receipt, XCircle, Image, Menu, AlertTriangle, RefreshCcw, BookOpen, Upload, Download, X, RotateCcw, Home, User, Settings, ExternalLink, Instagram, Twitter, Facebook, Youtube, Linkedin, Globe, Calendar, Mail } from 'lucide-react'
+import { LogOut, Plus, Edit, Trash2, CreditCard, RotateCw, Smartphone, Lock, Check, Package, Play, ShoppingBag, Sparkles, Crown, Receipt, XCircle, Image, Menu, AlertTriangle, RefreshCcw, BookOpen, Upload, Download, X, RotateCcw, Home, User, Settings, ExternalLink, Calendar, Mail, ChevronUp, ChevronDown, GripVertical } from 'lucide-react'
 import { BookletViewer, GuideSelector, GuideSelectorCompact, BOOKLET_IMAGES, BOOKLET_30SECS } from '@/components/game/BookletViewer'
 import { RotateDeviceScreen } from '@/components/game/RotateDeviceScreen'
-import { ThemeProvider, useTheme, BottomNav, useBottomNavPadding } from '@/components/theme'
+import { ThemeProvider, useTheme, BottomNav, useBottomNavPadding, SocialIcon, SocialPlatformSelector, SOCIAL_PLATFORMS, getPlatformConfig, ReorderableList } from '@/components/theme'
 
 // Simple Markdown to HTML converter (no external dependencies)
 function SimpleMarkdown({ children }) {
