@@ -11,12 +11,14 @@ import { useTheme } from './ThemeProvider'
  * @param {Function} onReorder - Callback when order changes: (newItems) => void
  * @param {Function} renderItem - Render function for each item: (item, index) => ReactNode
  * @param {string} className - Additional CSS classes
+ * @param {boolean} isDark - Dark mode flag
  */
 export function ReorderableList({ 
   items = [], 
   onReorder, 
   renderItem,
-  className = '' 
+  className = '',
+  isDark = false 
 }) {
   const { theme, isApple } = useTheme()
   
@@ -47,16 +49,16 @@ export function ReorderableList({
       {items.map((item, index) => (
         <div 
           key={item.id}
-          className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg group"
+          className={`flex items-center gap-2 p-2 rounded-lg group ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'}`}
           style={{ borderRadius: isApple ? theme.borderRadius.lg : theme.borderRadius.md }}
         >
           {/* Grip handle (visual only for now) */}
-          <div className="text-gray-300 cursor-grab">
+          <div className={`cursor-grab ${isDark ? 'text-gray-600' : 'text-gray-300'}`}>
             <GripVertical className="w-4 h-4" />
           </div>
           
           {/* Order number */}
-          <div className="w-6 h-6 flex items-center justify-center bg-gray-200 rounded text-xs font-medium text-gray-600">
+          <div className={`w-6 h-6 flex items-center justify-center rounded text-xs font-medium ${isDark ? 'bg-[#2a2a2a] text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
             {index + 1}
           </div>
           
@@ -72,8 +74,8 @@ export function ReorderableList({
               disabled={index === 0}
               className={`p-0.5 rounded transition-colors ${
                 index === 0 
-                  ? 'text-gray-300 cursor-not-allowed' 
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'
+                  ? `${isDark ? 'text-gray-700' : 'text-gray-300'} cursor-not-allowed` 
+                  : `${isDark ? 'text-gray-400 hover:text-white hover:bg-[#2a2a2a]' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'}`
               }`}
               aria-label="Move up"
             >
@@ -84,8 +86,8 @@ export function ReorderableList({
               disabled={index === items.length - 1}
               className={`p-0.5 rounded transition-colors ${
                 index === items.length - 1 
-                  ? 'text-gray-300 cursor-not-allowed' 
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'
+                  ? `${isDark ? 'text-gray-700' : 'text-gray-300'} cursor-not-allowed` 
+                  : `${isDark ? 'text-gray-400 hover:text-white hover:bg-[#2a2a2a]' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200'}`
               }`}
               aria-label="Move down"
             >
