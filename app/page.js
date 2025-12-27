@@ -1699,22 +1699,6 @@ function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
   const { theme, isApple } = useTheme()
   const { paddingBottom, paddingLeft, isLandscape } = useBottomNavPadding()
   
-  // Social icon mapping
-  const socialIcons = {
-    instagram: Instagram,
-    twitter: Twitter,
-    facebook: Facebook,
-    youtube: Youtube,
-    linkedin: Linkedin,
-    website: Globe,
-    default: ExternalLink
-  }
-  
-  const getSocialIcon = (name) => {
-    const key = name?.toLowerCase()
-    return socialIcons[key] || socialIcons.default
-  }
-  
   return (
     <div 
       className="min-h-screen bg-white"
