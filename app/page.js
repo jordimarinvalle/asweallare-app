@@ -2148,6 +2148,10 @@ function AppContent() {
   // App config state
   const [appConfig, setAppConfig] = useState(null)
   
+  // Admin check - use admin_emails from appConfig or fallback
+  const adminEmails = appConfig?.admin_emails?.split('\n').map(e => e.trim().toLowerCase()).filter(Boolean) || []
+  const isAdmin = user?.is_admin === true || (user?.email && adminEmails.includes(user.email.toLowerCase()))
+  
   // Admin
   const [adminCards, setAdminCards] = useState([])
   const [adminBoxes, setAdminBoxes] = useState([])
