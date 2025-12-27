@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS app_config (
   header_text TEXT,
   body_text TEXT,
   footer_text TEXT,
+  build_version TEXT DEFAULT '1.0.0',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
