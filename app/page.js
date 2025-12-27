@@ -5035,10 +5035,10 @@ function AppContent() {
                 </div>
                 
                 {/* Cascading Filters */}
-                <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                <div className={`mb-4 p-4 rounded-lg ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'}`}>
                   <div className="flex flex-wrap items-end gap-4">
                     <div>
-                      <Label className="text-xs text-gray-500">Collection Series</Label>
+                      <Label className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Collection Series</Label>
                       <select 
                         value={adminSeriesFilter} 
                         onChange={(e) => {
@@ -5046,21 +5046,21 @@ function AppContent() {
                           setAdminBoxFilter('')
                           setAdminPileFilter('')
                         }} 
-                        className="mt-1 block p-2 border rounded-md min-w-[180px]"
+                        className={`mt-1 block p-2 border rounded-md min-w-[180px] ${isDark ? 'bg-[#2a2a2a] border-[#3a3a3a] text-gray-200' : 'bg-white border-gray-300 text-gray-900'}`}
                       >
                         <option value="">All Series</option>
                         {adminSeries.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                       </select>
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-500">Box</Label>
+                      <Label className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Box</Label>
                       <select 
                         value={adminBoxFilter} 
                         onChange={(e) => {
                           setAdminBoxFilter(e.target.value)
                           setAdminPileFilter('')
                         }} 
-                        className="mt-1 block p-2 border rounded-md min-w-[180px]"
+                        className={`mt-1 block p-2 border rounded-md min-w-[180px] ${isDark ? 'bg-[#2a2a2a] border-[#3a3a3a] text-gray-200' : 'bg-white border-gray-300 text-gray-900'}`}
                       >
                         <option value="">All Boxes</option>
                         {adminBoxes
@@ -5069,17 +5069,17 @@ function AppContent() {
                       </select>
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-500">Pile</Label>
+                      <Label className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Pile</Label>
                       <select 
                         value={adminPileFilter} 
                         onChange={(e) => setAdminPileFilter(e.target.value)} 
-                        className="mt-1 block p-2 border rounded-md min-w-[120px]"
+                        className={`mt-1 block p-2 border rounded-md min-w-[120px] ${isDark ? 'bg-[#2a2a2a] border-[#3a3a3a] text-gray-200' : 'bg-white border-gray-300 text-gray-900'}`}
                       >
                         <option value="">All Piles</option>
                         {adminPiles.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                       </select>
                     </div>
-                    <div className="text-sm text-gray-500 pb-2">
+                    <div className={`text-sm pb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                       {(() => {
                         const filtered = adminCards.filter(card => {
                           if (adminSeriesFilter && card.seriesId !== adminSeriesFilter) return false
