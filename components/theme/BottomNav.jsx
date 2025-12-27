@@ -46,23 +46,32 @@ export function BottomNav({ currentView, onNavigate, className = '' }) {
     const Icon = item.icon
     const active = isActive(item.id)
     
+    // iOS blue for active state
+    const activeColor = isDark ? '#0A84FF' : '#007AFF'
+    // iOS gray for inactive state  
+    const inactiveColor = isDark ? '#8E8E93' : '#8E8E93'
+    
     return (
       <button
         onClick={() => onNavigate(item.id)}
-        className="relative flex items-center justify-center transition-all duration-200"
+        className="relative flex items-center justify-center transition-all duration-200 active:scale-95"
         style={{
-          width: isLandscape ? '100%' : '56px',
-          height: isLandscape ? '56px' : '44px',
-          padding: isLandscape ? '0' : '0',
+          width: isLandscape ? '100%' : '52px',
+          height: isLandscape ? '52px' : '40px',
         }}
         aria-label={item.id}
       >
-        {/* Active bubble/highlight */}
+        {/* Active bubble/highlight background */}
         {active && (
           <div 
-            className="absolute inset-1 rounded-full transition-all duration-300"
+            className="absolute transition-all duration-300 ease-out"
             style={{
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
+              width: isLandscape ? '44px' : '40px',
+              height: isLandscape ? '44px' : '36px',
+              borderRadius: isLandscape ? '12px' : '10px',
+              backgroundColor: isDark 
+                ? 'rgba(10, 132, 255, 0.15)' 
+                : 'rgba(0, 122, 255, 0.12)',
             }}
           />
         )}
@@ -70,12 +79,10 @@ export function BottomNav({ currentView, onNavigate, className = '' }) {
         <Icon 
           className="relative z-10 transition-all duration-200"
           style={{ 
-            width: '24px', 
-            height: '24px',
-            strokeWidth: active ? 2.2 : 1.8,
-            color: active 
-              ? (isDark ? '#0A84FF' : '#007AFF') // iOS blue for active
-              : (isDark ? '#8E8E93' : '#8E8E93') // iOS gray for inactive
+            width: '22px', 
+            height: '22px',
+            strokeWidth: active ? 2.2 : 1.7,
+            color: active ? activeColor : inactiveColor,
           }} 
         />
       </button>
@@ -88,18 +95,18 @@ export function BottomNav({ currentView, onNavigate, className = '' }) {
       <nav 
         className={`fixed left-0 top-0 bottom-0 z-50 flex flex-col items-center ${className}`}
         style={{ 
-          width: '72px',
-          paddingTop: 'env(safe-area-inset-top)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
+          width: '68px',
+          paddingTop: 'calc(env(safe-area-inset-top) + 8px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)',
           paddingLeft: 'env(safe-area-inset-left)',
-          backgroundColor: isDark ? 'rgba(28, 28, 30, 0.92)' : 'rgba(255, 255, 255, 0.92)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderRight: `0.5px solid ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+          backgroundColor: isDark ? 'rgba(28, 28, 30, 0.94)' : 'rgba(255, 255, 255, 0.94)',
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          borderRight: `0.5px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'}`,
         }}
       >
         {/* Left group items - vertically stacked at top */}
-        <div className="flex flex-col items-center gap-1 pt-4">
+        <div className="flex flex-col items-center gap-2">
           {leftNavItems.map((item) => (
             <NavButton key={item.id} item={item} />
           ))}
@@ -109,7 +116,7 @@ export function BottomNav({ currentView, onNavigate, className = '' }) {
         <div className="flex-1" />
         
         {/* Right group items - at bottom */}
-        <div className="flex flex-col items-center gap-1 pb-4">
+        <div className="flex flex-col items-center gap-2">
           {rightNavItems.map((item) => (
             <NavButton key={item.id} item={item} />
           ))}
@@ -121,32 +128,34 @@ export function BottomNav({ currentView, onNavigate, className = '' }) {
   // Portrait mode: floating bottom pill
   return (
     <nav 
-      className={`fixed bottom-0 left-0 right-0 z-50 flex justify-center ${className}`}
+      className={`fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none ${className}`}
       style={{ 
-        paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)',
-        paddingLeft: '16px',
-        paddingRight: '16px',
+        paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)',
+        paddingLeft: '20px',
+        paddingRight: '20px',
       }}
     >
       {/* Floating pill container */}
       <div 
-        className="flex items-center justify-between w-full"
+        className="flex items-center justify-between pointer-events-auto"
         style={{
-          maxWidth: '400px',
-          height: '64px',
-          padding: '0 8px',
-          borderRadius: '32px',
-          backgroundColor: isDark ? 'rgba(28, 28, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
+          width: '100%',
+          maxWidth: '360px',
+          height: '56px',
+          padding: '0 6px',
+          borderRadius: '28px',
+          backgroundColor: isDark 
+            ? 'rgba(44, 44, 46, 0.88)' 
+            : 'rgba(255, 255, 255, 0.88)',
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
           boxShadow: isDark 
-            ? '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0.5px 0 rgba(255, 255, 255, 0.1)' 
-            : '0 8px 32px rgba(0, 0, 0, 0.12), inset 0 0.5px 0 rgba(255, 255, 255, 0.8)',
-          border: `0.5px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'}`,
+            ? '0 4px 24px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(255, 255, 255, 0.06)' 
+            : '0 4px 24px rgba(0, 0, 0, 0.08), 0 0 0 0.5px rgba(0, 0, 0, 0.04)',
         }}
       >
         {/* Left group - Home, Play, Store */}
-        <div className="flex items-center gap-0">
+        <div className="flex items-center">
           {leftNavItems.map((item) => (
             <NavButton key={item.id} item={item} />
           ))}
@@ -185,8 +194,8 @@ export function useBottomNavPadding() {
   }, [])
   
   return {
-    paddingBottom: isLandscape ? '0' : 'calc(80px + env(safe-area-inset-bottom))',
-    paddingLeft: isLandscape ? '72px' : '0',
+    paddingBottom: isLandscape ? '0' : 'calc(76px + env(safe-area-inset-bottom))',
+    paddingLeft: isLandscape ? '68px' : '0',
     isLandscape
   }
 }
