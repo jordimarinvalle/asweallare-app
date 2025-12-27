@@ -1845,19 +1845,21 @@ function ProfileScreen({
     return Math.ceil(diff / (1000 * 60 * 60 * 24))
   }
   
+  const isDark = colorMode === 'dark'
+  
   if (!user) {
     return (
       <div 
-        className="min-h-screen bg-white flex flex-col items-center justify-center p-4"
+        className={`min-h-screen flex flex-col items-center justify-center p-4 ${isDark ? 'bg-[#0F0F0F]' : 'bg-white'}`}
         style={{ paddingBottom, paddingLeft }}
       >
-        <User className="w-16 h-16 text-gray-300 mb-4" />
-        <h2 className="text-2xl font-serif text-gray-900 mb-2">Welcome</h2>
-        <p className="text-gray-500 mb-6 text-center">Sign in to view your profile and purchases</p>
+        <User className={`w-16 h-16 mb-4 ${isDark ? 'text-gray-600' : 'text-gray-300'}`} />
+        <h2 className={`text-2xl font-serif mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Welcome</h2>
+        <p className={`mb-6 text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Sign in to view your profile and purchases</p>
         <Button 
           onClick={onSignIn}
-          className="bg-red-600 hover:bg-red-700 text-white px-8"
-          style={{ borderRadius: theme.borderRadius.lg }}
+          className="text-white px-8"
+          style={{ borderRadius: theme.borderRadius.lg, backgroundColor: colors.primary }}
         >
           Sign In
         </Button>
@@ -1867,19 +1869,19 @@ function ProfileScreen({
   
   return (
     <div 
-      className="min-h-screen bg-gray-50"
+      className={`min-h-screen ${isDark ? 'bg-[#0F0F0F]' : 'bg-gray-50'}`}
       style={{ paddingBottom, paddingLeft }}
     >
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
         {/* Profile Header */}
-        <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm">
+        <div className={`rounded-2xl p-6 mb-4 shadow-sm ${isDark ? 'bg-[#1a1a1a]' : 'bg-white'}`}>
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
-              <User className="w-8 h-8 text-gray-400" />
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-100'}`}>
+              <User className={`w-8 h-8 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
             </div>
             <div className="flex-1">
-              <p className="text-sm text-gray-500">Signed in as</p>
-              <p className="font-medium text-gray-900 truncate">{user.email}</p>
+              <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Signed in as</p>
+              <p className={`font-medium truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.email}</p>
             </div>
           </div>
           
@@ -1887,7 +1889,7 @@ function ProfileScreen({
           {isAdmin && (
             <button
               onClick={onGoToAdmin}
-              className="mt-4 w-full flex items-center justify-center gap-2 py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors"
+              className={`mt-4 w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${isDark ? 'bg-[#2a2a2a] hover:bg-[#3a3a3a] text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
             >
               <Settings className="w-4 h-4" />
               Admin Panel
