@@ -28,6 +28,7 @@ In a world of constant distraction, we've created a tool to help you:
 - Create meaningful memories`,
   footer_text: 'Made with ❤️ for authentic human connection',
   build_version: '1.0.0',
+  admin_emails: 'jordi.asweallare@gmail.com',
   socials: []
 }
 
