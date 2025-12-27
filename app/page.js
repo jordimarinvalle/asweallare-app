@@ -5317,7 +5317,7 @@ function AppContent() {
                     setEditingBundle(null)
                     setBundleForm({ id: '', name: '', description: '', priceId: '', boxIds: [], displayOrder: 0, isActive: true })
                     setShowBundleForm(true)
-                  }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
+                  }} className="h-9 px-4 text-sm font-medium bg-red-600 hover:bg-red-700 text-white">
                     <Plus className="w-4 h-4 mr-2" />Add Bundle
                   </Button>
                 </div>
