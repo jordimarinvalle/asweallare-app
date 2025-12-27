@@ -2000,12 +2000,40 @@ function ProfileScreen({
             Settings
           </h3>
           
-          {/* Theme Toggle */}
+          {/* Dark Mode Toggle */}
           <div className="flex items-center justify-between py-3 border-b border-gray-100">
             <div>
-              <p className="font-medium text-gray-900">Theme</p>
+              <p className="font-medium text-gray-900">Appearance</p>
               <p className="text-sm text-gray-500">
-                {manualOverride ? `Manual: ${themeName}` : `Auto-detected: ${autoDetected}`}
+                {colorModeOverride ? `Manual: ${colorMode}` : `Auto: ${autoColorMode}`}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+              <button
+                onClick={() => setColorModePreference('light')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  colorMode === 'light' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+                }`}
+              >
+                Light
+              </button>
+              <button
+                onClick={() => setColorModePreference('dark')}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  colorMode === 'dark' ? 'bg-gray-800 text-white' : 'text-gray-500'
+                }`}
+              >
+                Dark
+              </button>
+            </div>
+          </div>
+          
+          {/* Theme Toggle (Apple/Material) */}
+          <div className="flex items-center justify-between py-3">
+            <div>
+              <p className="font-medium text-gray-900">Style</p>
+              <p className="text-sm text-gray-500">
+                {manualOverride ? `Manual: ${themeName}` : `Auto: ${autoDetected}`}
               </p>
             </div>
             <div className="flex items-center gap-2">
