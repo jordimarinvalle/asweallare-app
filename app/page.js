@@ -3555,7 +3555,20 @@ function AppContent() {
       </nav>
       
       {/* Main content */}
-      <div className="pt-16">
+      <div className="pt-16" style={{ 
+        paddingBottom: showBottomNav ? paddingBottom : '0',
+        paddingLeft: showBottomNav && bottomNavLandscape ? paddingLeft : '0'
+      }}>
+        {/* Home Screen */}
+        {view === 'home' && (
+          <HomeScreen 
+            appConfig={appConfig}
+            onPlay={() => { setView('game'); setGameStarted(false) }}
+            onSignIn={() => setAuthOpen(true)}
+            user={user}
+          />
+        )}
+        
         {view === 'game' && !gameStarted && (
           <BoxSelectionScreen 
             boxes={boxes}
