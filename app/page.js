@@ -3717,6 +3717,19 @@ function AppContent() {
           </div>
         )}
         
+        {/* Profile Screen */}
+        {view === 'profile' && (
+          <ProfileScreen 
+            user={user}
+            purchases={purchases}
+            onSignOut={handleSignOut}
+            onCancelSubscription={openCancelDialog}
+            onSignIn={() => setAuthOpen(true)}
+            isAdmin={isAdmin}
+            onGoToAdmin={() => setView('admin')}
+          />
+        )}
+        
         {view === 'admin' && isAdmin && (
           <div className="max-w-6xl mx-auto p-8">
             <div className="flex justify-between items-center mb-8">
