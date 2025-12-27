@@ -4099,7 +4099,7 @@ function AppContent() {
                     setEditingSeries(null)
                     setSeriesForm({ id: '', name: '', description: '', displayOrder: 0, isActive: true })
                     setShowSeriesForm(true)
-                  }} className="bg-red-600 hover:bg-red-700 text-white" size="sm">
+                  }} className="h-9 px-4 text-sm font-medium bg-red-600 hover:bg-red-700 text-white">
                     <Plus className="w-4 h-4 mr-2" />Add Series
                   </Button>
                 </div>
