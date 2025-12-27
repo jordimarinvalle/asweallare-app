@@ -1754,7 +1754,7 @@ function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
       {/* Header Content (Markdown) */}
       {appConfig?.header_text && (
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-          <div className="prose prose-gray prose-lg max-w-none text-center">
+          <div className={`prose prose-lg max-w-none text-center ${isDark ? 'prose-invert' : 'prose-gray'}`}>
             <SimpleMarkdown>{appConfig.header_text}</SimpleMarkdown>
           </div>
         </div>
@@ -1762,9 +1762,9 @@ function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
       
       {/* Body Content (Markdown) */}
       {appConfig?.body_text && (
-        <div className="bg-gray-50 py-12">
+        <div className={`py-12 ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'}`}>
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
-            <div className="prose prose-gray prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-li:text-gray-600 prose-blockquote:border-red-500 prose-blockquote:text-gray-700">
+            <div className={`prose prose-lg max-w-none ${isDark ? 'prose-invert prose-blockquote:border-red-500' : 'prose-gray prose-headings:text-gray-900 prose-p:text-gray-600 prose-li:text-gray-600 prose-blockquote:border-red-500 prose-blockquote:text-gray-700'}`}>
               <SimpleMarkdown>{appConfig.body_text}</SimpleMarkdown>
             </div>
           </div>
@@ -1781,7 +1781,7 @@ function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${isDark ? 'bg-[#2a2a2a] hover:bg-[#3a3a3a] text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
                 style={{ borderRadius: isApple ? theme.borderRadius.full : theme.borderRadius.lg }}
               >
                 <SocialIcon platform={social.name} size={20} colored />
@@ -1794,9 +1794,9 @@ function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
       
       {/* Footer Content */}
       {appConfig?.footer_text && (
-        <div className="border-t border-gray-100 py-8">
+        <div className={`border-t py-8 ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
           <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-            <p className="text-gray-500">{appConfig.footer_text}</p>
+            <p className={isDark ? 'text-gray-500' : 'text-gray-500'}>{appConfig.footer_text}</p>
           </div>
         </div>
       )}
@@ -1807,7 +1807,7 @@ function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
 // ============================================================================
 // PROFILE SCREEN - User info, purchases, memberships
 // ============================================================================
-function ProfileScreen({ 
+function ProfileScreen({
   user, 
   purchases, 
   onSignOut, 
