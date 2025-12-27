@@ -4288,8 +4288,8 @@ function AppContent() {
                     
                     {/* Buttons - moved above bulk upload */}
                     <div className="flex gap-2 mt-4">
-                      <Button onClick={handleSaveBox} className="bg-red-600 hover:bg-red-700 text-white">{editingBox ? 'Update' : 'Create'}</Button>
-                      <Button onClick={() => { setShowBoxForm(false); setEditingBox(null); setUploadResult(null); setBulkUploadPileId('') }} variant="outline">Cancel</Button>
+                      <Button onClick={handleSaveBox} className="h-9 px-4 text-sm font-medium bg-red-600 hover:bg-red-700 text-white">{editingBox ? 'Update' : 'Create'}</Button>
+                      <Button onClick={() => { setShowBoxForm(false); setEditingBox(null); setUploadResult(null); setBulkUploadPileId('') }} variant="outline" className="h-9 px-4 text-sm font-medium">Cancel</Button>
                     </div>
                     
                     {/* Bulk Card Upload - Only when editing */}
