@@ -2088,7 +2088,7 @@ export default function App() {
 }
 
 function AppContent() {
-  const { theme } = useTheme()
+  const { theme, isDark, colors } = useTheme()
   const { paddingBottom, paddingLeft, isLandscape: bottomNavLandscape } = useBottomNavPadding()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
