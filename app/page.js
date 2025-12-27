@@ -1771,7 +1771,7 @@ function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
       {appConfig?.header_text && (
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <div className="prose prose-gray prose-lg max-w-none text-center">
-            <ReactMarkdown>{appConfig.header_text}</ReactMarkdown>
+            <SimpleMarkdown>{appConfig.header_text}</SimpleMarkdown>
           </div>
         </div>
       )}
@@ -1781,7 +1781,7 @@ function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
         <div className="bg-gray-50 py-12">
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <div className="prose prose-gray prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-li:text-gray-600 prose-blockquote:border-red-500 prose-blockquote:text-gray-700">
-              <ReactMarkdown>{appConfig.body_text}</ReactMarkdown>
+              <SimpleMarkdown>{appConfig.body_text}</SimpleMarkdown>
             </div>
           </div>
         </div>
