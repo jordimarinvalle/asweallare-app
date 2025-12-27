@@ -4897,7 +4897,7 @@ function AppContent() {
                             id="mockup-secondary-upload"
                           />
                           <label htmlFor="mockup-secondary-upload">
-                            <Button asChild size="sm" variant="outline" className="w-full cursor-pointer">
+                            <Button asChild variant="outline" className="h-9 px-4 text-sm font-medium w-full cursor-pointer">
                               <span><Upload className="w-4 h-4 mr-2" />{mockupsData.secondaryImage ? 'Replace' : 'Upload'} Secondary Image</span>
                             </Button>
                           </label>
