@@ -4752,7 +4752,7 @@ function AppContent() {
                       <Button 
                         onClick={() => loadMockups(mockupsBoxId)} 
                         variant="outline" 
-                        size="sm"
+                        className="h-9 px-4 text-sm font-medium"
                         disabled={mockupsLoading}
                       >
                         <RefreshCcw className={`w-4 h-4 mr-2 ${mockupsLoading ? 'animate-spin' : ''}`} />
@@ -4761,7 +4761,7 @@ function AppContent() {
                       <Button 
                         onClick={handleDownloadMockups} 
                         variant="outline" 
-                        size="sm"
+                        className="h-9 px-4 text-sm font-medium"
                         disabled={!mockupsData.mainImage && !mockupsData.secondaryImage && mockupsData.cardMockups.length === 0}
                       >
                         <Download className="w-4 h-4 mr-2" />
@@ -4770,8 +4770,7 @@ function AppContent() {
                       <Button 
                         onClick={() => handleDeleteMockup('all')} 
                         variant="outline" 
-                        size="sm"
-                        className="text-red-600 hover:text-red-700"
+                        className="h-9 px-4 text-sm font-medium text-red-600 hover:text-red-700"
                         disabled={!mockupsData.mainImage && !mockupsData.secondaryImage && mockupsData.cardMockups.length === 0}
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
