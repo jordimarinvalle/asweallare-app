@@ -1899,33 +1899,34 @@ function ProfileScreen({
         
         {/* Active Memberships */}
         {activeMemberships.length > 0 && (
-          <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Crown className="w-5 h-5 text-red-600" />
+          <div className={`rounded-2xl p-6 mb-4 shadow-sm ${isDark ? 'bg-[#1a1a1a]' : 'bg-white'}`}>
+            <h3 className={`font-semibold mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <Crown className="w-5 h-5" style={{ color: colors.primary }} />
               Active Memberships
             </h3>
             <div className="space-y-3">
               {activeMemberships.map((purchase) => {
                 const days = daysUntilExpiry(purchase.expires_at)
                 return (
-                  <div key={purchase.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div key={purchase.id} className={`flex items-center justify-between p-3 rounded-lg ${isDark ? 'bg-green-900/30' : 'bg-green-50'}`}>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                        <Crown className="w-5 h-5 text-green-600" />
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isDark ? 'bg-green-900/50' : 'bg-green-100'}`}>
+                        <Crown className="w-5 h-5 text-green-500" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{purchase.box_name || purchase.plan_name || 'Membership'}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{purchase.box_name || purchase.plan_name || 'Membership'}</p>
+                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                           Expires: {formatDate(purchase.expires_at)}
                           {days && days <= 30 && (
-                            <span className="ml-2 text-orange-600">({days} days left)</span>
+                            <span className="ml-2 text-orange-500">({days} days left)</span>
                           )}
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => onCancelSubscription(purchase)}
-                      className="text-sm text-red-600 hover:text-red-700 font-medium"
+                      className="text-sm font-medium"
+                      style={{ color: colors.danger }}
                     >
                       Cancel
                     </button>
@@ -1938,20 +1939,20 @@ function ProfileScreen({
         
         {/* Owned Products */}
         {oneTimePurchases.length > 0 && (
-          <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Package className="w-5 h-5 text-gray-600" />
+          <div className={`rounded-2xl p-6 mb-4 shadow-sm ${isDark ? 'bg-[#1a1a1a]' : 'bg-white'}`}>
+            <h3 className={`font-semibold mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <Package className={`w-5 h-5 ${isDark ? 'text-gray-500' : 'text-gray-600'}`} />
               Owned Products
             </h3>
             <div className="space-y-3">
               {oneTimePurchases.map((purchase) => (
-                <div key={purchase.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                    <Package className="w-5 h-5 text-gray-500" />
+                <div key={purchase.id} className={`flex items-center gap-3 p-3 rounded-lg ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-50'}`}>
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isDark ? 'bg-[#3a3a3a]' : 'bg-gray-100'}`}>
+                    <Package className={`w-5 h-5 ${isDark ? 'text-gray-500' : 'text-gray-500'}`} />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{purchase.box_name || purchase.product_name || 'Product'}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{purchase.box_name || purchase.product_name || 'Product'}</p>
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                       Purchased: {formatDate(purchase.created_at)}
                     </p>
                   </div>
