@@ -1759,7 +1759,7 @@ function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
       {appConfig?.header_text && (
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <div className={`prose prose-lg max-w-none text-center ${isDark ? 'prose-invert' : 'prose-gray'}`}>
-            <SimpleMarkdown>{appConfig.header_text}</SimpleMarkdown>
+            <SimpleMarkdown isDark={isDark}>{appConfig.header_text}</SimpleMarkdown>
           </div>
         </div>
       )}
@@ -1769,7 +1769,7 @@ function HomeScreen({ appConfig, onPlay, onSignIn, user }) {
         <div className={`py-12 ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'}`}>
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <div className={`prose prose-lg max-w-none ${isDark ? 'prose-invert prose-blockquote:border-red-500' : 'prose-gray prose-headings:text-gray-900 prose-p:text-gray-600 prose-li:text-gray-600 prose-blockquote:border-red-500 prose-blockquote:text-gray-700'}`}>
-              <SimpleMarkdown>{appConfig.body_text}</SimpleMarkdown>
+              <SimpleMarkdown isDark={isDark}>{appConfig.body_text}</SimpleMarkdown>
             </div>
           </div>
         </div>
