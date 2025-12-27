@@ -93,7 +93,7 @@ export async function PUT(request) {
     
     if (existing) {
       // Update
-      const { data, error } = await supabase
+      const { error: updateError } = await supabase
         .from('app_config')
         .update({
           name,
@@ -107,17 +107,25 @@ export async function PUT(request) {
           updated_at: new Date().toISOString()
         })
         .eq('slug', 'asweallare')
-        .select()
+      
+      if (updateError) throw updateError
+      
+      // Fetch updated record
+      const { data, error: selectError } = await supabase
+        .from('app_config')
+        .select('*')
+        .eq('slug', 'asweallare')
         .single()
       
-      if (error) throw error
+      if (selectError) throw selectError
       return NextResponse.json(data)
     } else {
       // Insert new
-      const { data, error } = await supabase
+      const newId = id || 'app_asweallare'
+      const { error: insertError } = await supabase
         .from('app_config')
         .insert({
-          id: id || 'app_asweallare',
+          id: newId,
           slug: 'asweallare',
           name,
           title,
@@ -128,10 +136,17 @@ export async function PUT(request) {
           footer_text,
           build_version
         })
-        .select()
+      
+      if (insertError) throw insertError
+      
+      // Fetch inserted record
+      const { data, error: selectError } = await supabase
+        .from('app_config')
+        .select('*')
+        .eq('id', newId)
         .single()
       
-      if (error) throw error
+      if (selectError) throw selectError
       return NextResponse.json(data)
     }
     
