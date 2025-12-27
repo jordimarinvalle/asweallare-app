@@ -252,3 +252,59 @@ CREATE TRIGGER update_local_users_updated_at
 -- ============================================================================
 -- Done! Local schema created successfully.
 -- ============================================================================
+
+-- ============================================================================
+-- APP_CONFIG TABLE - Application settings and content
+-- ============================================================================
+CREATE TABLE app_config (
+  id TEXT PRIMARY KEY,
+  slug TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  title TEXT,
+  tagline TEXT,
+  promise TEXT,
+  header_text TEXT,
+  body_text TEXT,
+  footer_text TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================================================
+-- APP_SOCIALS TABLE - Social links for the app
+-- ============================================================================
+CREATE TABLE app_socials (
+  id TEXT PRIMARY KEY,
+  app_id TEXT REFERENCES app_config(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  url TEXT NOT NULL,
+  icon TEXT,
+  display_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Insert default app config
+INSERT INTO app_config (id, slug, name, title, tagline, promise, header_text, body_text, footer_text) VALUES
+('app_asweallare', 'asweallare', 'AS WE ALL ARE', 'Unscripted Conversations', 'A therapeutic conversational card game', 'Know more about each other without the need to ask any question', 
+'## Welcome to AS WE ALL ARE
+
+A space for **authentic connection** and meaningful conversations.',
+'### How It Works
+
+1. **Select your deck** — Choose from our curated card collections
+2. **Draw a card** — Each card presents a thoughtful prompt
+3. **Share openly** — Take turns sharing your thoughts and experiences
+4. **Listen deeply** — Create space for others to be heard
+
+> "The quality of our lives depends on the quality of our conversations."
+
+### Why This Matters
+
+In a world of constant distraction, we''ve created a tool to help you:
+- Build deeper connections
+- Practice vulnerability
+- Discover new perspectives
+- Create meaningful memories',
+'Made with ❤️ for authentic human connection');
