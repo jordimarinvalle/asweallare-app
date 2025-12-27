@@ -4945,7 +4945,7 @@ function AppContent() {
                           id="mockup-cards-zip-upload"
                         />
                         <label htmlFor="mockup-cards-zip-upload">
-                          <Button asChild size="sm" className="bg-red-600 hover:bg-red-700 text-white cursor-pointer">
+                          <Button asChild className="h-9 px-4 text-sm font-medium bg-red-600 hover:bg-red-700 text-white cursor-pointer">
                             <span><Upload className="w-4 h-4 mr-2" />Upload ZIP of Card Mockups</span>
                           </Button>
                         </label>
