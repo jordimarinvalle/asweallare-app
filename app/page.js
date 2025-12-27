@@ -5297,8 +5297,8 @@ function AppContent() {
                                 isActive: price.is_active !== false
                               })
                               setShowPriceForm(true)
-                            }} size="sm" variant="ghost"><Edit className="w-4 h-4" /></Button>
-                            <Button onClick={() => { if(confirm('Delete this price?')) handleDeletePrice(price.id) }} size="sm" variant="ghost" className="text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                            }} size="sm" variant="ghost" className="h-8 w-8 p-0"><Edit className="w-4 h-4" /></Button>
+                            <Button onClick={() => { if(confirm('Delete this price?')) handleDeletePrice(price.id) }} size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
                           </div>
                         </div>
                       </Card>
