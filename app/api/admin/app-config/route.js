@@ -80,7 +80,11 @@ export async function GET(request) {
 export async function PUT(request) {
   try {
     const body = await request.json()
-    const { id, slug, name, title, tagline, promise, header_text, body_text, footer_text, build_version } = body
+    const { 
+      id, slug, name, title, tagline, promise, 
+      header_text, body_text, footer_text, build_version,
+      admin_emails, primary_color, secondary_color, accent_color, danger_color 
+    } = body
     
     const supabase = createSupabaseServer()
     
@@ -104,6 +108,11 @@ export async function PUT(request) {
           body_text,
           footer_text,
           build_version,
+          admin_emails,
+          primary_color,
+          secondary_color,
+          accent_color,
+          danger_color,
           updated_at: new Date().toISOString()
         })
         .eq('slug', 'asweallare')
