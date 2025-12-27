@@ -4844,7 +4844,7 @@ function AppContent() {
                             id="mockup-main-upload"
                           />
                           <label htmlFor="mockup-main-upload">
-                            <Button asChild size="sm" variant="outline" className="w-full cursor-pointer">
+                            <Button asChild variant="outline" className="h-9 px-4 text-sm font-medium w-full cursor-pointer">
                               <span><Upload className="w-4 h-4 mr-2" />{mockupsData.mainImage ? 'Replace' : 'Upload'} Main Image</span>
                             </Button>
                           </label>
