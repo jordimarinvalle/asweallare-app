@@ -2037,41 +2037,12 @@ function ProfileScreen({
             </div>
           </div>
           
-          {/* Theme Toggle (Apple/Material) */}
-          <div className="flex items-center justify-between py-3">
-            <div>
-              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Style</p>
-              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                {manualOverride ? `Manual: ${themeName}` : `Auto: ${autoDetected}`}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {manualOverride && (
-                <button
-                  onClick={resetToAuto}
-                  className={`text-xs mr-2 ${isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  Reset
-                </button>
-              )}
-              <button
-                onClick={toggleTheme}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  isApple 
-                    ? 'bg-gray-900 text-white' 
-                    : (isDark ? 'bg-[#2a2a2a] text-gray-300' : 'bg-gray-100 text-gray-700')
-                }`}
-              >
-                {isApple ? 'Apple' : 'Material'}
-              </button>
-            </div>
-          </div>
         </div>
         
         {/* Sign Out */}
         <button
           onClick={onSignOut}
-          className="w-full py-3 text-red-600 font-medium hover:bg-red-50 rounded-xl transition-colors"
+          className={`w-full py-3 font-medium rounded-xl transition-colors ${isDark ? 'text-red-500 hover:bg-[#1a1a1a]' : 'text-red-600 hover:bg-red-50'}`}
         >
           Sign Out
         </button>
