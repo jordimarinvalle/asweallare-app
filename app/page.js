@@ -1992,30 +1992,32 @@ function ProfileScreen({
           <div className="bg-white rounded-2xl p-8 mb-4 shadow-sm text-center">
             <Receipt className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <h3 className="font-medium text-gray-900 mb-2">No purchases yet</h3>
-            <p className="text-sm text-gray-500">Your purchase history will appear here</p>
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Your purchase history will appear here</p>
           </div>
         )}
         
         {/* Settings */}
-        <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm">
-          <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Settings className="w-5 h-5 text-gray-600" />
+        <div className={`rounded-2xl p-6 mb-4 shadow-sm ${isDark ? 'bg-[#1a1a1a]' : 'bg-white'}`}>
+          <h3 className={`font-semibold mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            <Settings className={`w-5 h-5 ${isDark ? 'text-gray-500' : 'text-gray-600'}`} />
             Settings
           </h3>
           
           {/* Dark Mode Toggle */}
-          <div className="flex items-center justify-between py-3 border-b border-gray-100">
+          <div className={`flex items-center justify-between py-3 border-b ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
             <div>
-              <p className="font-medium text-gray-900">Appearance</p>
-              <p className="text-sm text-gray-500">
+              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Appearance</p>
+              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                 {colorModeOverride ? `Manual: ${colorMode}` : `Auto: ${autoColorMode}`}
               </p>
             </div>
-            <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+            <div className={`flex items-center gap-1 rounded-full p-1 ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-100'}`}>
               <button
                 onClick={() => setColorModePreference('light')}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  colorMode === 'light' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+                  colorMode === 'light' 
+                    ? (isDark ? 'bg-[#3a3a3a] text-white shadow-sm' : 'bg-white text-gray-900 shadow-sm') 
+                    : (isDark ? 'text-gray-400' : 'text-gray-500')
                 }`}
               >
                 Light
@@ -2023,7 +2025,7 @@ function ProfileScreen({
               <button
                 onClick={() => setColorModePreference('dark')}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  colorMode === 'dark' ? 'bg-gray-800 text-white' : 'text-gray-500'
+                  colorMode === 'dark' ? 'bg-gray-800 text-white' : (isDark ? 'text-gray-400' : 'text-gray-500')
                 }`}
               >
                 Dark
@@ -2034,8 +2036,8 @@ function ProfileScreen({
           {/* Theme Toggle (Apple/Material) */}
           <div className="flex items-center justify-between py-3">
             <div>
-              <p className="font-medium text-gray-900">Style</p>
-              <p className="text-sm text-gray-500">
+              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Style</p>
+              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                 {manualOverride ? `Manual: ${themeName}` : `Auto: ${autoDetected}`}
               </p>
             </div>
@@ -2043,7 +2045,7 @@ function ProfileScreen({
               {manualOverride && (
                 <button
                   onClick={resetToAuto}
-                  className="text-xs text-gray-500 hover:text-gray-700 mr-2"
+                  className={`text-xs mr-2 ${isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                   Reset
                 </button>
@@ -2053,7 +2055,7 @@ function ProfileScreen({
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   isApple 
                     ? 'bg-gray-900 text-white' 
-                    : 'bg-gray-100 text-gray-700'
+                    : (isDark ? 'bg-[#2a2a2a] text-gray-300' : 'bg-gray-100 text-gray-700')
                 }`}
               >
                 {isApple ? 'Apple' : 'Material'}
