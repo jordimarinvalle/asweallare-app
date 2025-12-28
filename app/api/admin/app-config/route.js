@@ -83,7 +83,10 @@ export async function PUT(request) {
     const { 
       id, slug, name, title, tagline, promise, 
       header_text, body_text, footer_text, build_version,
-      admin_emails, primary_color, secondary_color, accent_color, danger_color 
+      admin_emails, primary_color, secondary_color, accent_color, danger_color,
+      // Font settings
+      font_primary, font_primary_weights, font_primary_line_height, font_primary_letter_spacing,
+      font_secondary, font_secondary_weights, font_secondary_line_height, font_secondary_letter_spacing
     } = body
     
     const supabase = createSupabaseServer()
@@ -113,6 +116,14 @@ export async function PUT(request) {
           secondary_color,
           accent_color,
           danger_color,
+          font_primary,
+          font_primary_weights,
+          font_primary_line_height,
+          font_primary_letter_spacing,
+          font_secondary,
+          font_secondary_weights,
+          font_secondary_line_height,
+          font_secondary_letter_spacing,
           updated_at: new Date().toISOString()
         })
         .eq('slug', 'asweallare')
@@ -148,7 +159,15 @@ export async function PUT(request) {
           primary_color,
           secondary_color,
           accent_color,
-          danger_color
+          danger_color,
+          font_primary,
+          font_primary_weights,
+          font_primary_line_height,
+          font_primary_letter_spacing,
+          font_secondary,
+          font_secondary_weights,
+          font_secondary_line_height,
+          font_secondary_letter_spacing
         })
       
       if (insertError) throw insertError
