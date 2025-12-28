@@ -4298,43 +4298,49 @@ function AppContent() {
                           </label>
                         </div>
                         
-                        {/* Uploaded Fonts List */}
-                        {customFonts.length > 0 && (
+                        {/* Uploaded/Custom Fonts List */}
+                        {customFonts.filter(f => f.font_type === 'custom').length > 0 && (
                           <div className="space-y-3">
-                            <p className={`text-xs uppercase tracking-wide ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Uploaded Fonts</p>
-                            {customFonts.map((fontFamily) => (
-                              <div key={fontFamily.name} className={`p-3 rounded-lg ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'}`}>
+                            <p className={`text-xs uppercase tracking-wide ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Custom Fonts</p>
+                            {customFonts.filter(f => f.font_type === 'custom').map((font) => (
+                              <div key={font.id} className={`p-3 rounded-lg ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'}`}>
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: fontFamily.name }}>{fontFamily.name}</span>
-                                  <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{fontFamily.files.length} file(s)</span>
+                                  <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: font.name }}>{font.name}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Weights: {font.weights}</span>
+                                    <button 
+                                      onClick={() => handleDeleteFont(font.id, font.font_type)}
+                                      className="text-red-500 hover:text-red-600 p-1"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
                                 </div>
-                                <div className="flex flex-wrap gap-2">
-                                  {fontFamily.files.map((file) => (
-                                    <div key={file.filename} className={`flex items-center gap-2 px-2 py-1 rounded text-xs ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-200'}`}>
-                                      <span className={isDark ? 'text-gray-300' : 'text-gray-600'}>{file.weight}</span>
-                                      <span className={isDark ? 'text-gray-500' : 'text-gray-400'}>({file.format})</span>
-                                      <button 
-                                        onClick={() => handleDeleteFont(file.filename)}
-                                        className="text-red-500 hover:text-red-600"
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                      </button>
-                                    </div>
-                                  ))}
-                                </div>
-                                <p className={`mt-2 text-xs ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-                                  Use in config: <code className={`px-1 py-0.5 rounded ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-200'}`}>{fontFamily.name}</code>
-                                </p>
+                                {font.description && (
+                                  <p className={`text-xs ${isDark ? 'text-gray-600' : 'text-gray-500'}`}>{font.description}</p>
+                                )}
                               </div>
                             ))}
                           </div>
                         )}
                         
-                        {customFonts.length === 0 && (
+                        {customFonts.filter(f => f.font_type === 'custom').length === 0 && (
                           <p className={`text-sm text-center py-4 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-                            No custom fonts uploaded yet. Upload a font file to use it in your app.
+                            No custom fonts uploaded yet. Upload font files to use them in your app.
                           </p>
                         )}
+                        
+                        {/* System/Default Fonts Info */}
+                        <div className="mt-4 pt-4 border-t border-dashed" style={{ borderColor: isDark ? '#2a2a2a' : '#e5e5e5' }}>
+                          <p className={`text-xs uppercase tracking-wide mb-2 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>Pre-installed Fonts</p>
+                          <div className="flex flex-wrap gap-2">
+                            {customFonts.filter(f => f.is_default).map(font => (
+                              <span key={font.id} className={`px-2 py-1 text-xs rounded ${isDark ? 'bg-[#1a1a1a] text-gray-400' : 'bg-gray-100 text-gray-600'}`}>
+                                {font.name} ({font.weights})
+                              </span>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </Card>
                     
