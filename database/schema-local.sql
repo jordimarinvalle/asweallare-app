@@ -331,5 +331,19 @@ ALTER TABLE app_config ADD COLUMN IF NOT EXISTS ios_gray4 TEXT DEFAULT '#D1D1D6'
 ALTER TABLE app_config ADD COLUMN IF NOT EXISTS ios_gray5 TEXT DEFAULT '#E5E5EA';
 ALTER TABLE app_config ADD COLUMN IF NOT EXISTS ios_gray6 TEXT DEFAULT '#F2F2F7';
 
+-- Font Configuration
+-- Primary Font (Manrope) - Used for navigation, buttons, headlines, body text, forms, UI, cards
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_primary TEXT DEFAULT 'Manrope';
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_primary_weights TEXT DEFAULT '400,500,600,700';
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_primary_line_height TEXT DEFAULT '1.5';
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_primary_letter_spacing TEXT DEFAULT '-0.02em';
+
+-- Secondary Font (Lora) - Used for explanations, "why" sections, helper text, quotes, philosophical text
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_secondary TEXT DEFAULT 'Lora';
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_secondary_weights TEXT DEFAULT '400,500,400italic';
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_secondary_line_height TEXT DEFAULT '1.65';
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_secondary_letter_spacing TEXT DEFAULT '0';
+
 -- Update existing row with default admin email
 UPDATE app_config SET admin_emails = 'jordi.asweallare@gmail.com' WHERE slug = 'asweallare' AND (admin_emails IS NULL OR admin_emails = '');
+
