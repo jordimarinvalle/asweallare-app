@@ -2167,7 +2167,13 @@ function AppContent() {
   
   // Custom fonts state
   const [customFonts, setCustomFonts] = useState([])
-  const [fontUploadForm, setFontUploadForm] = useState({ family: '', weight: 'Regular' })
+  const [fontUploadForm, setFontUploadForm] = useState({ 
+    family: '', 
+    weight: '400', 
+    style: 'normal',
+    description: '',
+    usageHint: ''
+  })
   const [fontUploading, setFontUploading] = useState(false)
   
   // Mockups state
