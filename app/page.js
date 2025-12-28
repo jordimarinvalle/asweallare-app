@@ -3215,16 +3215,16 @@ function AppContent() {
     }
   }
   
-  // Load custom fonts
+  // Load custom fonts from database
   const loadCustomFonts = async () => {
     try {
-      const response = await fetch('/api/admin/fonts')
+      const response = await fetch('/api/admin/fonts?app_id=app_asweallare')
       const data = await response.json()
       if (data.fonts) {
         setCustomFonts(data.fonts)
       }
     } catch (err) {
-      console.error('Failed to load custom fonts:', err)
+      console.error('Failed to load fonts:', err)
     }
   }
   
