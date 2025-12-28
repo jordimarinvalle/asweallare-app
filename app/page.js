@@ -4101,13 +4101,13 @@ function AppContent() {
                     {/* Typography / Fonts */}
                     <Card className="p-6">
                       <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Typography</h3>
-                      <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Configure fonts and typography settings. Manrope is used everywhere (navigation, buttons, headlines, body). Lora is for special sections (explanations, quotes, philosophical text).</p>
+                      <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Select fonts from the library or upload custom fonts. Primary font is used everywhere, Secondary font for special content.</p>
                       
                       <div className="grid md:grid-cols-2 gap-6">
-                        {/* Primary Font - Manrope */}
+                        {/* Primary Font Selection */}
                         <div className={`p-4 rounded-lg ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'}`}>
                           <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xl font-semibold" style={{ fontFamily: 'Manrope' }}>Aa</span>
+                            <span className="text-xl font-semibold" style={{ fontFamily: adminAppConfig.font_primary || 'Manrope' }}>Aa</span>
                             <div>
                               <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Primary Font</p>
                               <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Navigation, Buttons, Headlines, Body</p>
@@ -4116,11 +4116,26 @@ function AppContent() {
                           <div className="space-y-3">
                             <div>
                               <Label className="text-xs mb-1 block">Font Family</Label>
-                              <Input 
+                              <select
                                 value={adminAppConfig.font_primary || 'Manrope'}
-                                onChange={(e) => setAdminAppConfig({...adminAppConfig, font_primary: e.target.value})}
-                                placeholder="Manrope"
-                              />
+                                onChange={(e) => {
+                                  const selectedFont = customFonts.find(f => f.name === e.target.value)
+                                  setAdminAppConfig({
+                                    ...adminAppConfig, 
+                                    font_primary: e.target.value,
+                                    font_primary_id: selectedFont?.id || null,
+                                    font_primary_line_height: selectedFont?.default_line_height || '1.5',
+                                    font_primary_letter_spacing: selectedFont?.default_letter_spacing || '-0.02em'
+                                  })
+                                }}
+                                className={`w-full h-10 px-3 rounded-md border text-sm ${isDark ? 'bg-[#2a2a2a] border-[#3a3a3a] text-gray-200' : 'bg-white border-gray-300'}`}
+                              >
+                                {customFonts.map(font => (
+                                  <option key={font.id} value={font.name}>
+                                    {font.name} {font.is_default ? '(Default)' : font.font_type === 'custom' ? '(Custom)' : ''}
+                                  </option>
+                                ))}
+                              </select>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                               <div>
@@ -4138,6 +4153,85 @@ function AppContent() {
                               <div>
                                 <Label className="text-xs mb-1 block">Letter Spacing</Label>
                                 <Input 
+                                  value={adminAppConfig.font_primary_letter_spacing || '-0.02em'}
+                                  onChange={(e) => setAdminAppConfig({...adminAppConfig, font_primary_letter_spacing: e.target.value})}
+                                  placeholder="-0.02em"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Available Weights</Label>
+                              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                {customFonts.find(f => f.name === adminAppConfig.font_primary)?.weights || '400,500,600,700'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Secondary Font Selection */}
+                        <div className={`p-4 rounded-lg ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'}`}>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xl" style={{ fontFamily: adminAppConfig.font_secondary || 'Lora', fontStyle: 'italic' }}>Aa</span>
+                            <div>
+                              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Secondary Font</p>
+                              <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Explanations, Quotes, Helper Text</p>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <div>
+                              <Label className="text-xs mb-1 block">Font Family</Label>
+                              <select
+                                value={adminAppConfig.font_secondary || 'Lora'}
+                                onChange={(e) => {
+                                  const selectedFont = customFonts.find(f => f.name === e.target.value)
+                                  setAdminAppConfig({
+                                    ...adminAppConfig, 
+                                    font_secondary: e.target.value,
+                                    font_secondary_id: selectedFont?.id || null,
+                                    font_secondary_line_height: selectedFont?.default_line_height || '1.65',
+                                    font_secondary_letter_spacing: selectedFont?.default_letter_spacing || '0'
+                                  })
+                                }}
+                                className={`w-full h-10 px-3 rounded-md border text-sm ${isDark ? 'bg-[#2a2a2a] border-[#3a3a3a] text-gray-200' : 'bg-white border-gray-300'}`}
+                              >
+                                {customFonts.map(font => (
+                                  <option key={font.id} value={font.name}>
+                                    {font.name} {font.is_default ? '(Default)' : font.font_type === 'custom' ? '(Custom)' : ''}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <Label className="text-xs mb-1 block">Line Height</Label>
+                                <Input 
+                                  type="number"
+                                  step="0.05"
+                                  min="1"
+                                  max="2.5"
+                                  value={adminAppConfig.font_secondary_line_height || '1.65'}
+                                  onChange={(e) => setAdminAppConfig({...adminAppConfig, font_secondary_line_height: e.target.value})}
+                                  placeholder="1.65"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs mb-1 block">Letter Spacing</Label>
+                                <Input 
+                                  value={adminAppConfig.font_secondary_letter_spacing || '0'}
+                                  onChange={(e) => setAdminAppConfig({...adminAppConfig, font_secondary_letter_spacing: e.target.value})}
+                                  placeholder="0"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Available Styles</Label>
+                              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                {customFonts.find(f => f.name === adminAppConfig.font_secondary)?.styles || 'normal,italic'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div> 
                                   value={adminAppConfig.font_primary_letter_spacing || '-0.02em'}
                                   onChange={(e) => setAdminAppConfig({...adminAppConfig, font_primary_letter_spacing: e.target.value})}
                                   placeholder="-0.02em"
