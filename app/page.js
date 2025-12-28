@@ -3242,8 +3242,12 @@ function AppContent() {
     try {
       const formData = new FormData()
       formData.append('font', file)
-      formData.append('family', fontUploadForm.family)
+      formData.append('name', fontUploadForm.family)
       formData.append('weight', fontUploadForm.weight)
+      formData.append('style', fontUploadForm.style || 'normal')
+      formData.append('app_id', 'app_asweallare')
+      formData.append('description', fontUploadForm.description || '')
+      formData.append('usage_hint', fontUploadForm.usageHint || '')
       
       const response = await fetch('/api/admin/fonts', {
         method: 'POST',
@@ -3254,8 +3258,8 @@ function AppContent() {
       if (data.error) {
         toast({ title: 'Upload failed', description: data.error, variant: 'destructive' })
       } else {
-        toast({ title: 'Font uploaded', description: `${data.font.family} ${data.font.weight}` })
-        setFontUploadForm({ family: '', weight: 'Regular' })
+        toast({ title: 'Font uploaded', description: `${data.font?.name || fontUploadForm.family} - ${data.file?.weight}` })
+        setFontUploadForm({ family: '', weight: '400', style: 'normal', description: '', usageHint: '' })
         loadCustomFonts()
         // Reset file input
         e.target.value = ''
