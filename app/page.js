@@ -3128,7 +3128,8 @@ function AppContent() {
       loadAdminSeries(),
       loadAdminPrices(),
       loadAdminPiles(),
-      loadAdminBundles()
+      loadAdminBundles(),
+      loadCustomFonts()
     ])
   }
   
