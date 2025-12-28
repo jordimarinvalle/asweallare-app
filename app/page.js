@@ -4206,6 +4206,95 @@ function AppContent() {
                           </div>
                         </div>
                       </div>
+                      
+                      {/* Custom Font Upload */}
+                      <div className={`mt-6 p-4 rounded-lg border ${isDark ? 'border-[#2a2a2a] bg-[#0a0a0a]' : 'border-gray-200 bg-white'}`}>
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Upload Custom Fonts</p>
+                            <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Upload TTF, WOFF, or WOFF2 files</p>
+                          </div>
+                        </div>
+                        
+                        {/* Upload Form */}
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          <Input 
+                            value={fontUploadForm.family}
+                            onChange={(e) => setFontUploadForm({...fontUploadForm, family: e.target.value})}
+                            placeholder="Font Family (e.g., Roboto)"
+                            className="flex-1 min-w-[150px]"
+                          />
+                          <select
+                            value={fontUploadForm.weight}
+                            onChange={(e) => setFontUploadForm({...fontUploadForm, weight: e.target.value})}
+                            className={`h-9 px-3 rounded-md border text-sm ${isDark ? 'bg-[#1a1a1a] border-[#2a2a2a] text-gray-200' : 'bg-white border-gray-300'}`}
+                          >
+                            <option value="Thin">Thin (100)</option>
+                            <option value="Light">Light (300)</option>
+                            <option value="Regular">Regular (400)</option>
+                            <option value="Medium">Medium (500)</option>
+                            <option value="SemiBold">SemiBold (600)</option>
+                            <option value="Bold">Bold (700)</option>
+                            <option value="ExtraBold">ExtraBold (800)</option>
+                            <option value="Black">Black (900)</option>
+                            <option value="Italic">Italic</option>
+                            <option value="BoldItalic">Bold Italic</option>
+                          </select>
+                          <label className={`h-9 px-4 flex items-center gap-2 rounded-md cursor-pointer text-sm font-medium transition-colors ${
+                            fontUploadForm.family 
+                              ? 'bg-[var(--ios-blue)] text-white hover:opacity-90' 
+                              : `${isDark ? 'bg-[#2a2a2a] text-gray-500' : 'bg-gray-100 text-gray-400'} cursor-not-allowed`
+                          }`}>
+                            <Upload className="w-4 h-4" />
+                            {fontUploading ? 'Uploading...' : 'Choose File'}
+                            <input 
+                              type="file" 
+                              accept=".ttf,.woff,.woff2,.otf"
+                              onChange={handleFontUpload}
+                              disabled={!fontUploadForm.family || fontUploading}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+                        
+                        {/* Uploaded Fonts List */}
+                        {customFonts.length > 0 && (
+                          <div className="space-y-3">
+                            <p className={`text-xs uppercase tracking-wide ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Uploaded Fonts</p>
+                            {customFonts.map((fontFamily) => (
+                              <div key={fontFamily.name} className={`p-3 rounded-lg ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'}`}>
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: fontFamily.name }}>{fontFamily.name}</span>
+                                  <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{fontFamily.files.length} file(s)</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  {fontFamily.files.map((file) => (
+                                    <div key={file.filename} className={`flex items-center gap-2 px-2 py-1 rounded text-xs ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-200'}`}>
+                                      <span className={isDark ? 'text-gray-300' : 'text-gray-600'}>{file.weight}</span>
+                                      <span className={isDark ? 'text-gray-500' : 'text-gray-400'}>({file.format})</span>
+                                      <button 
+                                        onClick={() => handleDeleteFont(file.filename)}
+                                        className="text-red-500 hover:text-red-600"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                                <p className={`mt-2 text-xs ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                                  Use in config: <code className={`px-1 py-0.5 rounded ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-200'}`}>{fontFamily.name}</code>
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {customFonts.length === 0 && (
+                          <p className={`text-sm text-center py-4 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                            No custom fonts uploaded yet. Upload a font file to use it in your app.
+                          </p>
+                        )}
+                      </div>
                     </Card>
                     
                     {/* Social Links */}
