@@ -3277,12 +3277,17 @@ function AppContent() {
     }
   }
   
-  // Delete font file
-  const handleDeleteFont = async (filename) => {
-    if (!confirm(`Delete font file "${filename}"?`)) return
+  // Delete font
+  const handleDeleteFont = async (fontId, fontType) => {
+    if (fontType === 'system') {
+      toast({ title: 'Cannot delete system fonts', variant: 'destructive' })
+      return
+    }
+    
+    if (!confirm(`Delete this font? This will remove all associated files.`)) return
     
     try {
-      const response = await fetch(`/api/admin/fonts?filename=${encodeURIComponent(filename)}`, {
+      const response = await fetch(`/api/admin/fonts?id=${encodeURIComponent(fontId)}`, {
         method: 'DELETE'
       })
       const data = await response.json()
