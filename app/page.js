@@ -4005,6 +4005,131 @@ function AppContent() {
                       </div>
                     </Card>
                     
+                    {/* Typography / Fonts */}
+                    <Card className="p-6">
+                      <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Typography</h3>
+                      <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Configure fonts and typography settings. Manrope is used everywhere (navigation, buttons, headlines, body). Lora is for special sections (explanations, quotes, philosophical text).</p>
+                      
+                      <div className="grid md:grid-cols-2 gap-6">
+                        {/* Primary Font - Manrope */}
+                        <div className={`p-4 rounded-lg ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'}`}>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xl font-semibold" style={{ fontFamily: 'Manrope' }}>Aa</span>
+                            <div>
+                              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Primary Font</p>
+                              <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Navigation, Buttons, Headlines, Body</p>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <div>
+                              <Label className="text-xs mb-1 block">Font Family</Label>
+                              <Input 
+                                value={adminAppConfig.font_primary || 'Manrope'}
+                                onChange={(e) => setAdminAppConfig({...adminAppConfig, font_primary: e.target.value})}
+                                placeholder="Manrope"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <Label className="text-xs mb-1 block">Line Height</Label>
+                                <Input 
+                                  type="number"
+                                  step="0.05"
+                                  min="1"
+                                  max="2.5"
+                                  value={adminAppConfig.font_primary_line_height || '1.5'}
+                                  onChange={(e) => setAdminAppConfig({...adminAppConfig, font_primary_line_height: e.target.value})}
+                                  placeholder="1.5"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs mb-1 block">Letter Spacing</Label>
+                                <Input 
+                                  value={adminAppConfig.font_primary_letter_spacing || '-0.02em'}
+                                  onChange={(e) => setAdminAppConfig({...adminAppConfig, font_primary_letter_spacing: e.target.value})}
+                                  placeholder="-0.02em"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Weights (comma-separated)</Label>
+                              <Input 
+                                value={adminAppConfig.font_primary_weights || '400,500,600,700'}
+                                onChange={(e) => setAdminAppConfig({...adminAppConfig, font_primary_weights: e.target.value})}
+                                placeholder="400,500,600,700"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Secondary Font - Lora */}
+                        <div className={`p-4 rounded-lg ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'}`}>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-xl" style={{ fontFamily: 'Lora', fontStyle: 'italic' }}>Aa</span>
+                            <div>
+                              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Secondary Font</p>
+                              <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Explanations, Quotes, Helper Text</p>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <div>
+                              <Label className="text-xs mb-1 block">Font Family</Label>
+                              <Input 
+                                value={adminAppConfig.font_secondary || 'Lora'}
+                                onChange={(e) => setAdminAppConfig({...adminAppConfig, font_secondary: e.target.value})}
+                                placeholder="Lora"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <Label className="text-xs mb-1 block">Line Height</Label>
+                                <Input 
+                                  type="number"
+                                  step="0.05"
+                                  min="1"
+                                  max="2.5"
+                                  value={adminAppConfig.font_secondary_line_height || '1.65'}
+                                  onChange={(e) => setAdminAppConfig({...adminAppConfig, font_secondary_line_height: e.target.value})}
+                                  placeholder="1.65"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs mb-1 block">Letter Spacing</Label>
+                                <Input 
+                                  value={adminAppConfig.font_secondary_letter_spacing || '0'}
+                                  onChange={(e) => setAdminAppConfig({...adminAppConfig, font_secondary_letter_spacing: e.target.value})}
+                                  placeholder="0"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs mb-1 block">Weights (comma-separated)</Label>
+                              <Input 
+                                value={adminAppConfig.font_secondary_weights || '400,500,400italic'}
+                                onChange={(e) => setAdminAppConfig({...adminAppConfig, font_secondary_weights: e.target.value})}
+                                placeholder="400,500,400italic"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Font Preview */}
+                      <div className={`mt-4 p-4 rounded-lg border ${isDark ? 'border-[#2a2a2a] bg-[#0a0a0a]' : 'border-gray-200 bg-white'}`}>
+                        <p className={`text-xs uppercase tracking-wide mb-3 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Preview</p>
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className={`text-xl font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: 'Manrope' }}>Manrope Headline (Bold 700)</h4>
+                            <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`} style={{ fontFamily: 'Manrope', fontWeight: 400, lineHeight: 1.5, letterSpacing: '-0.02em' }}>Body text in Manrope Regular (400) with -0.02em letter spacing. Used for navigation, buttons, all UI elements, and general content.</p>
+                          </div>
+                          <div className={`p-4 rounded-lg ${isDark ? 'bg-[#1a1a1a]' : 'bg-gray-50'}`} style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                            <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`} style={{ fontFamily: 'Lora', fontWeight: 400, lineHeight: 1.65, letterSpacing: 0 }}>Explanatory text in Lora Regular. This font is reserved for "why" sections, philosophical framing, and helper text where the tone shifts to something more reflective.</p>
+                            <p className={`mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`} style={{ fontFamily: 'Lora', fontStyle: 'italic', lineHeight: 1.7 }}>"Lora Italic for quotes and emphasis, creating a sense of reflection and emotional depth."</p>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                    
                     {/* Social Links */}
                     <Card className="p-6">
                       <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Social Links</h3>
