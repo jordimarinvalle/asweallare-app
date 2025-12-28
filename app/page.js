@@ -2165,6 +2165,11 @@ function AppContent() {
   const [adminAppConfigLoading, setAdminAppConfigLoading] = useState(false)
   const [adminAppSocialForm, setAdminAppSocialForm] = useState({ platform: 'Instagram', url: '' })
   
+  // Custom fonts state
+  const [customFonts, setCustomFonts] = useState([])
+  const [fontUploadForm, setFontUploadForm] = useState({ family: '', weight: 'Regular' })
+  const [fontUploading, setFontUploading] = useState(false)
+  
   // Mockups state
   const [mockupsSeriesFilter, setMockupsSeriesFilter] = useState('')
   const [mockupsBoxId, setMockupsBoxId] = useState('')
