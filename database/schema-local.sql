@@ -344,6 +344,105 @@ ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_secondary_weights TEXT DEFA
 ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_secondary_line_height TEXT DEFAULT '1.65';
 ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_secondary_letter_spacing TEXT DEFAULT '0';
 
+-- Foreign key references to app_fonts (added after app_fonts table exists)
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_primary_id TEXT;
+ALTER TABLE app_config ADD COLUMN IF NOT EXISTS font_secondary_id TEXT;
+
 -- Update existing row with default admin email
 UPDATE app_config SET admin_emails = 'jordi.asweallare@gmail.com' WHERE slug = 'asweallare' AND (admin_emails IS NULL OR admin_emails = '');
+
+-- ============================================================================
+-- APP_FONTS TABLE - Custom and pre-installed fonts
+-- ============================================================================
+DROP TABLE IF EXISTS app_fonts CASCADE;
+
+CREATE TABLE app_fonts (
+  id TEXT PRIMARY KEY,
+  app_id TEXT REFERENCES app_config(id) ON DELETE CASCADE,
+  
+  -- Font identification
+  name TEXT NOT NULL,                    -- Font family name (e.g., "Manrope", "Lora")
+  slug TEXT NOT NULL,                    -- URL-safe identifier (e.g., "manrope", "lora")
+  
+  -- Font type
+  font_type TEXT DEFAULT 'custom',       -- 'system' (pre-installed), 'custom' (uploaded), 'google' (Google Fonts URL)
+  
+  -- Font files (for uploaded/local fonts)
+  file_path TEXT,                        -- Path to font file (e.g., "/fonts/manrope/")
+  file_format TEXT,                      -- File format: 'ttf', 'woff', 'woff2', 'otf', 'variable'
+  
+  -- Google Fonts (if using Google Fonts CDN)
+  google_fonts_url TEXT,                 -- Google Fonts import URL
+  
+  -- Font metadata
+  weights TEXT DEFAULT '400',            -- Comma-separated weights: "400,500,600,700"
+  styles TEXT DEFAULT 'normal',          -- Comma-separated styles: "normal,italic"
+  is_variable BOOLEAN DEFAULT false,     -- Is this a variable font?
+  
+  -- Default typography settings for this font
+  default_line_height TEXT DEFAULT '1.5',
+  default_letter_spacing TEXT DEFAULT '0',
+  
+  -- Usage hints
+  description TEXT,                      -- Description of the font
+  usage_hint TEXT,                       -- e.g., "headlines", "body", "quotes"
+  
+  -- Display and status
+  display_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  is_default BOOLEAN DEFAULT false,      -- Pre-installed default font
+  
+  -- Timestamps
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Unique constraint per app
+  UNIQUE(app_id, slug)
+);
+
+-- Insert pre-installed fonts
+INSERT INTO app_fonts (id, app_id, name, slug, font_type, file_path, file_format, weights, styles, is_variable, default_line_height, default_letter_spacing, description, usage_hint, display_order, is_default) VALUES
+-- Manrope - Primary font
+('font_manrope', 'app_asweallare', 'Manrope', 'manrope', 'system', '/fonts/manrope/', 'variable', '400,500,600,700', 'normal', true, '1.5', '-0.02em', 
+ 'A modern geometric sans-serif with excellent readability', 'Navigation, Buttons, Headlines, Body, Forms, UI', 1, true),
+
+-- Lora - Secondary font  
+('font_lora', 'app_asweallare', 'Lora', 'lora', 'system', '/fonts/lora/', 'variable', '400,500', 'normal,italic', true, '1.65', '0',
+ 'An elegant serif font for thoughtful, reflective content', 'Explanations, Quotes, Why sections, Helper text', 2, true);
+
+-- Update app_config with font references
+UPDATE app_config SET 
+  font_primary_id = 'font_manrope',
+  font_secondary_id = 'font_lora'
+WHERE slug = 'asweallare';
+
+-- Add foreign key constraints (after data is inserted)
+-- Note: These may fail if the fonts don't exist yet, so we use a DO block
+DO $$
+BEGIN
+  -- Try to add foreign key for font_primary_id
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints 
+    WHERE constraint_name = 'app_config_font_primary_id_fkey'
+  ) THEN
+    ALTER TABLE app_config 
+    ADD CONSTRAINT app_config_font_primary_id_fkey 
+    FOREIGN KEY (font_primary_id) REFERENCES app_fonts(id) ON DELETE SET NULL;
+  END IF;
+  
+  -- Try to add foreign key for font_secondary_id
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints 
+    WHERE constraint_name = 'app_config_font_secondary_id_fkey'
+  ) THEN
+    ALTER TABLE app_config 
+    ADD CONSTRAINT app_config_font_secondary_id_fkey 
+    FOREIGN KEY (font_secondary_id) REFERENCES app_fonts(id) ON DELETE SET NULL;
+  END IF;
+EXCEPTION
+  WHEN others THEN
+    -- Ignore errors (constraints may already exist)
+    NULL;
+END $$;
+
 
