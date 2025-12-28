@@ -3214,6 +3214,78 @@ function AppContent() {
     }
   }
   
+  // Load custom fonts
+  const loadCustomFonts = async () => {
+    try {
+      const response = await fetch('/api/admin/fonts')
+      const data = await response.json()
+      if (data.fonts) {
+        setCustomFonts(data.fonts)
+      }
+    } catch (err) {
+      console.error('Failed to load custom fonts:', err)
+    }
+  }
+  
+  // Upload font file
+  const handleFontUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    if (!fontUploadForm.family) {
+      toast({ title: 'Font family name required', variant: 'destructive' })
+      return
+    }
+    
+    setFontUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('font', file)
+      formData.append('family', fontUploadForm.family)
+      formData.append('weight', fontUploadForm.weight)
+      
+      const response = await fetch('/api/admin/fonts', {
+        method: 'POST',
+        body: formData
+      })
+      
+      const data = await response.json()
+      if (data.error) {
+        toast({ title: 'Upload failed', description: data.error, variant: 'destructive' })
+      } else {
+        toast({ title: 'Font uploaded', description: `${data.font.family} ${data.font.weight}` })
+        setFontUploadForm({ family: '', weight: 'Regular' })
+        loadCustomFonts()
+        // Reset file input
+        e.target.value = ''
+      }
+    } catch (err) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' })
+    } finally {
+      setFontUploading(false)
+    }
+  }
+  
+  // Delete font file
+  const handleDeleteFont = async (filename) => {
+    if (!confirm(`Delete font file "${filename}"?`)) return
+    
+    try {
+      const response = await fetch(`/api/admin/fonts?filename=${encodeURIComponent(filename)}`, {
+        method: 'DELETE'
+      })
+      const data = await response.json()
+      if (data.error) {
+        toast({ title: 'Delete failed', description: data.error, variant: 'destructive' })
+      } else {
+        toast({ title: 'Font deleted' })
+        loadCustomFonts()
+      }
+    } catch (err) {
+      toast({ title: 'Delete failed', description: err.message, variant: 'destructive' })
+    }
+  }
+  
   // Update mockup display_order
   const handleUpdateMockupOrder = async (mockupId, newOrder) => {
     try {
