@@ -1,0 +1,923 @@
+# ==============================================================================
+# AS WE ALL ARE - Product & Technical Handover Document
+# Version: 1.0.0
+# Generated: 2024
+# Purpose: Complete context for rebuilding mobile app (Ionic/React Native/Flutter)
+# ==============================================================================
+
+project_overview:
+  name: "AS WE ALL ARE"
+  tagline: "Unscripted Conversations"
+  philosophy: |
+    A therapeutic conversational card game designed to create authentic 
+    human connection through thoughtful prompts. The app facilitates meaningful 
+    conversations without the awkwardness of asking direct personal questions.
+    Cards present prompts that invite reflection and sharing.
+  
+  problem_solved: |
+    In a world of constant distraction and superficial interactions, people 
+    struggle to have meaningful conversations. This app provides a structured 
+    yet natural way to:
+    - Build deeper connections with friends, family, or partners
+    - Practice vulnerability in a safe context
+    - Discover new perspectives about people you think you know
+    - Create memorable shared experiences
+  
+  what_it_is_not:
+    - NOT a dating app or matchmaking service
+    - NOT a party game focused on entertainment or humor
+    - NOT a competitive game with winners or losers
+    - NOT a therapy replacement (though therapeutically inspired)
+    - NOT social media or content sharing platform
+    - NOT multiplayer online (it's in-person, face-to-face)
+
+architecture_overview:
+  system_design:
+    admin_web_app:
+      technology: "Next.js 14 (React)"
+      purpose: "Content management, pricing, user administration"
+      location: "Existing codebase - DO NOT REBUILD"
+      database: "PostgreSQL (Supabase in production, local PG in dev)"
+      responsibilities:
+        - Manage collection series and boxes
+        - Upload and organize card content
+        - Configure pricing and bundles
+        - Manage mockup images for store display
+        - Configure app settings (colors, fonts, content)
+        - View user purchases and memberships
+    
+    mobile_app:
+      status: "TO BE REBUILT"
+      recommended_tech:
+        - "Ionic (Angular/React/Vue)"
+        - "React Native"
+        - "Flutter"
+      purpose: "Consumer-facing game experience"
+      responsibilities:
+        - Card game experience (the core product)
+        - Deck selection and purchase flow
+        - User authentication
+        - Store/purchase interface
+        - Profile and membership management
+  
+  why_admin_stays_app_rebuilt:
+    reasons:
+      - Admin is web-only, works well as responsive Next.js app
+      - Mobile app needs native-like performance for card animations
+      - Mobile app needs offline capability for card content
+      - Mobile app needs proper iOS/Android store deployment
+      - Separation allows independent iteration cycles
+      - Admin is content management, App is experience delivery
+  
+  data_flow:
+    direction: "Admin → Database → Mobile App"
+    sync_strategy: |
+      1. Admin creates/updates content in database
+      2. Mobile app fetches content via REST API
+      3. Card images are bundled with app (not fetched per-session)
+      4. User purchases/memberships sync via API
+      5. Offline mode: cards work without network, purchases need network
+
+collection_series:
+  purpose: |
+    Collection Series are thematic groupings of card boxes. They allow the app 
+    to host multiple distinct card game products under one umbrella. Each series 
+    has its own branding, card styles, and target audience while sharing the 
+    same underlying game mechanics.
+  
+  how_multiple_series_coexist:
+    - Each series has unique visual identity (card backs, colors)
+    - User can own boxes from multiple series
+    - Store displays series as separate sections
+    - Game play is per-box (not cross-series mixing)
+    - Future: different game modes per series possible
+  
+  examples:
+    - series_id: "unscripted_conversations"
+      name: "Unscripted Conversations"
+      description: "Deep, meaningful conversation starters"
+      audience: "Adults seeking authentic connection"
+      card_style: "White cards with black text, Black cards with white text"
+    
+    - series_id: "uncomfortable_questions"
+      name: "Uncomfortable Questions"
+      description: "Thought-provoking prompts that push boundaries"
+      audience: "Adventurous conversationalists"
+      card_style: "Different visual style (TBD)"
+  
+  implementation_notes:
+    - All boxes belong to exactly one collection_series
+    - Piles (white/black) are per-series
+    - Cards reference both box_id and pile_id
+    - UI should filter/group by series in deck selection
+
+core_entities:
+  collection_series:
+    description: "Top-level grouping of card boxes by theme/brand"
+    fields:
+      id: "TEXT PRIMARY KEY - e.g., 'series_unscripted'"
+      name: "TEXT NOT NULL - Display name"
+      description: "TEXT - Marketing description"
+      display_order: "INTEGER - Sort order in UI"
+      is_active: "BOOLEAN - Show/hide in app"
+    relationships:
+      - "Has many Boxes"
+      - "Has many Piles"
+  
+  boxes:
+    description: |
+      A box is a purchasable deck of cards. Think of it as a physical card box 
+      you'd buy in a store. Boxes can be 'sample' (free preview) or 'full' 
+      (paid product). Sample boxes link to their full versions.
+    fields:
+      id: "TEXT PRIMARY KEY - e.g., 'box_white_108'"
+      name: "TEXT NOT NULL - Display name (e.g., 'White Box 108')"
+      description: "TEXT - Long marketing description"
+      description_short: "TEXT - One-line description"
+      tagline: "TEXT - Catchy phrase"
+      topics: "TEXT[] - Array of topic tags"
+      price_id: "TEXT FK - Links to prices table"
+      color: "TEXT - Primary color hex"
+      color_palette: "TEXT[] - Array of brand colors"
+      path: "TEXT - URL-safe identifier"
+      display_order: "INTEGER - Sort order"
+      is_sample: "BOOLEAN - Is this a free sample box?"
+      full_box_id: "TEXT FK - For samples, points to full version"
+      is_active: "BOOLEAN - Show/hide in app"
+      collection_series_id: "TEXT FK - Parent series"
+    
+    is_sample_explained:
+      definition: |
+        is_sample=true means this box is a FREE PREVIEW, not a demo.
+        It contains real cards (usually 10-15) that users can play 
+        without purchasing. It's a taste of the full experience.
+      purpose:
+        - Let users experience the game before buying
+        - Reduce friction to first play
+        - Marketing/conversion tool
+      behavior:
+        - Sample boxes appear in deck selection even without purchase
+        - Sample boxes show "Sample" badge
+        - After playing sample, prompt to buy full version
+        - Sample cards are a SUBSET of the full box cards
+      link_to_full:
+        - full_box_id points to the paid full version
+        - Used to show "Get Full Version" prompt
+        - Used to hide sample when full is owned
+  
+  piles:
+    description: |
+      Piles represent the two card stacks in the game: typically 'white' and 
+      'black'. Each pile has its own card back image. During gameplay, players 
+      draw alternately from each pile.
+    fields:
+      id: "TEXT PRIMARY KEY"
+      slug: "TEXT UNIQUE - e.g., 'white', 'black'"
+      name: "TEXT - Display name"
+      image_path: "TEXT - Path to card back image"
+      collection_series_id: "TEXT FK"
+      display_order: "INTEGER"
+      is_active: "BOOLEAN"
+    game_mechanics:
+      - Two piles per game session
+      - Players draw one card from each pile per turn
+      - White card = one type of prompt
+      - Black card = different type of prompt
+      - Pile determines card back visual
+  
+  cards:
+    description: |
+      Individual card content. Each card belongs to one box and one pile. 
+      Cards have text (the prompt) and an image (the card face).
+    fields:
+      id: "TEXT PRIMARY KEY"
+      box_id: "TEXT FK NOT NULL - Parent box"
+      pile_id: "TEXT FK NOT NULL - Which pile (white/black)"
+      text: "TEXT - The card prompt text"
+      image_path: "TEXT NOT NULL - Path to card face image"
+      is_active: "BOOLEAN"
+    content_notes:
+      - Text is the readable prompt shown when card flips
+      - Image is the full card face (may include decorative elements)
+      - Cards are pre-rendered images, not dynamic text on templates
+  
+  prices:
+    description: |
+      Pricing configurations for boxes and bundles. Supports one-time purchases 
+      and time-limited memberships with optional promotional pricing.
+    fields:
+      id: "TEXT PRIMARY KEY"
+      label: "TEXT - Display name (e.g., '30-Day Access')"
+      payment_info: "TEXT - What user gets"
+      hook_info: "TEXT - Marketing hook"
+      amount: "DECIMAL - Price in base currency"
+      promo_amount: "DECIMAL - Discounted price (optional)"
+      promo_enabled: "BOOLEAN - Is promo active?"
+      currency: "TEXT - e.g., 'USD'"
+      membership_days: "INTEGER - Days of access (null = permanent)"
+      stripe_price_id: "TEXT - Stripe integration"
+      display_order: "INTEGER"
+      is_active: "BOOLEAN"
+    pricing_models:
+      one_time: "membership_days = null, user owns forever"
+      membership: "membership_days > 0, access expires after N days"
+  
+  bundles:
+    description: |
+      A bundle groups multiple boxes into a single purchasable package, 
+      typically at a discount. Used for 'All Access' or 'Complete Collection' 
+      offers.
+    fields:
+      id: "TEXT PRIMARY KEY"
+      name: "TEXT - Bundle name"
+      description: "TEXT"
+      price_id: "TEXT FK - Bundle price"
+      box_ids: "TEXT[] - Array of included box IDs"
+      display_order: "INTEGER"
+      is_active: "BOOLEAN"
+    behavior:
+      - Purchasing bundle grants access to all listed boxes
+      - Bundle pricing often cheaper than individual boxes
+      - Can be time-limited via price.membership_days
+  
+  user_products:
+    description: "Records of individual box purchases per user"
+    fields:
+      id: "UUID PRIMARY KEY"
+      user_id: "UUID FK - The purchaser"
+      box_id: "TEXT FK - Purchased box"
+      purchase_type: "TEXT - 'one_time' or 'subscription'"
+      stripe_subscription_id: "TEXT"
+      stripe_payment_id: "TEXT"
+      is_active: "BOOLEAN"
+      expires_at: "TIMESTAMP - For memberships"
+    access_logic:
+      - If expires_at is null, access is permanent
+      - If expires_at is in future, access is granted
+      - If expires_at is in past, access is revoked
+  
+  user_memberships:
+    description: "Records of bundle/membership purchases"
+    fields:
+      id: "UUID PRIMARY KEY"
+      user_id: "UUID FK"
+      bundle_id: "TEXT FK"
+      price_id: "TEXT FK"
+      starts_at: "TIMESTAMP"
+      expires_at: "TIMESTAMP NOT NULL"
+      stripe_payment_id: "TEXT"
+      is_active: "BOOLEAN"
+    expiration_logic:
+      - Membership grants access to all bundle boxes
+      - Access valid from starts_at to expires_at
+      - After expiration, user loses access unless renewed
+      - Renewal creates new membership record
+
+database_schema:
+  tables:
+    - collection_series
+    - boxes
+    - piles
+    - cards
+    - prices
+    - bundles
+    - user_products
+    - user_memberships
+    - local_users
+    - app_config
+    - app_socials
+    - app_fonts
+    - mockup_images
+    - subscription_plans
+  
+  key_relationships:
+    boxes_to_series: "boxes.collection_series_id → collection_series.id"
+    cards_to_boxes: "cards.box_id → boxes.id"
+    cards_to_piles: "cards.pile_id → piles.id"
+    piles_to_series: "piles.collection_series_id → collection_series.id"
+    boxes_to_prices: "boxes.price_id → prices.id"
+    bundles_to_prices: "bundles.price_id → prices.id"
+    sample_to_full: "boxes.full_box_id → boxes.id (self-reference)"
+    purchases_to_users: "user_products.user_id → local_users.id"
+    purchases_to_boxes: "user_products.box_id → boxes.id"
+    memberships_to_bundles: "user_memberships.bundle_id → bundles.id"
+    mockups_to_boxes: "mockup_images.box_id → boxes.id"
+    fonts_to_app: "app_fonts.app_id → app_config.id"
+    socials_to_app: "app_socials.app_id → app_config.id"
+  
+  design_rationale:
+    text_ids_not_uuids: |
+      Using TEXT IDs (e.g., 'box_white_108') instead of UUIDs for content 
+      tables allows human-readable references and easier debugging. UUIDs 
+      are used for user-generated records (purchases, memberships).
+    
+    denormalized_arrays: |
+      Arrays (topics, color_palette, box_ids in bundles) are stored as 
+      PostgreSQL arrays for simplicity. Could be normalized to join tables 
+      if needed, but current scale doesn't require it.
+    
+    soft_deletes: |
+      is_active flags instead of hard deletes preserve historical data 
+      and allow easy recovery. Filtering by is_active=true in queries.
+    
+    timestamps: |
+      created_at/updated_at on all tables for audit trail and cache 
+      invalidation strategies.
+  
+  scalability_considerations:
+    - Indexes on foreign keys and commonly filtered columns
+    - Separate tables for mockups vs cards (different lifecycle)
+    - App config as separate table (one row, cached heavily)
+    - User tables use UUID for sharding potential
+
+static_assets_and_images:
+  philosophy: |
+    Card images are LOCAL to the app bundle, not fetched from server during 
+    gameplay. This ensures:
+    - Instant card flips without network latency
+    - Offline gameplay capability
+    - Consistent experience regardless of connection quality
+    - Reduced server costs (no CDN for every card view)
+  
+  directory_structure:
+    app_bundle:
+      public/cards/: "Card face images organized by box"
+      public/booklet/: "Experience guide pages (21 images)"
+      public/booklet-30secs/: "Quick guide pages (4 images)"
+      public/fonts/: "Custom font files (Manrope, Lora)"
+      public/fonts/custom/: "User-uploaded fonts"
+    
+    admin_uploads:
+      public/mockups/: "Store display images (hero, secondary, card previews)"
+      public/uploads/: "Bulk uploaded card ZIPs"
+  
+  image_naming_convention:
+    card_images:
+      format: "{md5_hash}.{extension}"
+      example: "a3f2b4c5d6e7f8g9h0i1j2k3.png"
+      reason: |
+        MD5 hash of content ensures:
+        - Duplicate detection (same hash = same image)
+        - Cache-friendly (hash changes if content changes)
+        - No naming conflicts across boxes
+    
+    mockup_images:
+      format: "Stored with original filename in database"
+      types:
+        BOX_MAIN: "Hero image for deck selection (large, prominent)"
+        BOX_SECONDARY: "Supporting image (used in detail views)"
+        CARD: "Card preview thumbnails for store"
+  
+  replacement_behavior:
+    on_reupload: |
+      If a card image with same content is re-uploaded:
+      - MD5 hash matches existing file
+      - File is NOT duplicated
+      - Database reference updated to point to existing file
+      - Old orphaned files can be garbage collected
+    
+    on_update: |
+      If card content changes (new image):
+      - New MD5 hash generated
+      - New file saved
+      - Old file orphaned (kept for history or GC'd)
+  
+  card_back_images:
+    location: "public/white-card-back.png, public/black-card-back.png"
+    purpose: "Shown before card is flipped"
+    per_pile: "Each pile has its own back image"
+
+experience_guide:
+  purpose: |
+    The Experience Guide is an in-app tutorial/booklet that explains how to 
+    play the game and get the most out of the conversation experience. It's 
+    presented as a series of image slides in a carousel/modal.
+  
+  versions:
+    complete_guide:
+      pages: 21
+      location: "/booklet/Artboard {N}.png"
+      description: "Full explanation with philosophy, tips, examples"
+      estimated_read_time: "5-7 minutes"
+    
+    quick_guide:
+      pages: 4
+      location: "/booklet-30secs/Artboard {N}.png"
+      description: "Essential rules in 30 seconds"
+      estimated_read_time: "30 seconds"
+  
+  modal_behavior:
+    trigger: "User taps 'Experience Guide' or '?' button"
+    display: "Full-screen modal overlay"
+    orientation: "Landscape required (shows rotate prompt if portrait)"
+    navigation:
+      - Swipe left/right for page navigation
+      - Arrow buttons on sides
+      - Page indicator dots at bottom
+      - Keyboard arrows supported (web)
+      - Escape or X to close
+  
+  carousel_implementation:
+    gesture: "Horizontal swipe with 50px minimum distance"
+    animation: "Slide transition between pages"
+    preloading: "All images loaded when modal opens"
+  
+  ux_intent: |
+    The guide is designed to be optional but accessible. First-time users 
+    are encouraged to read it, but experienced players can skip directly 
+    to playing. The two versions accommodate different patience levels.
+
+orientation_handling:
+  game_requires_landscape:
+    reason: |
+      The card game experience requires landscape orientation because:
+      - Two card piles need horizontal space
+      - Cards are designed for horizontal viewing
+      - Better visibility of card text
+      - Matches physical card game experience
+  
+  portrait_blocking:
+    trigger: "Game view detected in portrait orientation"
+    display: |
+      Full-screen overlay showing:
+      - Phone icon with rotation animation
+      - "Please rotate your device" message
+      - Blocks interaction with game until rotated
+    dismissal: "Automatic when device rotates to landscape"
+  
+  flip_phone_animation:
+    description: "Animated phone icon rotating from portrait to landscape"
+    implementation: "CSS keyframe animation, 4-second cycle"
+    purpose: "Clear visual instruction for users"
+  
+  where_enforced:
+    - Game play view (cards visible)
+    - Experience guide/booklet viewer
+    - See more detail modal
+  
+  where_not_enforced:
+    - Home screen
+    - Store/purchase screens
+    - Profile screens
+    - Deck selection
+
+game_experience:
+  overview: |
+    The core game loop involves two players (or one person reflecting) drawing 
+    cards from two piles and sharing responses to the prompts. The experience 
+    is designed to feel intimate, thoughtful, and emotionally safe.
+  
+  two_piles_system:
+    white_pile:
+      visual: "Stack of cards with white card back"
+      content_type: "Typically introspective or personal prompts"
+      position: "Left side of screen"
+    
+    black_pile:
+      visual: "Stack of cards with black card back"
+      content_type: "Typically relational or curious prompts"
+      position: "Right side of screen"
+    
+    gameplay:
+      - Each turn, draw one card from each pile
+      - Cards start face-down (showing backs)
+      - Tap to flip and reveal prompt
+      - Both cards flipped = sharing begins
+  
+  card_stacking_visual:
+    description: |
+      Cards appear as a messy stack (like a real pile of shuffled cards) 
+      with slight random rotations. This creates visual interest and 
+      reinforces the physical card game metaphor.
+    implementation:
+      - Random rotation between -3° and +3° per card
+      - Slight offset for depth illusion
+      - Top card is active/tappable
+      - Stack shrinks as cards are drawn
+  
+  tap_hint:
+    when_shown: "When card pile is ready to draw"
+    visual: "Red pill badge saying 'TAP' on the pile"
+    purpose: "Clear call-to-action for interaction"
+    hides_when: "Card is being drawn or pile is empty"
+  
+  flip_animation:
+    trigger: "Tap on face-down card (or pile to draw)"
+    animation: "3D Y-axis rotation (card flips horizontally)"
+    duration: "~400ms"
+    implementation: "CSS transform with perspective"
+    states:
+      - "Face down (card back visible)"
+      - "Flipping (mid-rotation)"
+      - "Face up (card content visible)"
+  
+  sounds:
+    card_draw: "Subtle paper/card sound when drawing"
+    card_flip: "Flip sound when revealing card"
+    timer_warning: "Soft bell at countdown milestones"
+    timer_end: "Gentle chime when sharing time starts"
+    implementation_note: "Sounds should be optional/mutable"
+  
+  timer_system:
+    purpose: "Adds structure to sharing, prevents overthinking"
+    phases:
+      idle: "No timer visible, waiting for cards"
+      countdown: "Visible countdown (e.g., 30 seconds) after both flipped"
+      waiting: "Countdown finished, ready to start sharing"
+      countup: "Sharing in progress, counting up time"
+      finished: "Sharing complete"
+    
+    countdown_behavior:
+      trigger: "Both cards flipped"
+      display: "Large centered timer"
+      default: "30 seconds"
+      action: "Tap timer to start sharing early"
+    
+    countup_behavior:
+      trigger: "Player taps 'Start Sharing'"
+      display: "Elapsed time counter"
+      purpose: "Awareness of speaking time, fairness"
+    
+    visual_style:
+      countdown: "Red/orange pulsing, urgent"
+      countup: "Calm blue/green, supportive"
+  
+  ux_messages:
+    tap_instruction: "'TAP' badge on pile"
+    flip_both: "Implied by timer not starting until both flipped"
+    start_sharing: "Button appears after countdown"
+    next_player: "Button to reset for next round"
+  
+  emotional_pacing:
+    design_intent: |
+      The game deliberately slows down the pace of conversation:
+      - Countdown creates anticipation (processing time)
+      - Physical tap creates commitment to engagement
+      - Timer prevents rushed responses
+      - Card-by-card reveal builds curiosity
+    
+    no_rush_signals:
+      - Soft colors and animations
+      - Generous touch targets
+      - No score or competition
+      - "Take your time" implicit in design
+
+deck_selection_flow:
+  hierarchy: "Collection Series → Boxes within Series"
+  
+  display_logic:
+    owned_boxes: "Full access, prominent display"
+    sample_boxes: "Shown with 'Sample' badge, playable without purchase"
+    locked_boxes: "Shown with price, tap to purchase"
+  
+  sample_hiding_rules:
+    - If user owns full box, hide corresponding sample
+    - If user doesn't own full box, show sample prominently
+    - Samples never shown as 'locked'
+  
+  combination_rules:
+    - Cards from different boxes can be combined in one session
+    - User selects 1-N boxes before starting game
+    - Cards from selected boxes are shuffled together
+    - Maintains pile separation (white stays white, black stays black)
+  
+  image_usage:
+    hero_image:
+      type: "BOX_MAIN from mockup_images"
+      usage: "Large card in deck selection grid"
+      aspect: "Landscape, prominent"
+    
+    secondary_image:
+      type: "BOX_SECONDARY from mockup_images"
+      usage: "Detail view, 'See More' modal"
+      aspect: "Supporting visuals"
+  
+  see_more_modal:
+    trigger: "Tap on box card or 'See More' button"
+    content:
+      - Hero image (large)
+      - Secondary images (carousel if multiple)
+      - Full description
+      - Topic tags
+      - Price (if not owned)
+      - 'Play' or 'Purchase' CTA
+    behavior: "Booklet-style carousel viewer"
+    orientation: "Landscape enforced"
+
+navigation:
+  architecture: "Bottom navigation only, no top header"
+  
+  bottom_nav:
+    style: "iOS App Store-inspired floating pill"
+    position: "Fixed bottom, centered horizontally"
+    design:
+      shape: "Rounded pill (30px radius)"
+      background: "Frosted glass effect (blur + transparency)"
+      shadow: "Subtle elevation shadow"
+    
+    layout:
+      left_group:
+        position: "Left side of pill"
+        spacing: "Even spacing between icons"
+        icons:
+          - id: "home"
+            icon: "House/Home"
+            route: "Home screen"
+          - id: "play"
+            icon: "Gamepad2 (game controller)"
+            route: "Deck selection / Game"
+          - id: "store"
+            icon: "ShoppingBag"
+            route: "Store / Pricing"
+      
+      right_group:
+        position: "Right side of pill, separated from left"
+        icons:
+          - id: "profile"
+            icon: "User"
+            route: "Profile / Settings"
+    
+    selected_state:
+      indicator: "Subtle rounded bubble behind icon"
+      color: "iOS blue (#007AFF light, #0A84FF dark)"
+      inactive_color: "iOS gray (#8E8E93)"
+      animation: "Scale and opacity transition"
+    
+    icon_style:
+      size: "24px"
+      stroke: "2.0 active, 1.6 inactive"
+      labels: "NONE - icons only"
+  
+  no_top_navigation:
+    reason: |
+      Removing top navigation maximizes content space and creates a cleaner, 
+      more immersive experience. All navigation is via bottom bar. Back 
+      navigation handled by swipe gestures or contextual buttons.
+  
+  safe_area_handling:
+    ios: "Respects safe-area-inset-bottom for home indicator"
+    android: "Respects navigation bar insets"
+
+theming:
+  design_system: "iOS-only look and feel"
+  
+  no_material_design:
+    reason: |
+      The app targets a premium, minimalist aesthetic. iOS design language 
+      was chosen because it:
+      - Feels more premium and refined
+      - Better suits the contemplative nature of the app
+      - Simpler, less visual noise
+      - Target audience expectation
+  
+  color_modes:
+    light:
+      background: "#FFFFFF"
+      background_secondary: "#F2F2F7"
+      text_primary: "#000000"
+      text_secondary: "rgba(60, 60, 67, 0.85)"
+      text_tertiary: "rgba(60, 60, 67, 0.6)"
+      separator: "rgba(60, 60, 67, 0.29)"
+      accent_blue: "#007AFF"
+    
+    dark:
+      background: "#000000"
+      background_secondary: "#1C1C1E"
+      text_primary: "#FFFFFF"
+      text_secondary: "rgba(235, 235, 245, 0.85)"
+      text_tertiary: "rgba(235, 235, 245, 0.6)"
+      separator: "rgba(84, 84, 88, 0.65)"
+      accent_blue: "#0A84FF"
+  
+  brand_accent:
+    color: "#D12128"
+    name: "Brand Red"
+    usage: |
+      Use sparingly for:
+      - Primary CTA buttons (Play, Purchase)
+      - Error states
+      - Important badges
+      DO NOT use for general UI chrome
+  
+  typography:
+    primary_font:
+      family: "Manrope"
+      weights: "400 (body), 500 (emphasis), 600 (subheadings), 700 (headings)"
+      usage: "Everything - navigation, buttons, headlines, body, forms, UI"
+      line_height: "1.5"
+      letter_spacing: "-0.02em"
+    
+    secondary_font:
+      family: "Lora"
+      weights: "400 (regular), 400 italic (quotes), 500 (emphasis)"
+      usage: |
+        INTENTIONAL use only:
+        - Explanatory paragraphs
+        - "Why" sections
+        - Philosophical framing
+        - Block quotes and callouts
+        - Helper text with reflective tone
+      line_height: "1.65 (increased for readability)"
+      letter_spacing: "0"
+    
+    mixing_rules:
+      - NEVER mix Manrope and Lora in same sentence
+      - Give Lora text breathing space (margins)
+      - Keep Lora blocks shorter than Manrope blocks
+      - Lora signals "tone shift" to reflective content
+  
+  spacing_philosophy:
+    principle: "Generous padding, clean hierarchy"
+    guidelines:
+      - Minimum tap targets: 44px
+      - Card padding: 16px standard
+      - Screen margins: 16-20px
+      - Between sections: 24-32px
+  
+  border_radius:
+    buttons: "12px (large), 8px (small)"
+    cards: "12px"
+    inputs: "10px"
+    pills: "9999px (full)"
+
+profile_section:
+  content_when_logged_out:
+    - Welcome message
+    - Sign In button
+    - Appearance toggle (Light/Dark)
+  
+  content_when_logged_in:
+    header:
+      - User avatar (or default icon)
+      - User email
+      - Account creation date
+    
+    settings:
+      appearance:
+        label: "Appearance"
+        type: "Segmented control"
+        options: "Light / Dark"
+        persistence: "localStorage + user preference"
+    
+    purchase_history:
+      display: "List of purchased boxes and bundles"
+      info_per_item:
+        - Product name
+        - Purchase date
+        - Expiration date (if membership)
+        - Status (Active/Expired)
+    
+    membership_state:
+      active_membership:
+        display: "Badge showing 'Member'"
+        info: "Expiration date, included boxes"
+      
+      no_membership:
+        display: "Upsell to bundle"
+        cta: "Get All Access"
+      
+      expired_membership:
+        display: "Expired notice"
+        cta: "Renew Membership"
+    
+    actions:
+      - Sign Out button
+      - (Future: Delete Account, Export Data)
+
+export_and_portability:
+  what_admin_exports:
+    via_api:
+      - Collection Series list
+      - Boxes with all metadata
+      - Piles configuration
+      - Cards (text + image paths)
+      - Prices and bundles
+      - App config (colors, fonts, content)
+      - User purchases (per-user)
+    
+    static_assets:
+      - Card images (bundled with app)
+      - Booklet images
+      - Font files
+  
+  what_mobile_app_consumes:
+    on_install:
+      - Bundled card images
+      - Bundled fonts
+      - Bundled booklet images
+    
+    on_launch:
+      - App config (theme, content)
+      - Box/series catalog
+      - Prices
+    
+    on_login:
+      - User purchases
+      - User memberships
+    
+    on_purchase:
+      - Creates user_product or user_membership record
+  
+  for_another_developer:
+    api_endpoints:
+      catalog: "GET /api/collection-series, /api/boxes, /api/cards"
+      store: "GET /api/prices, /api/bundles"
+      user: "GET /api/user/products, /api/user/memberships"
+      config: "GET /api/app-config"
+      auth: "POST /api/auth/* (login, register, etc.)"
+    
+    required_knowledge:
+      - PostgreSQL or Supabase
+      - REST API consumption
+      - Stripe for payments (existing integration)
+      - JWT for authentication
+    
+    implementation_freedom:
+      - Choose any mobile framework
+      - Implement animations as you see fit
+      - Customize sound design
+      - Adapt UI to platform conventions where sensible
+
+non_goals:
+  explicitly_avoided:
+    - Social features (sharing, friends list)
+    - Online multiplayer (play with strangers)
+    - Gamification (points, achievements, leaderboards)
+    - AI-generated content
+    - User-generated cards
+    - Chat or messaging
+    - Location-based features
+    - Push notification marketing
+    - Ads or ad-supported tier
+    - Heavy analytics or tracking
+    - Complex onboarding flows
+    - Subscription with recurring billing complexity
+  
+  why_avoided: |
+    The product's soul is about authentic human connection in the physical 
+    world. Digital features should support, not replace, that experience. 
+    Keeping the app simple maintains focus and reduces distraction from 
+    the actual conversation.
+
+core_principle:
+  one_sentence: |
+    "Create a digital tool that gets out of the way and lets humans truly 
+    connect through thoughtful conversation."
+  
+  expanded: |
+    Every design decision should be evaluated against: "Does this help 
+    people have better conversations, or does it distract from that goal?"
+    
+    The app is a facilitator, not a destination. Success is measured by 
+    the quality of conversations had, not by time spent in the app.
+
+implementation_notes_for_mobile:
+  priority_order:
+    1: "Card flip animation and game experience"
+    2: "Deck selection and navigation"
+    3: "Purchase flow and ownership"
+    4: "Profile and settings"
+    5: "Offline capability"
+  
+  critical_ux_requirements:
+    - Card flip must feel premium (smooth 60fps animation)
+    - Landscape lock must be bulletproof
+    - Offline play must work for owned decks
+    - Sample flow must seamlessly lead to purchase
+  
+  testing_scenarios:
+    - First-time user with no account
+    - User with only sample access
+    - User with one purchased box
+    - User with bundle/membership
+    - User with expired membership
+    - Offline mode for all above
+    - Orientation changes mid-game
+
+api_authentication:
+  method: "JWT tokens"
+  endpoints:
+    login: "POST /api/auth/local/login"
+    register: "POST /api/auth/local/register"
+    logout: "POST /api/auth/local/logout"
+    me: "GET /api/auth/local/me"
+  
+  token_handling:
+    storage: "Secure storage (Keychain/Keystore)"
+    refresh: "On 401, attempt token refresh"
+    expiration: "Configurable, typically 7-30 days"
+
+payment_integration:
+  provider: "Stripe"
+  flow:
+    1: "User selects product"
+    2: "App creates checkout session via API"
+    3: "User completes payment in Stripe"
+    4: "Webhook confirms payment"
+    5: "Backend creates user_product/membership"
+    6: "App refreshes user purchases"
+  
+  considerations:
+    - Handle payment failures gracefully
+    - Show clear receipts
+    - Support restore purchases (App Store/Play Store)
