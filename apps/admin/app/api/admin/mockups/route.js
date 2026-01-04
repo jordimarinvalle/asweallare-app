@@ -304,7 +304,7 @@ async function handleSingleImageUpload(supabase, supabaseAdmin, file, boxId, ima
     created_at: new Date().toISOString()
   }
   
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('mockup_images')
     .insert(newImageData)
   
