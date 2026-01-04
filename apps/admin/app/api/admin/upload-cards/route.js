@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServer } from '../../../../lib/supabase-server'
-import { writeFile, mkdir, rm } from 'fs/promises'
-import path from 'path'
+import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 import AdmZip from 'adm-zip'
+import path from 'path'
 
-// Helper to get authenticated user (supports both local and Supabase)
-async function getAuthenticatedUser() {
-  // In local mode, check the auth-token cookie
+const BUCKET_NAME = 'assets'
+
+// Helper to get authenticated user and check admin status
+async function getAuthenticatedUserAndCheckAdmin() {
   if (process.env.LOCAL_MODE === 'true') {
     const { cookies } = await import('next/headers')
     const { getUserFromToken } = await import('../../../../lib/auth-local')
@@ -18,48 +19,72 @@ async function getAuthenticatedUser() {
     if (token) {
       const user = await getUserFromToken(token)
       if (user) {
-        return { user, error: null }
+        return { user, isAdmin: true, error: null }
       }
     }
-    return { user: null, error: 'Not authenticated' }
+    return { user: null, isAdmin: false, error: 'Not authenticated' }
   }
   
-  // Supabase mode
   const supabase = createSupabaseServer()
   const { data: { user }, error } = await supabase.auth.getUser()
-  return { user, error }
+  
+  if (error || !user) {
+    return { user: null, isAdmin: false, error: error?.message || 'Not authenticated' }
+  }
+  
+  try {
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+    
+    const { data: config } = await supabaseAdmin
+      .from('app_config')
+      .select('admin_emails')
+      .single()
+    
+    const adminEmails = config?.admin_emails || []
+    const isAdmin = adminEmails.includes(user.email)
+    
+    return { user, isAdmin, error: null }
+  } catch (dbError) {
+    console.error('[UPLOAD-CARDS] Error checking admin status:', dbError)
+    return { user, isAdmin: false, error: null }
+  }
 }
 
-// Admin email restriction (for Supabase mode)
-const ADMIN_EMAIL = 'mocasin@gmail.com'
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
+}
 
 export async function POST(request) {
   const supabase = createSupabaseServer()
+  const supabaseAdmin = getSupabaseAdmin()
   
   try {
-    // Check auth
-    const { user, error: authError } = await getAuthenticatedUser()
+    const { user, isAdmin, error: authError } = await getAuthenticatedUserAndCheckAdmin()
     
-    // In local mode, any authenticated user is admin
-    // In Supabase mode, check admin email or is_admin flag
-    const isLocalMode = process.env.LOCAL_MODE === 'true'
-    const isAuthorized = isLocalMode 
-      ? (user !== null)
-      : (user && (user.email === ADMIN_EMAIL || user.is_admin))
-    
-    if (authError || !isAuthorized) {
-      console.log('[UPLOAD-CARDS] Auth failed:', { authError, user: user?.email, isLocalMode })
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (authError || !user) {
+      console.log('[UPLOAD-CARDS] Auth failed:', { authError, user: user?.email })
+      return NextResponse.json({ error: 'Unauthorized - Not authenticated' }, { status: 401 })
     }
     
-    console.log('[UPLOAD-CARDS] Auth passed for:', user?.email)
+    if (!isAdmin) {
+      console.log('[UPLOAD-CARDS] Admin check failed:', { user: user?.email, isAdmin })
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 })
+    }
+    
+    console.log('[UPLOAD-CARDS] Auth passed for admin:', user?.email)
     
     const formData = await request.formData()
     const zipFile = formData.get('file')
     const boxId = formData.get('boxId')
-    const boxSlug = formData.get('boxSlug') // e.g., "white-box-108"
+    const boxSlug = formData.get('boxSlug')
     const pileId = formData.get('pileId')
-    const pileSlug = formData.get('pileSlug') // e.g., "black" or "white"
+    const pileSlug = formData.get('pileSlug')
     
     if (!zipFile || !boxId || !boxSlug || !pileId || !pileSlug) {
       return NextResponse.json({ 
@@ -69,13 +94,11 @@ export async function POST(request) {
     
     console.log('[UPLOAD-CARDS] Processing ZIP for box:', boxSlug, 'pile:', pileSlug)
     
-    // Get ZIP file buffer
     const bytes = await zipFile.arrayBuffer()
     const buffer = Buffer.from(bytes)
     
-    // Create target directory
-    // Path: /public/cards/{box_slug}/{pile_slug}/
-    const targetDir = path.join(process.cwd(), 'public', 'cards', boxSlug, pileSlug)
+    // Storage path: cards/{box_slug}/{pile_slug}/
+    const storagePath = `cards/${boxSlug}/${pileSlug}`
     
     // Delete existing cards for this box+pile combination
     const { data: existingCards } = await supabase
@@ -85,25 +108,27 @@ export async function POST(request) {
       .eq('pile_id', pileId)
     
     if (existingCards && existingCards.length > 0) {
-      // Delete from database
       await supabase
         .from('cards')
         .delete()
         .eq('box_id', boxId)
         .eq('pile_id', pileId)
       
-      // Try to remove existing files from disk
+      // Try to remove existing files from storage
       try {
-        await rm(targetDir, { recursive: true, force: true })
+        const { data: files } = await supabaseAdmin.storage
+          .from(BUCKET_NAME)
+          .list(storagePath)
+        
+        if (files && files.length > 0) {
+          const filePaths = files.map(f => `${storagePath}/${f.name}`)
+          await supabaseAdmin.storage.from(BUCKET_NAME).remove(filePaths)
+        }
       } catch (err) {
-        // Directory might not exist, that's ok
+        console.log('[UPLOAD-CARDS] Could not remove old files:', err.message)
       }
     }
     
-    // Recreate target directory
-    await mkdir(targetDir, { recursive: true })
-    
-    // Extract ZIP using adm-zip
     let zip
     try {
       zip = new AdmZip(buffer)
@@ -113,15 +138,12 @@ export async function POST(request) {
     
     const zipEntries = zip.getEntries()
     
-    // Filter for image files only
     const imageEntries = zipEntries.filter(entry => {
       const name = entry.entryName.toLowerCase()
-      // Skip directories, __MACOSX files, and hidden files
       if (entry.isDirectory) return false
       if (name.includes('__macosx')) return false
       if (name.startsWith('.')) return false
       if (path.basename(name).startsWith('.')) return false
-      // Only allow image files
       return /\.(png|jpg|jpeg)$/i.test(name)
     })
     
@@ -131,31 +153,35 @@ export async function POST(request) {
     
     console.log('[UPLOAD-CARDS] Found', imageEntries.length, 'images in ZIP')
     
-    // Process each image file
     const createdCards = []
     const errors = []
     
     for (const entry of imageEntries) {
       try {
-        // Get file buffer
         const fileBuffer = entry.getData()
-        
-        // Generate MD5 hash as filename
         const md5Hash = crypto.createHash('md5').update(fileBuffer).digest('hex')
-        
-        // Keep original extension
         const originalExt = path.extname(entry.entryName).toLowerCase() || '.png'
         const newFilename = `${md5Hash}${originalExt}`
+        const fullStoragePath = `${storagePath}/${newFilename}`
         
-        // Write file to target directory
-        const targetPath = path.join(targetDir, newFilename)
-        await writeFile(targetPath, fileBuffer)
+        // Upload to Supabase Storage
+        const { error: uploadError } = await supabaseAdmin.storage
+          .from(BUCKET_NAME)
+          .upload(fullStoragePath, fileBuffer, {
+            contentType: originalExt === '.png' ? 'image/png' : 'image/jpeg',
+            upsert: true
+          })
         
-        // Relative path for database (with leading slash for web access)
-        const relativeImagePath = `/cards/${boxSlug}/${pileSlug}/${newFilename}`
+        if (uploadError) {
+          errors.push({ file: entry.entryName, error: uploadError.message })
+          continue
+        }
         
-        // Create card record in database
-        // Use MD5 as the card ID
+        // Get public URL
+        const { data: { publicUrl } } = supabaseAdmin.storage
+          .from(BUCKET_NAME)
+          .getPublicUrl(fullStoragePath)
+        
         const cardId = md5Hash
         
         const { error: dbError } = await supabase
@@ -165,7 +191,7 @@ export async function POST(request) {
             box_id: boxId,
             pile_id: pileId,
             text: null,
-            image_path: relativeImagePath,
+            image_path: publicUrl,
             is_active: true,
             created_at: new Date().toISOString()
           })
@@ -176,7 +202,7 @@ export async function POST(request) {
           createdCards.push({
             id: cardId,
             originalFile: path.basename(entry.entryName),
-            imagePath: relativeImagePath
+            imagePath: publicUrl
           })
         }
       } catch (err) {
@@ -205,7 +231,8 @@ export async function POST(request) {
 
 export async function GET() {
   return NextResponse.json({ 
-    message: 'POST a ZIP file to bulk upload cards',
+    message: 'POST a ZIP file to bulk upload cards to Supabase Storage',
+    bucket: BUCKET_NAME,
     fields: {
       file: 'ZIP file containing PNG/JPG images (required)',
       boxId: 'Box ID (required)',
