@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '../lib/supabase'
 import { Button } from '@/components/ui/button'
@@ -16,6 +17,17 @@ import { LogOut, Plus, Edit, Trash2, CreditCard, RotateCw, Smartphone, Lock, Che
 import { BookletViewer, GuideSelector, GuideSelectorCompact, BOOKLET_IMAGES, BOOKLET_30SECS } from '@/components/game/BookletViewer'
 import { RotateDeviceScreen } from '@/components/game/RotateDeviceScreen'
 import { ThemeProvider, useTheme, BottomNav, useBottomNavPadding, SocialIcon, SocialPlatformSelector, SOCIAL_PLATFORMS, getPlatformConfig, ReorderableList } from '@/components/theme'
+
+// Helper function to get correct image URL (handles both relative paths and full URLs)
+function getImageUrl(path) {
+  if (!path) return null
+  // If it's already a full URL (http/https), return as-is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path
+  }
+  // Otherwise, ensure it starts with /
+  return path.startsWith('/') ? path : `/${path}`
+}
 
 // Simple Markdown to HTML converter (no external dependencies)
 function SimpleMarkdown({ children, isDark = false }) {
