@@ -597,7 +597,7 @@ export async function POST(request) {
     if (path === 'auth/signup') {
       const { email, password } = body
       
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await supabaseAdmin.auth.signUp({
         email,
         password,
       })
@@ -612,7 +612,7 @@ export async function POST(request) {
     if (path === 'auth/signin') {
       const { email, password } = body
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabaseAdmin.auth.signInWithPassword({
         email,
         password,
       })
@@ -656,7 +656,7 @@ export async function POST(request) {
     }
 
     if (path === 'auth/google') {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabaseAdmin.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`
@@ -710,7 +710,7 @@ export async function POST(request) {
         timestamp: new Date().toISOString()
       }
       
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('saved_draws')
         .insert([draw])
         .select()
@@ -976,7 +976,7 @@ export async function POST(request) {
         created_at: new Date().toISOString()
       }
       
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await supabaseAdminAdmin
         .from('cards')
         .insert([card])
         .select()
@@ -1022,7 +1022,7 @@ export async function POST(request) {
         created_at: new Date().toISOString()
       }
       
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await supabaseAdminAdmin
         .from('boxes')
         .insert([box])
         .select()
@@ -1054,7 +1054,7 @@ export async function POST(request) {
         created_at: new Date().toISOString()
       }
       
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('collection_series')
         .insert([series])
         .select()
@@ -1096,7 +1096,7 @@ export async function POST(request) {
         created_at: new Date().toISOString()
       }
       
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('prices')
         .insert([price])
         .select()
@@ -1130,7 +1130,7 @@ export async function POST(request) {
         created_at: new Date().toISOString()
       }
       
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('piles')
         .insert([pile])
         .select()
@@ -1164,7 +1164,7 @@ export async function POST(request) {
         created_at: new Date().toISOString()
       }
       
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('bundles')
         .insert([bundle])
         .select()
@@ -1407,7 +1407,7 @@ export async function PUT(request) {
       
       // Use service role client for admin operations (bypasses RLS)
       const supabaseAdmin = getSupabaseAdmin()
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await supabaseAdminAdmin
         .from('piles')
         .update(updateData)
         .eq('id', pileId)
