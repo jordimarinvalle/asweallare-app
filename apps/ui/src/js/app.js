@@ -114,7 +114,25 @@ function startGame(boxIds) {
     state.whiteFlipped = false
     resetTimer()
     
+    // Store pile images for card backs
+    if (blackCards.length > 0 && blackCards[0].pile_image) {
+      state.blackPileImage = blackCards[0].pile_image
+    }
+    if (whiteCards.length > 0 && whiteCards[0].pile_image) {
+      state.whitePileImage = whiteCards[0].pile_image
+    }
+    
     console.log('Game started with', blackCards.length, 'black cards and', whiteCards.length, 'white cards')
+    
+    // Dispatch event to notify game page that cards are ready
+    document.dispatchEvent(new CustomEvent('cards-loaded', { 
+      detail: { 
+        blackCount: blackCards.length, 
+        whiteCount: whiteCards.length,
+        blackPileImage: state.blackPileImage,
+        whitePileImage: state.whitePileImage
+      } 
+    }))
   })
 }
 
