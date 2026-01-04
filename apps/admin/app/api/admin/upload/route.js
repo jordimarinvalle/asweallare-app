@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
+import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
+
+const BUCKET_NAME = 'assets'
 
 // Helper to get authenticated user and check admin status
 async function getAuthenticatedUserAndCheckAdmin() {
@@ -16,7 +17,7 @@ async function getAuthenticatedUserAndCheckAdmin() {
     if (token) {
       const user = await getUserFromToken(token)
       if (user) {
-        return { user, isAdmin: true, error: null } // Local mode: all authenticated users are admins
+        return { user, isAdmin: true, error: null }
       }
     }
     return { user: null, isAdmin: false, error: 'Not authenticated' }
@@ -24,7 +25,6 @@ async function getAuthenticatedUserAndCheckAdmin() {
   
   // Supabase mode
   const { createSupabaseServer } = await import('../../../../lib/supabase-server')
-  const { createClient } = await import('@supabase/supabase-js')
   
   const supabase = createSupabaseServer()
   const { data: { user }, error } = await supabase.auth.getUser()
@@ -55,6 +55,14 @@ async function getAuthenticatedUserAndCheckAdmin() {
   }
 }
 
+// Get Supabase admin client for storage operations
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
+}
+
 export async function POST(request) {
   try {
     // Check auth and admin status
@@ -74,9 +82,7 @@ export async function POST(request) {
     
     const formData = await request.formData()
     const file = formData.get('file')
-    const folder = formData.get('folder') // Generic folder path (e.g., collections/unscripted_conversations/piles)
-    const boxFolder = formData.get('boxFolder') || 'uploads'
-    const cardColor = formData.get('cardColor') || 'black'
+    const folder = formData.get('folder') || 'uploads' // e.g., collections/unscripted_conversations/piles
     const customFilename = formData.get('filename') // Optional custom filename
     
     if (!file) {
@@ -87,48 +93,61 @@ export async function POST(request) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     
-    // Generate filename
-    const extension = path.extname(file.name) || '.png'
-    let filename
+    // Determine file extension from original filename or mime type
+    const originalName = file.name || 'file'
+    const extension = originalName.includes('.') 
+      ? '.' + originalName.split('.').pop()
+      : ''
     
+    // Generate filename
+    let filename
     if (customFilename) {
-      // Use custom filename if provided
-      filename = customFilename.endsWith(extension) ? customFilename : `${customFilename}${extension}`
+      // Use custom filename if provided, ensure extension
+      filename = customFilename.includes('.') ? customFilename : `${customFilename}${extension}`
     } else {
       // Generate MD5 hash for unique filename
       const md5Hash = crypto.createHash('md5').update(buffer).digest('hex')
       filename = `${md5Hash}${extension}`
     }
     
-    let folderPath, imagePath
+    // Build storage path: folder/filename
+    const storagePath = folder ? `${folder}/${filename}` : filename
     
-    if (folder) {
-      // Generic folder upload (for piles, etc.)
-      folderPath = path.join(process.cwd(), 'public', folder)
-      imagePath = `/${folder}/${filename}`
-    } else {
-      // Card-specific upload (legacy behavior)
-      const colorFolder = cardColor === 'black' ? `${boxFolder}-blacks` : `${boxFolder}-whites`
-      folderPath = path.join(process.cwd(), 'public', 'cards', boxFolder, colorFolder)
-      imagePath = `/cards/${boxFolder}/${colorFolder}/${filename}`
+    console.log(`[UPLOAD] Uploading to Supabase Storage: ${BUCKET_NAME}/${storagePath}`)
+    
+    // Upload to Supabase Storage
+    const supabase = getSupabaseAdmin()
+    
+    const { data, error: uploadError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(storagePath, buffer, {
+        contentType: file.type || 'application/octet-stream',
+        upsert: true // Overwrite if exists
+      })
+    
+    if (uploadError) {
+      console.error('[UPLOAD] Supabase Storage error:', uploadError)
+      return NextResponse.json({ 
+        error: `Storage upload failed: ${uploadError.message}` 
+      }, { status: 500 })
     }
     
-    // Create directory if it doesn't exist
-    await mkdir(folderPath, { recursive: true })
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(storagePath)
     
-    // Write file
-    const filePath = path.join(folderPath, filename)
-    await writeFile(filePath, buffer)
-    
-    console.log(`[UPLOAD] File uploaded: ${filePath}`)
+    console.log(`[UPLOAD] File uploaded successfully: ${publicUrl}`)
     
     return NextResponse.json({ 
       success: true, 
-      path: imagePath,
-      imagePath,
-      image_path: imagePath,
+      path: publicUrl,
+      imagePath: publicUrl,
+      image_path: publicUrl,
+      url: publicUrl,
       filename,
-      message: 'Image uploaded successfully'
+      storagePath,
+      message: 'File uploaded successfully to Supabase Storage'
     })
     
   } catch (error) {
@@ -139,13 +158,12 @@ export async function POST(request) {
 
 export async function GET() {
   return NextResponse.json({ 
-    message: 'Use POST to upload images',
+    message: 'Use POST to upload files to Supabase Storage',
+    bucket: BUCKET_NAME,
     fields: {
-      file: 'Image file (required)',
-      folder: 'Generic folder path (e.g., collections/unscripted_conversations/piles)',
-      filename: 'Optional custom filename',
-      boxFolder: 'Box folder name for cards (e.g., white-box-108)',
-      cardColor: 'Card color: black or white'
+      file: 'File to upload (required)',
+      folder: 'Folder path within bucket (e.g., collections/unscripted_conversations/piles)',
+      filename: 'Optional custom filename'
     }
   })
 }
