@@ -6,7 +6,13 @@ export default defineConfig({
   base: '/',
   server: {
     host: '0.0.0.0',
-    port: 8080
+    port: 8080,
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      '.preview.emergentagent.com',
+      'font-manager-ui.preview.emergentagent.com'
+    ]
   },
   build: {
     outDir: 'dist'
