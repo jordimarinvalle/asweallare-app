@@ -1,5 +1,5 @@
 {
-  "/api/admin/upload/route": "app/api/admin/upload/route.js",
+  "/api/app-config/route": "app/api/app-config/route.js",
   "/api/[[...path]]/route": "app/api/[[...path]]/route.js",
-  "/page": "app/page.js"
+  "/api/admin/mockups/route": "app/api/admin/mockups/route.js"
 }
