@@ -1,7 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServer } from '../../../lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 import { getStripe } from '../../../lib/stripe'
 import { v4 as uuidv4 } from 'uuid'
+
+// Create Supabase admin client with service role for admin operations
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
+}
 
 // CORS helper
 function handleCORS(response) {
