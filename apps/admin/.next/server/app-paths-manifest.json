@@ -1,7 +1,3 @@
 {
-  "/api/auth/local/signin/route": "app/api/auth/local/signin/route.js",
-  "/api/[[...path]]/route": "app/api/[[...path]]/route.js",
-  "/api/app-config/route": "app/api/app-config/route.js",
-  "/api/admin/fonts/route": "app/api/admin/fonts/route.js",
-  "/api/admin/app-config/route": "app/api/admin/app-config/route.js"
+  "/api/admin/upload/route": "app/api/admin/upload/route.js"
 }
