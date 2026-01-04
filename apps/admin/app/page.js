@@ -5456,7 +5456,7 @@ function AppContent() {
                     })
                     .map(card => {
                       const imgPath = card.imagePath || card.image_path
-                      const imgSrc = imgPath ? (imgPath.startsWith('/') ? imgPath : `/${imgPath}`) : null
+                      const imgSrc = getImageUrl(imgPath)
                       return (
                         <Card key={card.id} className="p-3 overflow-hidden">
                           <div className="aspect-[3/4] mb-2 rounded overflow-hidden bg-gray-100 relative">
