@@ -466,7 +466,7 @@ async function deleteMockupsByType(supabase, supabaseAdmin, boxId, imageType) {
 
 // Helper: Delete all mockups for a box
 async function deleteAllMockupsForBox(supabase, supabaseAdmin, boxId) {
-  const { data: mockups } = await supabase
+  const { data: mockups } = await supabaseAdmin
     .from('mockup_images')
     .select('*')
     .eq('box_id', boxId)
@@ -477,7 +477,7 @@ async function deleteAllMockupsForBox(supabase, supabaseAdmin, boxId) {
     await deleteStorageFile(supabaseAdmin, img.image_path)
   }
   
-  await supabase
+  await supabaseAdmin
     .from('mockup_images')
     .delete()
     .eq('box_id', boxId)
