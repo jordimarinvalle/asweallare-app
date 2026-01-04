@@ -2151,6 +2151,18 @@ function AppContent() {
   const adminEmails = appConfig?.admin_emails?.split('\n').map(e => e.trim().toLowerCase()).filter(Boolean) || []
   const isAdmin = user?.is_admin === true || (user?.email && adminEmails.includes(user.email.toLowerCase()))
   
+  // Debug logging for admin check
+  React.useEffect(() => {
+    if (user) {
+      console.log('[DEBUG] Admin check:', {
+        userEmail: user.email,
+        adminEmails: adminEmails,
+        isAdmin: isAdmin,
+        appConfigLoaded: !!appConfig
+      })
+    }
+  }, [user, appConfig, adminEmails, isAdmin])
+  
   // Admin
   const [adminCards, setAdminCards] = useState([])
   const [adminBoxes, setAdminBoxes] = useState([])
