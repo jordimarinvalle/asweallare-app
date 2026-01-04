@@ -184,7 +184,7 @@ export async function POST(request) {
         
         const cardId = md5Hash
         
-        const { error: dbError } = await supabase
+        const { error: dbError } = await supabaseAdmin
           .from('cards')
           .insert({
             id: cardId,
