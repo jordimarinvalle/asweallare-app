@@ -108,7 +108,7 @@ export async function POST(request) {
       .eq('pile_id', pileId)
     
     if (existingCards && existingCards.length > 0) {
-      await supabase
+      await supabaseAdmin
         .from('cards')
         .delete()
         .eq('box_id', boxId)
