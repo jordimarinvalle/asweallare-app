@@ -443,7 +443,7 @@ async function handleCardMockupsZip(supabase, supabaseAdmin, zipFile, boxId) {
 
 // Helper: Delete mockups by type
 async function deleteMockupsByType(supabase, supabaseAdmin, boxId, imageType) {
-  const { data: mockups } = await supabase
+  const { data: mockups } = await supabaseAdmin
     .from('mockup_images')
     .select('*')
     .eq('box_id', boxId)
@@ -455,7 +455,7 @@ async function deleteMockupsByType(supabase, supabaseAdmin, boxId, imageType) {
     await deleteStorageFile(supabaseAdmin, img.image_path)
   }
   
-  await supabase
+  await supabaseAdmin
     .from('mockup_images')
     .delete()
     .eq('box_id', boxId)
