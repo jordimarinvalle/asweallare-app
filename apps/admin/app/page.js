@@ -1188,7 +1188,7 @@ function BoxSelectionScreen({
                       }`}
                     >
                       <img
-                        src={boxMockups[seeMoreBox.id].secondaryImage.imagePath}
+                        src={getImageUrl(boxMockups[seeMoreBox.id].secondaryImage.imagePath)}
                         alt="Box back"
                         className="w-full h-full object-cover"
                       />
@@ -1212,7 +1212,7 @@ function BoxSelectionScreen({
                       }`}
                     >
                       <img
-                        src={mockup.imagePath}
+                        src={getImageUrl(mockup.imagePath)}
                         alt={`Card ${idx + 1}`}
                         className="w-full h-full object-cover"
                         loading="lazy"
