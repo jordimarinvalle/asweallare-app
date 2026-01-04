@@ -16,6 +16,7 @@ window.appState = {
   boxes: [],
   piles: [],
   cards: [],
+  hasAllAccess: false,
   selectedBoxIds: [],
   gameStarted: false,
   // Game state
@@ -44,7 +45,7 @@ async function loadAppConfig() {
     
     if (data) {
       state.appConfig = data
-      console.log('App config loaded:', data)
+      console.log('App config loaded:', data.name || 'default')
     }
   } catch (err) {
     console.error('Error loading app config:', err)
@@ -56,9 +57,11 @@ async function loadBoxes() {
     const response = await fetch(`${API_BASE}/boxes`)
     const data = await response.json()
     
-    if (data && Array.isArray(data)) {
-      state.boxes = data
-      console.log('Boxes loaded:', data.length, 'boxes')
+    // API returns { boxes: [...], hasAllAccess: boolean }
+    if (data && data.boxes) {
+      state.boxes = data.boxes
+      state.hasAllAccess = data.hasAllAccess || false
+      console.log('Boxes loaded:', data.boxes.length, 'boxes')
     }
   } catch (err) {
     console.error('Error loading boxes:', err)
@@ -67,15 +70,18 @@ async function loadBoxes() {
 
 async function loadPiles() {
   try {
-    const response = await fetch(`${API_BASE}/piles`)
+    // Piles are returned with admin/piles endpoint
+    const response = await fetch(`${API_BASE}/admin/piles`)
     const data = await response.json()
     
-    if (data && Array.isArray(data)) {
-      state.piles = data
-      console.log('Piles loaded:', data.length, 'piles')
+    // API returns { piles: [...] }
+    if (data && data.piles) {
+      state.piles = data.piles
+      console.log('Piles loaded:', data.piles.length, 'piles')
     }
   } catch (err) {
     console.error('Error loading piles:', err)
+    // Piles might fail without auth - that's OK for guest mode
   }
 }
 
@@ -83,27 +89,17 @@ async function loadCardsForBoxes(boxIds) {
   if (!boxIds || boxIds.length === 0) return []
   
   try {
-    // Fetch cards for each box
-    const allCards = []
+    // Use the cards endpoint with box_ids parameter
+    const boxIdsParam = boxIds.join(',')
+    const response = await fetch(`${API_BASE}/cards?box_ids=${boxIdsParam}`)
+    const data = await response.json()
     
-    for (const boxId of boxIds) {
-      const response = await fetch(`${API_BASE}/boxes/${boxId}/cards`)
-      const data = await response.json()
-      
-      if (data && Array.isArray(data)) {
-        allCards.push(...data)
-      }
+    // API returns { cards: [...] } with color field already set
+    if (data && data.cards) {
+      state.cards = data.cards
+      console.log('Cards loaded:', data.cards.length, 'cards')
+      return data.cards
     }
-    
-    // Add color based on pile
-    const cardsWithColor = allCards.map(card => ({
-      ...card,
-      color: card.pile?.slug === 'black' || card.pile_id?.includes('black') ? 'black' : 'white'
-    }))
-    
-    state.cards = cardsWithColor
-    console.log('Cards loaded:', cardsWithColor.length, 'cards')
-    return cardsWithColor
   } catch (err) {
     console.error('Error loading cards:', err)
   }
@@ -128,6 +124,7 @@ function startGame(boxIds) {
   state.gameStarted = true
   
   loadCardsForBoxes(boxIds).then(cards => {
+    // Cards already have 'color' field from API (black/white based on pile slug)
     const blackCards = cards.filter(c => c.color === 'black')
     const whiteCards = cards.filter(c => c.color === 'white')
     
@@ -314,10 +311,12 @@ window.appFunctions = {
 // ============================================================================
 
 async function initApp() {
+  console.log('===========================================')
   console.log('Initializing AS WE ALL ARE UI App...')
   console.log('API Base:', API_BASE)
+  console.log('===========================================')
   
-  // Check auth state (Supabase)
+  // Check auth state (Supabase) - optional for local mode
   try {
     const { data: { session } } = await supabase.auth.getSession()
     if (session?.user) {
@@ -335,13 +334,27 @@ async function initApp() {
   
   // Load initial data from LOCAL API
   console.log('Loading data from local API...')
-  await Promise.all([
-    loadAppConfig(),
-    loadBoxes(),
-    loadPiles()
-  ])
+  
+  try {
+    await loadAppConfig()
+  } catch (e) {
+    console.log('App config load error (non-critical):', e.message)
+  }
+  
+  try {
+    await loadBoxes()
+  } catch (e) {
+    console.log('Boxes load error:', e.message)
+  }
+  
+  try {
+    await loadPiles()
+  } catch (e) {
+    console.log('Piles load error (may require auth):', e.message)
+  }
   
   console.log('Data loaded. Boxes:', state.boxes.length)
+  console.log('Boxes:', state.boxes.map(b => b.name).join(', '))
   
   // Initialize Framework7
   const app = new Framework7({
