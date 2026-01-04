@@ -1,0 +1,262 @@
+import { state, drawCard, flipCard, resetRound, reshufflePile, endGame, startSharing, finishSharing, app } from '../js/app.js'
+
+export default (props, { $f7, $on, $el }) => {
+  let isLandscape = window.innerWidth > window.innerHeight
+  
+  const checkOrientation = () => {
+    isLandscape = window.innerWidth > window.innerHeight
+    const rotateScreen = $el.value?.querySelector('.rotate-device-screen')
+    const gameContent = $el.value?.querySelector('.game-content')
+    
+    if (rotateScreen && gameContent) {
+      rotateScreen.style.display = isLandscape ? 'none' : 'flex'
+      gameContent.style.display = isLandscape ? 'flex' : 'none'
+    }
+  }
+  
+  const updateTimerDisplay = () => {
+    const timerEl = $el.value?.querySelector('.timer-display')
+    if (!timerEl) return
+    
+    const { timerState, timerSeconds } = state
+    
+    timerEl.className = `timer-display ${timerState}`
+    
+    switch (timerState) {
+      case 'idle':
+        timerEl.textContent = 'Tap on the cards to flip them and start your turn'
+        break
+      case 'countdown':
+        timerEl.textContent = `Ready? Tap to begin sharing (${timerSeconds}s)`
+        break
+      case 'waiting':
+        timerEl.textContent = 'Ready when you are — tap to start sharing'
+        break
+      case 'countup':
+        const mins = Math.floor(timerSeconds / 60)
+        let msg = "Tap when you're done sharing"
+        if (mins >= 3) msg = "Tap when done. 3 minutes — wrapping up?"
+        else if (mins >= 2) msg = "Tap when done. 2 minutes — you're in the flow."
+        else if (mins >= 1) msg = "Tap when done. 1 minute — keep sharing."
+        timerEl.textContent = msg
+        break
+      case 'finished':
+        const finMins = Math.floor(timerSeconds / 60)
+        const finSecs = timerSeconds % 60
+        let timeStr = finSecs + 's'
+        if (finMins > 0) timeStr = `${finMins}m ${finSecs}s`
+        timerEl.textContent = `Done (${timeStr}) — tap to reset for next turn`
+        break
+    }
+  }
+  
+  const updateCards = () => {
+    // Update black pile
+    const blackPile = $el.value?.querySelector('.card-pile.black')
+    if (blackPile) {
+      const cardInner = blackPile.querySelector('.card-inner')
+      const cardFront = blackPile.querySelector('.card-front')
+      
+      if (state.currentBlack) {
+        blackPile.classList.toggle('flipped', state.blackFlipped)
+        const imgPath = state.currentBlack.image_path || ''
+        const imgSrc = imgPath.startsWith('/') ? imgPath : '/' + imgPath
+        cardFront.innerHTML = `<img src="${imgSrc}" alt="Card" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />`
+      } else {
+        blackPile.classList.remove('flipped')
+      }
+      
+      // Update remaining count
+      const countEl = blackPile.closest('.pile-container')?.querySelector('.pile-count')
+      if (countEl) countEl.textContent = `${state.blackDeck.length} cards left`
+    }
+    
+    // Update white pile
+    const whitePile = $el.value?.querySelector('.card-pile.white')
+    if (whitePile) {
+      const cardFront = whitePile.querySelector('.card-front')
+      
+      if (state.currentWhite) {
+        whitePile.classList.toggle('flipped', state.whiteFlipped)
+        const imgPath = state.currentWhite.image_path || ''
+        const imgSrc = imgPath.startsWith('/') ? imgPath : '/' + imgPath
+        cardFront.innerHTML = `<img src="${imgSrc}" alt="Card" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />`
+      } else {
+        whitePile.classList.remove('flipped')
+      }
+      
+      const countEl = whitePile.closest('.pile-container')?.querySelector('.pile-count')
+      if (countEl) countEl.textContent = `${state.whiteDeck.length} cards left`
+    }
+  }
+  
+  $on('pageInit', () => {
+    checkOrientation()
+    window.addEventListener('resize', checkOrientation)
+    window.addEventListener('orientationchange', checkOrientation)
+    
+    // Timer update listener
+    document.addEventListener('timer-update', () => {
+      updateTimerDisplay()
+    })
+    
+    // Card pile click handlers
+    const blackPile = $el.value?.querySelector('.card-pile.black')
+    const whitePile = $el.value?.querySelector('.card-pile.white')
+    
+    blackPile?.addEventListener('click', () => {
+      if (!state.currentBlack && state.blackDeck.length > 0) {
+        drawCard('black')
+      } else if (state.currentBlack) {
+        flipCard('black')
+      }
+      updateCards()
+    })
+    
+    whitePile?.addEventListener('click', () => {
+      if (!state.currentWhite && state.whiteDeck.length > 0) {
+        drawCard('white')
+      } else if (state.currentWhite) {
+        flipCard('white')
+      }
+      updateCards()
+    })
+    
+    // Timer click
+    const timerEl = $el.value?.querySelector('.timer-display')
+    timerEl?.addEventListener('click', () => {
+      const { timerState } = state
+      if (timerState === 'countdown' || timerState === 'waiting') {
+        startSharing()
+      } else if (timerState === 'countup') {
+        finishSharing()
+      } else if (timerState === 'finished') {
+        resetRound()
+        updateCards()
+      }
+      updateTimerDisplay()
+    })
+    
+    // Reset button
+    const resetBtn = $el.value?.querySelector('.reset-btn')
+    resetBtn?.addEventListener('click', () => {
+      resetRound()
+      updateCards()
+      updateTimerDisplay()
+    })
+    
+    // Reshuffle buttons
+    $el.value?.querySelector('.reshuffle-black')?.addEventListener('click', (e) => {
+      e.stopPropagation()
+      reshufflePile('black')
+      updateCards()
+    })
+    
+    $el.value?.querySelector('.reshuffle-white')?.addEventListener('click', (e) => {
+      e.stopPropagation()
+      reshufflePile('white')
+      updateCards()
+    })
+    
+    // Exit button
+    const exitBtn = $el.value?.querySelector('.exit-btn')
+    exitBtn?.addEventListener('click', () => {
+      endGame()
+      $f7.views.main.router.navigate('/experience/')
+    })
+    
+    // Initial update
+    updateCards()
+    updateTimerDisplay()
+  })
+  
+  $on('pageBeforeRemove', () => {
+    window.removeEventListener('resize', checkOrientation)
+    window.removeEventListener('orientationchange', checkOrientation)
+  })
+  
+  return () => {
+    return /* html */ `
+      <div class="page no-navbar no-toolbar" data-name="game">
+        <div class="page-content" style="padding: 0;">
+          
+          <!-- Rotate Device Screen -->
+          <div class="rotate-device-screen" style="display: none;">
+            <div class="rotate-icon">
+              <i class="f7-icons" style="font-size: 64px; color: #8E8E93;">device_phone_landscape</i>
+            </div>
+            <h2 style="margin-top: 24px; font-size: 20px; font-weight: 600;">Rotate Your Device</h2>
+            <p style="color: #8E8E93; margin-top: 8px;">Please rotate to landscape mode to play</p>
+          </div>
+          
+          <!-- Game Content -->
+          <div class="game-content game-screen" style="display: flex;">
+            
+            <!-- Exit Button -->
+            <button class="button exit-btn" style="position: absolute; top: 20px; left: 20px; padding: 8px 16px;">
+              <i class="f7-icons" style="font-size: 20px;">xmark</i>
+            </button>
+            
+            <!-- Timer Display -->
+            <div class="timer-display idle">
+              Tap on the cards to flip them and start your turn
+            </div>
+            
+            <!-- Reset Button -->
+            <button class="button reset-btn" style="position: absolute; top: 20px; right: 20px; padding: 8px;">
+              <i class="f7-icons" style="font-size: 20px;">arrow_counterclockwise</i>
+            </button>
+            
+            <!-- Card Piles -->
+            <div class="game-cards-container">
+              
+              <!-- Black Pile -->
+              <div class="pile-container" style="text-align: center;">
+                <div class="card-pile black">
+                  <div class="card-inner">
+                    <div class="card-back" style="background: #000; border: 2px solid #666;">
+                      <img src="/assets/black-card-back.png" alt="Black card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" />
+                      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                        <span style="background:#D12128;color:white;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:500;">
+                          <i class="f7-icons" style="font-size:14px;">arrow_2_circlepath</i> Tap
+                        </span>
+                      </div>
+                    </div>
+                    <div class="card-front" style="background: #000; border: 2px solid #666;"></div>
+                  </div>
+                </div>
+                <p class="pile-count" style="margin-top: 12px; color: #8E8E93; font-size: 14px;">${state.blackDeck.length} cards left</p>
+                <button class="button button-small reshuffle-black" style="margin-top: 8px;">
+                  <i class="f7-icons" style="font-size: 16px;">shuffle</i>
+                </button>
+              </div>
+              
+              <!-- White Pile -->
+              <div class="pile-container" style="text-align: center;">
+                <div class="card-pile white">
+                  <div class="card-inner">
+                    <div class="card-back" style="background: #fff; border: 2px solid #ddd;">
+                      <img src="/assets/white-card-back.png" alt="White card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" />
+                      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                        <span style="background:#D12128;color:white;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:500;">
+                          <i class="f7-icons" style="font-size:14px;">arrow_2_circlepath</i> Tap
+                        </span>
+                      </div>
+                    </div>
+                    <div class="card-front" style="background: #fff; border: 2px solid #ddd;"></div>
+                  </div>
+                </div>
+                <p class="pile-count" style="margin-top: 12px; color: #8E8E93; font-size: 14px;">${state.whiteDeck.length} cards left</p>
+                <button class="button button-small reshuffle-white" style="margin-top: 8px;">
+                  <i class="f7-icons" style="font-size: 16px;">shuffle</i>
+                </button>
+              </div>
+              
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    `
+  }
+}
