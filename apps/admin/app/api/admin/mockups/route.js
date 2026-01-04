@@ -211,7 +211,7 @@ export async function DELETE(request) {
 
 // PUT - Update mockup image (display_order)
 export async function PUT(request) {
-  const supabase = createSupabaseServer()
+  const supabaseAdmin = getSupabaseAdmin()
   
   try {
     const { user, isAdmin, error: authError } = await getAuthenticatedUserAndCheckAdmin()
@@ -227,7 +227,7 @@ export async function PUT(request) {
       return NextResponse.json({ error: 'id and displayOrder required' }, { status: 400 })
     }
     
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('mockup_images')
       .update({ display_order: parseInt(displayOrder) })
       .eq('id', id)
