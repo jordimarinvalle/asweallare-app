@@ -597,7 +597,7 @@ export async function POST(request) {
     if (path === 'auth/signup') {
       const { email, password } = body
       
-      const { data, error } = await supabaseAdmin.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
       })
@@ -612,7 +612,7 @@ export async function POST(request) {
     if (path === 'auth/signin') {
       const { email, password } = body
       
-      const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
