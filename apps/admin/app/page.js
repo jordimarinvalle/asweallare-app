@@ -5220,7 +5220,7 @@ function AppContent() {
                         {mockupsData.secondaryImage ? (
                           <div className="relative">
                             <img 
-                              src={mockupsData.secondaryImage.image_path} 
+                              src={getImageUrl(mockupsData.secondaryImage.image_path)} 
                               alt="Secondary mockup" 
                               className="w-full h-48 object-contain bg-gray-50 rounded-lg"
                             />
