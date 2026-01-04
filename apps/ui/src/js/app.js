@@ -415,7 +415,11 @@ function initGamePage(page) {
     if (blackPile && blackFront) {
       if (state.currentBlack) {
         blackPile.classList.toggle('flipped', state.blackFlipped)
-        const imgSrc = state.currentBlack.image_path?.startsWith('/') ? state.currentBlack.image_path : '/' + (state.currentBlack.image_path || '')
+        const imgPath = state.currentBlack.image_path || ''
+        // Don't add / prefix if it's already a full URL
+        const imgSrc = imgPath.startsWith('http://') || imgPath.startsWith('https://') 
+          ? imgPath 
+          : (imgPath.startsWith('/') ? imgPath : '/' + imgPath)
         blackFront.innerHTML = `<img src="${imgSrc}" alt="Card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'" />`
       } else {
         blackPile.classList.remove('flipped')
@@ -425,7 +429,11 @@ function initGamePage(page) {
     if (whitePile && whiteFront) {
       if (state.currentWhite) {
         whitePile.classList.toggle('flipped', state.whiteFlipped)
-        const imgSrc = state.currentWhite.image_path?.startsWith('/') ? state.currentWhite.image_path : '/' + (state.currentWhite.image_path || '')
+        const imgPath = state.currentWhite.image_path || ''
+        // Don't add / prefix if it's already a full URL
+        const imgSrc = imgPath.startsWith('http://') || imgPath.startsWith('https://') 
+          ? imgPath 
+          : (imgPath.startsWith('/') ? imgPath : '/' + imgPath)
         whiteFront.innerHTML = `<img src="${imgSrc}" alt="Card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'" />`
       } else {
         whitePile.classList.remove('flipped')
