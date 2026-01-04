@@ -1,11 +1,12 @@
 {
-    "name": "nextjs-mongo-template",
-    "version": "0.1.0",
+    "name": "asweallare-monorepo",
+    "version": "1.0.0",
     "private": true,
     "scripts": {
-        "dev": "NODE_OPTIONS='--max-old-space-size=512' next dev --hostname 0.0.0.0 --port 3000",
-        "dev:no-reload": "next dev --hostname 0.0.0.0 --port 3000",
-        "dev:webpack": "next dev --hostname 0.0.0.0 --port 3000",
+        "dev": "node proxy-server.js",
+        "dev:admin": "NODE_OPTIONS='--max-old-space-size=512' next dev --hostname 0.0.0.0 --port 3001",
+        "dev:ui": "cd apps/ui && yarn dev",
+        "dev:all": "concurrently \"yarn dev:admin\" \"yarn dev:ui\" \"yarn dev\"",
         "build": "next build",
         "start": "next start"
     },
