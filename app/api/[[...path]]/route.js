@@ -139,13 +139,19 @@ export async function GET(request) {
       const { user } = await getAuthenticatedUser()
       const boxIds = url.searchParams.get('box_ids')?.split(',').filter(Boolean) || []
       
+      console.log('[CARDS API] Requested box_ids:', boxIds)
+      console.log('[CARDS API] User:', user?.id || 'unauthenticated')
+      
       // Get user's accessible boxes
       const { accessibleBoxIds } = await getUserAccessibleBoxes(user?.id || null)
+      
+      console.log('[CARDS API] Accessible box IDs:', accessibleBoxIds)
       
       // Determine which boxes to query
       let queryBoxIds = []
       if (boxIds.length > 0) {
         queryBoxIds = boxIds.filter(id => accessibleBoxIds.includes(id))
+        console.log('[CARDS API] Filtered query box IDs:', queryBoxIds)
         if (queryBoxIds.length === 0) {
           return handleCORS(NextResponse.json({ cards: [], message: 'No accessible boxes' }))
         }
@@ -155,6 +161,8 @@ export async function GET(request) {
         return handleCORS(NextResponse.json({ cards: [], message: 'No accessible boxes' }))
       }
       
+      console.log('[CARDS API] Querying cards for boxes:', queryBoxIds)
+      
       // Query cards
       const { data: cards, error } = await supabase
         .from('cards')
@@ -162,6 +170,8 @@ export async function GET(request) {
         .in('box_id', queryBoxIds)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
+      
+      console.log('[CARDS API] Query result:', cards?.length || 0, 'cards, error:', error?.message || 'none')
       
       if (error) {
         console.error('[CARDS API] Error fetching cards:', error)
