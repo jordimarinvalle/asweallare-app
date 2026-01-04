@@ -1,0 +1,20 @@
+{
+  "name": "asweallare-ui",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 8080",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "framework7": "^8.3.3",
+    "framework7-icons": "^5.0.5",
+    "dom7": "^4.0.6",
+    "@supabase/supabase-js": "^2.89.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  }
+}

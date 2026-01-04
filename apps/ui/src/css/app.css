@@ -1,0 +1,194 @@
+/* Framework7 CSS */
+@import 'framework7/css/bundle';
+
+/* iOS Theme specifics */
+:root {
+  --f7-theme-color: #007AFF;
+  --f7-theme-color-rgb: 0, 122, 255;
+  --f7-safe-area-top: env(safe-area-inset-top);
+  --f7-safe-area-bottom: env(safe-area-inset-bottom);
+  --f7-safe-area-left: env(safe-area-inset-left);
+  --f7-safe-area-right: env(safe-area-inset-right);
+  
+  /* Brand colors */
+  --app-primary: #D12128;
+  --app-primary-rgb: 209, 33, 40;
+}
+
+/* Ensure iOS styling */
+.ios {
+  --f7-toolbar-bg-color: rgba(255, 255, 255, 0.95);
+  --f7-tabbar-labels-bg-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Bottom tabbar styling - floating pill */
+.tabbar-labels.tabbar-floating {
+  margin: 8px 16px;
+  margin-bottom: calc(8px + var(--f7-safe-area-bottom));
+  border-radius: 30px;
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+  width: auto;
+  max-width: 320px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tabbar-labels.tabbar-floating .toolbar-inner {
+  padding: 0 8px;
+}
+
+/* Card pile styling */
+.card-pile {
+  width: 252px;
+  height: 352px;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.card-pile .card-back,
+.card-pile .card-front {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  position: absolute;
+  backface-visibility: hidden;
+  transition: transform 0.5s ease;
+}
+
+.card-pile .card-front {
+  transform: rotateY(180deg);
+}
+
+.card-pile.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-pile .card-inner {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+}
+
+/* Game screen - landscape only */
+.game-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 24px;
+}
+
+.game-cards-container {
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Deck selection horizontal scroll */
+.deck-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 16px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.deck-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.deck-tile {
+  flex-shrink: 0;
+  width: 160px;
+  height: 200px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  scroll-snap-align: start;
+}
+
+.deck-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.deck-tile .sample-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(var(--app-primary-rgb), 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.deck-tile .lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Timer styles */
+.timer-display {
+  text-align: center;
+  padding: 12px 24px;
+  border-radius: 12px;
+  min-width: 320px;
+}
+
+.timer-display.idle {
+  background: #F2F2F7;
+  color: #8E8E93;
+}
+
+.timer-display.countdown {
+  background: white;
+  border: 1px solid var(--app-primary);
+  color: var(--app-primary);
+}
+
+.timer-display.active {
+  background: var(--app-primary);
+  color: white;
+}
+
+.timer-display.finished {
+  background: #000;
+  color: white;
+}
+
+/* Rotate device screen */
+.rotate-device-screen {
+  position: fixed;
+  inset: 0;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.rotate-icon {
+  width: 80px;
+  height: 80px;
+  animation: rotate-hint 2s ease-in-out infinite;
+}
+
+@keyframes rotate-hint {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(90deg); }
+}
