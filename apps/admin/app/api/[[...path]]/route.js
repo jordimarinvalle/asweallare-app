@@ -588,6 +588,7 @@ export async function POST(request) {
   const url = new URL(request.url)
   const path = url.pathname.replace('/api/', '')
   const supabase = createSupabaseServer()
+  const supabaseAdmin = getSupabaseAdmin() // Service role client for admin operations
 
   try {
     const body = await request.json()
