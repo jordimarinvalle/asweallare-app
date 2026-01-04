@@ -656,7 +656,7 @@ export async function POST(request) {
     }
 
     if (path === 'auth/google') {
-      const { data, error } = await supabaseAdmin.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`
