@@ -1,201 +1,184 @@
 <analysis>
 
 **original_problem_statement:**
-The user initiated this session with a series of UI polish and bug fix requests following a major UI overhaul from a previous session. This quickly evolved into a series of significant feature additions and architectural refactorings.
-
-1.  **Initial UI Polish (User-reported bugs):**
-    *   Fix numerous dark mode inconsistencies in the admin panel, including forms, social icon backgrounds, and text colors.
-    *   Standardize the styling of all buttons in the admin panel for a consistent look and feel.
-    *   Remove extraneous UI elements like a border under the admin tabs and unnecessary titles (e.g., 'New Pile').
-    *   Fix missing SQL schema updates for theme colors.
-
-2.  **New Bottom Navigation:**
-    *   Replace the existing bottom navigation with a new iOS App Store-inspired design, featuring a floating pill shape, a blur effect, and a bubble highlight for the active icon.
-
-3.  **Global iOS Theme:**
-    *   Refine the entire application's styling to match the new iOS look and feel, covering buttons, cards, forms, and typography.
-    *   Implement a fully functional light and dark mode for the new iOS theme.
-    *   Update the database schema to store iOS-specific theme colors.
-
-4.  **Custom Font Management System:**
-    *   Integrate custom fonts (Manrope and Lora) into the application.
-    *   Create an admin UI to manage fonts, allowing an admin to configure primary and secondary fonts, line-height, and letter-spacing.
-    *   Implement a font upload feature in the admin panel.
-    *   Architecturally refactor the font system from simple config fields to a dedicated  database table with proper relationships to the  table.
-
-5.  **Product Handover Document:**
-    *   Acting as a product architect, generate a comprehensive technical and product handover document in YAML format (). This document is intended for a new team/AI to rebuild the application for mobile platforms (React Native/Ionic) while using the existing admin panel as the backend.
+The user wants to refactor a monolithic Next.js application into a clean monorepo structure. The core requirements are:
+1.  **Structural Separation**: Create a monorepo with two independent applications:
+    *   : A new consumer-facing UI app built with Framework7 and Vite for a native iOS look and feel.
+    *   : The existing Next.js application, repurposed to serve only as the admin panel.
+2.  **UI/UX Overhaul**: The  app must be visually rebuilt using only native Framework7 components, including a specific floating pill style bottom tab bar. The existing, working play experience (card game) must be preserved within this new UI.
+3.  **Authentication**: The  app will use Google SSO and Magic Link, while the  app will use Magic Link only, with access gated by an  list in the database.
+4.  **Admin Access Logging**: A new database table, , must be created to log unsuccessful login attempts to the admin panel.
+5.  **Unified Access**: Both applications should be accessible from a single domain, with a reverse proxy routing  to the  app and  to the  app.
+6.  **Database**: The entire system must use a single Supabase instance for its database and authentication, moving away from any local database setup.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is in a highly polished state with a consistent iOS-native look and feel.
-- **UI/Theming:** A global iOS theme is implemented via CSS variables in  and a refactored . It includes a fully functional, persistence-aware Light/Dark mode, accessible via an iOS-style segmented control on the Profile screen. The main navigation is a custom-built, floating pill-style bottom bar.
-- **Font System:** A robust, database-driven custom font management system is in place. It uses a new  table to store font metadata and files. The admin panel features a Typography section where an administrator can upload new fonts (TTF/WOFF/WOFF2), delete existing ones, and assign the primary and secondary fonts for the application from the available list. The frontend correctly applies these fonts.
-- **Admin Panel:** The admin panel has been significantly improved with standardized button styles and consistent dark mode support across all forms and components.
-- **Documentation:** A comprehensive product and technical handover document, , has been generated. It details the project's architecture, data models, UX flows, and design philosophy, serving as a blueprint for future mobile development.
+The project has been successfully restructured into a monorepo.
+-   **Monorepo Structure**: The  and  directories have been created, containing the Framework7 and Next.js applications, respectively. A  directory also exists.
+-   **Applications**:
+    -   The **UI app** () is a functional Framework7 + Vite application. It successfully fetches data (boxes, cards) from the backend API, displays the deck selection screen, and the core card-flipping play experience has been verified to be working.
+    -   The **Admin app** () is the original Next.js application, running independently.
+-   **Reverse Proxy**: A custom Node.js proxy server () is running at the root. It correctly routes traffic:
+    -   Requests to  are forwarded to the UI app (running on port 8080).
+    -   Requests to , , and  are forwarded to the Admin/API app (running on port 3001).
+-   **Database**: The project is fully connected to a remote Supabase instance. The database schema has been reset and repopulated, including the new  table and sample data for testing.
 
 **Last working item**:
-    - Last item agent was working: The agent's final task was to act as a senior product architect and generate a complete product and technical handover document in YAML format. This document () was created to enable a different development team to rebuild the client-facing application for mobile platforms, using the existing admin panel as a headless CMS. The agent gathered context from the entire codebase, including the database schema, UI components, and game logic, to create this detailed specification.
-    - Status: USER VERIFICATION PENDING
-    - Agent Testing Done: Y
-    - Which testing method agent to use? NA(if testing is already done)
+    - Last item agent was working: The agent was fixing a bug where a logged-in admin user could not see the Admin Panel link in the profile section of the  app. The agent correctly identified the root cause as a  JavaScript error in , which was preventing the component from rendering correctly. The agent has just applied the fix by adding .
+    - Status: IN PROGRESS
+    - Agent Testing Done: N
+    - Which testing method agent to use? manual testing by curl
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  Issue 1:  Stripe webhook for purchases is broken (P2)
-  Issue 2:  Password reset link functionality is not working (P2)
+  Issue 1: Admin panel link missing for admin users (P0)
+  Issue 2: Stripe webhook for purchases is broken (P2)
+  Issue 3: Password reset link functionality is not working (P2)
   
   Issues Detail:
   - Issue 1: 
-     - Attempted fixes: None in this session. This is a long-standing issue carried over from previous forks.
+     - Attempted fixes: The agent correctly diagnosed that the  field in the database was populated, and the API was returning it. The final bug was identified as a missing  statement in . The fix has been applied.
      - Next debug checklist: 
-        - Investigate the Stripe webhook endpoint.
-        - Check server logs for errors when a purchase event is sent from Stripe.
-        - Verify the logic for processing successful payments and granting user products/memberships.
-     - Why fix this issue and what will be achieved with the fix? This is critical business logic. Fixing it will re-enable the application's monetization feature.
+        1. Restart the admin application to ensure the code change is live.
+        2. Log in to the  application as the admin user ().
+        3. Navigate to the profile section.
+        4. Verify that the Admin Panel link/button is now visible.
+        5. A screenshot of the profile section showing the link would be ideal for verification.
+     - Why fix this issue and what will be achieved with the fix? This is critical for allowing administrators to access the main admin control panel from the application's UI.
+     - Status:  IN PROGRESS
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? Frontend
+     - Blocked on other issue: None
+  - Issue 2: 
+     - Attempted fixes: None in this session. Carried over from the previous state of the project.
+     - Next debug checklist: Investigate the Stripe webhook endpoint and server logs.
+     - Why fix this issue and what will be achieved with the fix? This is critical business logic for monetization.
      - Status:  NOT STARTED
      - Is recurring issue? Y
      - Should Test frontend/backend/both after fix? Backend
      - Blocked on other issue: None
-  - Issue 2: 
-     - Attempted fixes: None in this session. This is a long-standing issue.
-     - Next debug checklist: 
-        - Investigate the Supabase Auth password reset flow.
-        - Check the email templates and server configuration for sending emails.
-        - Verify the endpoint that handles the password reset token from the user's email.
-     - Why fix this issue and what will be achieved with the fix? This is critical user account management functionality. Fixing it will allow users to recover their accounts.
+  - Issue 3: 
+     - Attempted fixes: None in this session. Carried over.
+     - Next debug checklist: Investigate Supabase Auth password reset flow and email configuration.
+     - Why fix this issue and what will be achieved with the fix? This is critical user account management functionality.
      - Status:  NOT STARTED
      - Is recurring issue? Y
-     'Should Test frontend/backend/both after fix? Backend
+     - Should Test frontend/backend/both after fix? Backend
      - Blocked on other issue: None
 
 **In progress Task List**:
-There are no tasks currently in progress.
+  - Task 1: **Phase 1 — Structural Separation & Verification**
+     - Where to resume: The agent needs to verify the fix for the admin panel link (Issue 1). Once confirmed by the user, Phase 1 will be complete.
+     - What will be achieved with this? This will complete the foundational monorepo and reverse-proxy setup, ensuring both apps are running, accessible, and the core functionalities (play experience, admin access) are intact.
+     - Status:  IN PROGRESS
+     - Should Test frontend/backend/both after fix? Frontend
+     - Blocked on something: User verification of the admin link fix.
 
 **Upcoming and Future Tasks**
     Upcoming Tasks:
-    - **Task 1: User Review of  (P0)**: The user needs to review the generated handover document to ensure it meets their requirements for completeness and accuracy.
-    
+    - **Task 1: Implement Admin Access Logging (P1)**: Implement the logic within the admin app's authentication flow to log failed login attempts to the  table. This is part of Phase 4 of the PRD.
+        - File to modify:  (or wherever the login logic resides).
+
     Future Tasks:
-    - **Task 2: Fix Stripe Webhook (P2)**: Address the broken Stripe purchase flow.
-    - **Task 3: Fix Password Reset Link (P2)**: Address the broken password reset functionality.
+    - **Task 2: UI Visual Reset (Phase 2) (P1)**: Rebuild the UI app's screens (, , , ) to use **only** native Framework7 components, removing all old styling and custom HTML. The goal is a pure, native iOS look and feel as per the PRD.
+        - Files to modify:  and .
+    - **Task 3: Final Polish (Phase 5) (P2)**: Update the root  to correctly build and run the new monorepo structure (UI app, Admin app, and Proxy). Create a clear  with setup instructions.
 
 **Completed work in this session**
-- **UI/UX Polish & Bug Fixes:**
-  - Fixed numerous dark mode styling issues across the admin panel, including forms, cards, social icons, and text areas.
-  - Standardized all buttons within the admin panel for a consistent look, feel, and size.
-  - Removed unnecessary UI elements, such as a border under the admin tabs and redundant form titles.
-
-- **iOS Theme Overhaul:**
-  - Replaced the bottom navigation with a new, custom-built iOS App Store-style floating pill component ().
-  - Overhauled the application's entire visual theme to an iOS-centric design, rewriting  and .
-  - Implemented a fully functional and persistent Light/Dark mode toggle using an iOS-style segmented control.
-
-- **Custom Font Management System:**
-  - **Architecture:** Refactored the font system to be database-driven. Created a new  table and linked it to the  table via foreign keys (, ).
-  - **Backend:** Created a new API endpoint () to handle font management (uploading files, CRUD operations on the  table).
-  - **Frontend (Admin):** Built a new Typography section in the admin panel that allows users to:
-    - Upload new font files (TTF, WOFF, WOFF2).
-    - See a list of all available fonts from the database.
-    - Delete custom-uploaded fonts.
-    - Select the primary and secondary fonts for the app from dropdowns populated with available fonts.
-    - Configure line-height and letter-spacing for each font type.
-  - **Integration:** Integrated custom fonts (Manrope, Lora) into the application and stored them in .
-
-- **Documentation:**
-  - Generated a comprehensive product and technical handover document () as requested, detailing the system architecture, data models, UX flows, and design philosophy for future mobile app development.
-
-- **Troubleshooting:**
-  - Correctly diagnosed a user-reported Docker error as a local network/DNS issue and provided effective troubleshooting steps.
-
-**Earlier issues found/mentioned but not fixed**
-   - Issue 1: Stripe webhook purchase flow is broken.
-   - Issue 2: Password reset link is broken.
-
-**Known issue recurrence from previous fork**
-  - Issue recurrence in previous fork: The broken Stripe webhook purchase flow.
-  - Recurrence count: 5+
-  - Status: NOT STARTED
+- **Monorepo Restructuring**: Successfully separated the monolithic application into a monorepo with  (Framework7+Vite) and  (Next.js).
+- **Reverse Proxy Implementation**: Created a Node.js  server () to route traffic from a single entry point to the correct application ( -> UI,  -> Admin).
+- **Framework7 UI App Creation**: Scaffolded a new UI app, implemented the basic structure with a bottom tab bar, and successfully integrated the data-fetching and core play experience logic.
+- **Database Migration to Supabase**: Guided the user to reset the Supabase database with a new, clean schema () and fixtures (), including the new  table. The entire application now exclusively uses Supabase.
+- **Data Fetching and Game Logic Porting**: Refactored the data fetching logic in the new UI app to call the backend API and ported the card game logic, verifying the entire play cycle from deck selection to card flipping.
+- **Extensive Debugging**: Solved numerous complex issues, including Framework7 page lifecycle problems, CORS/host errors with Vite, and environmental constraints preventing direct database access.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Database-Driven Theming/Fonts**: The application's theme (colors) and typography (font family, styles) are now almost entirely controlled by values stored in the PostgreSQL database ( and  tables) and managed via the admin panel.
-- **Headless CMS Pattern**: The project has solidified into a Headless CMS architecture, where the Next.js app serves as both an admin panel for content management and an API provider for a client application. The creation of  formalizes this for a future mobile client.
-- **API for File Uploads**: A new API endpoint () was created to handle  for uploading font files, saving them to the server's filesystem, and creating a corresponding record in the database.
-- **Monolithic Frontend with Dynamic UI**: The  file remains a large, single-file application that dynamically renders different views. The agent successfully navigated and modified this complex file to implement all new features and fixes.
-- **Architectural Refactoring (On-the-fly)**: The agent demonstrated the ability to pivot its implementation based on user feedback. It initially built a simple font system and then completely re-architected it to a more robust, database-normalized structure when the user suggested a better approach.
+- **Monorepo**: The project is structured as a monorepo, separating the UI and Admin applications.
+- **Reverse Proxy**: A Node.js server using  acts as a reverse proxy, routing requests to the appropriate downstream service based on the URL path ( vs ).
+- **Framework7**: The UI application is built with Framework7 Core and Vite, using its file-based routing with separate HTML files and a centralized JavaScript logic file () that leverages page events for initialization.
+- **Headless Backend**: The Next.js application in  now primarily serves as a headless backend, providing a REST API for the UI app and an administration interface.
+- **Supabase-Only Architecture**: All data persistence and authentication are handled by a single remote Supabase instance. The local PostgreSQL setup has been removed.
 
 **key DB schema**
-  - **app_fonts**: 
+  - **admin_access_attempts**: 
   - **app_config**: 
-  - **app_socials**: (Unchanged)
-
-**changes in tech stack**
-- No new libraries were added.  was installed on the container to handle the font files.
+  - **boxes**: 
+  - **cards**: 
+  - **piles**: 
 
 **All files of reference**
-- : **(New & Critical)** The final output of this session, a complete product/technical specification.
-- : The monolithic file containing all frontend logic, which was heavily modified to implement all UI fixes and the new font management UI.
-- : Defines the new, improved database schema with the  table.
-- : The new backend API for all font management.
-- : Completely rewritten to define the global iOS theme, light/dark modes, and  rules.
-- : The new iOS-style floating pill navigation component.
-- : The refactored theme provider supporting the new iOS theme.
+- : **(New & Critical)** The reverse proxy that enables single-domain access to both apps.
+- : **(New & Critical)** The core logic for the entire Framework7 UI application, including routing, data fetching, and game mechanics.
+- : **(Heavily Modified)** The monolithic file for the admin application. Contains the logic for rendering all views and was just fixed.
+- : **(New & Critical)** The single source of truth for the entire database schema, designed to be run on a fresh Supabase instance.
+- : **(New)** Provides the initial data (sample boxes, piles) for the application.
+- : **(Modified)** Updated to allow the preview host to connect.
+- : **(Modified)** Commented out the local PostgreSQL service to reflect the Supabase-only architecture.
 
 **Areas that need refactoring**:
-- : This remains a critical area for refactoring. Its size and complexity are immense. The work in this session has only added to it. Breaking it down into separate screen and component files is the most important future technical debt to address.
+- : This remains a massive monolithic file and the primary source of technical debt in the admin application. Any new work on the admin panel should consider breaking components out of it.
+- : As more features are added to the UI app, this file will grow. It should be structured carefully to keep page-specific logic separated.
 
 **key api endpoints**
-- : Retrieves the list of all available fonts from the  table.
-- : Handles font file upload. Saves the file to  and creates a new record in the  table.
-- : Deletes a font file from the filesystem and its corresponding record from the  table.
+- : Serves the Framework7 UI app.
+- : Serves the Next.js Admin app.
+- : All API endpoints provided by the Next.js backend.
 
 **Critical Info for New Agent**
-1.  ** is the Source of Truth:** The user's final request was to generate . This document contains a complete architectural and product overview. Before starting any new feature, **you must read and understand this file**. It represents the user's desired state and vision for the project.
-2.  **Database-Driven Design:** The application's appearance (fonts, colors) is now heavily controlled by the database. To change core fonts or theme colors, the changes must be made in the  and  tables, ideally via the admin UI. A local Docker restart with volume deletion () is required to apply schema changes from .
-3.  **Authentication is Supabase:** The preview and likely production environments use Supabase for authentication. You cannot log in with local credentials. UI features locked behind authentication (like the full Profile screen) may need to be temporarily exposed for testing, as the agent did with the dark mode toggle.
-4.  ** is a Monolith:** Be extremely cautious when editing . It contains the logic for almost every screen and state in the application. Any significant new feature should ideally involve a plan to refactor a piece of this file into a separate component.
-5.  **Long-Standing Issues:** Critical bugs related to Stripe and Password Reset exist and have been deferred. Do not attempt to fix them unless explicitly asked by the user.
+1.  **Understand the Proxy**: The entry point is . It listens on the main port (3000) and routes traffic to the UI app (8080) or the Admin app (3001). All development and testing must be done through the proxy's URL.
+2.  **Two Separate Apps**: Remember you are working with two distinct applications. The UI is Framework7/Vite, and the Admin is Next.js. They have separate dependencies and run as separate processes.
+3.  **Supabase is the Source of Truth**: The entire application relies on a remote Supabase instance. There is no local database. Schema changes must be made in .
+4.  **UI Logic is in **: For the UI app, page-specific logic is not in the  files but is handled via  events in . This is the central place to add or modify frontend behavior.
+5.  **Admin Monolith**: Be cautious when editing . It's a very large file containing the UI and logic for all admin views.
 
 **documents created in this job**
 - 
 - 
+- 
+- All files for the new  application.
 
 **Last 10 User Messages and any pending HUMAN messages**
-- User (Msg 415): Requested the agent act as a senior product architect and generate a complete, detailed YAML handover document for a mobile app rebuild. (COMPLETED)
-- User (Msg 358): Provided critical architectural feedback, suggesting a dedicated  table instead of disconnected fields, which the agent then implemented. (COMPLETED)
-- User (Msg 357): Informed the agent of a local Docker  error. (ADDRESSED - Agent provided troubleshooting steps).
-- User (Msg 356): Asked if there was a way to upload new fonts. (COMPLETED - Agent built the feature).
-- User (Msg 286): Requested a major new feature: a custom font system using Manrope and Lora, manageable from the admin UI. (COMPLETED)
-- User (Msg 193): Requested a global iOS theme overhaul, bottom nav pill adjustments, dark mode testing, and SQL updates. (COMPLETED)
-- User (Msg 192): Responded to agent's iOS navigation summary.
-- User (Msg 168): Expressed satisfaction with the button standardization and deferred other minor issues. (COMPLETED)
-- User (Msg 79): Requested the agent standardize all admin buttons. (COMPLETED)
-- User (Msg 5): Provided the initial, detailed list of UI bugs and polish items for the session. (COMPLETED)
+- User (Msg 418): Reports that the Admin Panel link is missing from the profile section after logging in as an admin. (IN PROGRESS)
+- User (Msg 406): Reports the UI app is not working on the preview URL due to a Vite  error. (RESOLVED)
+- User (Msg 341): Requests a new feature: a reverse proxy to serve both the UI and Admin apps from a single domain. (COMPLETED)
+- User (Msg 300): Confirms they have successfully executed the  and  files on Supabase. (COMPLETED)
+- User (Msg 296): Agrees to manually drop and recreate the database tables using the SQL provided by the agent. (COMPLETED)
+- User (Msg 281): Provides the Supabase database password. (ADDRESSED)
+- User (Msg 274): Asks the agent to run the SQL directly against Supabase. (ADDRESSED - Agent determined it was not possible due to environment constraints).
+- User (Msg 251): Instructs the agent to manage the database schema in a file that can be run to create fresh environments. (COMPLETED)
+- User (Msg 240): Provides the Supabase  key and confirms they will manage sample cards via the Admin UI. Instructs agent to comment out local DB from docker-compose. (COMPLETED)
+- User (Msg 235): Provides critical direction: use Supabase ONLY (no local DB), and clarifies that the play experience needs to be tested on the new UI app, not the old admin app. (ADDRESSED)
 
 **Project Health Check:**
-- **Broken**: The critical business logic for Stripe webhooks (purchases) and Supabase password resets remains broken and has been intentionally deferred.
-- **Mocked**: N/A.
+- **Broken**:
+  - Stripe webhook functionality.
+  - Password reset functionality.
+- **Mocked**: N/A
 
 **3rd Party Integrations**
-- **Supabase (Database & Auth)** — Used for authentication.
-- **PostgreSQL ( library)** — Used for direct database connection in the local environment.
-- **** — Used for UI icons.
+- **Supabase**: Used for PostgreSQL database and user authentication (Google SSO, Magic Link).
+- **Framework7**: Core UI library for the consumer-facing  app.
+- **Vite**: Build tool for the  app.
+- ****: Node.js library used for the custom reverse proxy.
 
 **Testing status**
   - Testing agent used after significant changes: NO
   - Troubleshoot agent used after agent stuck in loop: NO
   - Test files created: []
-  - Known regressions: None. The agent successfully navigated and fixed a temporary compilation error caused by its own complex refactoring of .
+  - Known regressions: None.
 
 **Credentials to test flow:**
-- Admin access is via Supabase and cannot be used in the preview environment. The default admin email in the database is .
-- To test new database schema changes, run the local environment with .
+- **Admin User**: 
+- **Access**:
+  - UI App: 
+  - Admin App: 
 
 **What agent forgot to execute**
-The agent was exceptionally thorough and did not forget any user requests. It successfully addressed a long list of initial bugs, implemented three major new features (iOS nav, iOS theme, Font system), performed a significant architectural refactor based on user feedback, and completed the final meta-task of creating a handover document.
+- The agent has not yet started implementing the logic to log failed admin access attempts into the  table, as requested in the original PRD (Phase 4).
+- The agent has not yet started the visual reset of the UI app screens to use pure Framework7 components (Phase 2).
 
 </analysis>
