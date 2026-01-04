@@ -17,26 +17,46 @@
 
 /* Ensure iOS styling */
 .ios {
-  --f7-toolbar-bg-color: rgba(255, 255, 255, 0.95);
-  --f7-tabbar-labels-bg-color: rgba(255, 255, 255, 0.95);
+  --f7-toolbar-bg-color: rgba(255, 255, 255, 0.92);
+  --f7-tabbar-labels-bg-color: rgba(255, 255, 255, 0.92);
 }
 
-/* Bottom tabbar styling - floating pill */
-.tabbar-labels.tabbar-floating {
-  margin: 8px 16px;
-  margin-bottom: calc(8px + var(--f7-safe-area-bottom));
+/* Bottom tabbar styling - floating pill (iOS App Store style) */
+.toolbar.tabbar-labels.toolbar-bottom {
+  background: transparent;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+}
+
+.toolbar.tabbar-labels.toolbar-bottom::before {
+  display: none;
+}
+
+.toolbar.tabbar-labels.toolbar-bottom .toolbar-inner {
+  margin: 0 auto;
+  max-width: 320px;
+  height: 60px;
   border-radius: 30px;
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
-  width: auto;
-  max-width: 320px;
-  left: 50%;
-  transform: translateX(-50%);
+  padding: 0 8px;
 }
 
-.tabbar-labels.tabbar-floating .toolbar-inner {
-  padding: 0 8px;
+/* Tab link styling */
+.toolbar.tabbar-labels .tab-link {
+  flex-direction: column;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.toolbar.tabbar-labels .tab-link i.f7-icons {
+  font-size: 22px;
+  margin-bottom: 2px;
 }
 
 /* Card pile styling */
