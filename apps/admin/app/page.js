@@ -282,7 +282,7 @@ function CardPile({
                 // Show image if available
                 <div className={`w-full h-full border-2 ${borderColor} rounded-lg overflow-hidden`}>
                   <img 
-                    src={getImageUrl(currentCard.imagePath ? currentCard.imagePath : `/${currentCard.imagePath}`}
+                    src={getImageUrl(currentCard.imagePath)}
                     alt={currentCard.title || 'Card'}
                     className="w-full h-full object-cover"
                   />
