@@ -1260,6 +1260,7 @@ export async function PUT(request) {
   const url = new URL(request.url)
   const path = url.pathname.replace('/api/', '')
   const supabase = createSupabaseServer()
+  const supabaseAdmin = getSupabaseAdmin() // Service role client for admin operations
 
   try {
     const { user, error: authError } = await getAuthenticatedUser()
@@ -1280,7 +1281,7 @@ export async function PUT(request) {
       if (body.imagePath !== undefined) updateData.image_path = body.imagePath
       if (body.isActive !== undefined) updateData.is_active = body.isActive
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('cards')
         .update(updateData)
         .eq('id', cardId)
