@@ -33,11 +33,11 @@
         
         <!-- Black Pile -->
         <div class="pile-container" style="text-align: center;">
-          <div class="card-stack-wrapper" id="black-stack-wrapper">
+          <div class="card-stack-wrapper">
             <!-- Stacked cards behind (for visual effect) -->
-            <div class="stacked-card stacked-1" id="black-stacked-1"></div>
-            <div class="stacked-card stacked-2" id="black-stacked-2"></div>
-            <div class="stacked-card stacked-3" id="black-stacked-3"></div>
+            <div class="stacked-card stacked-1" id="black-stack-1"></div>
+            <div class="stacked-card stacked-2" id="black-stack-2"></div>
+            <div class="stacked-card stacked-3" id="black-stack-3"></div>
             <!-- Main card -->
             <div id="black-pile" class="card-pile black">
               <div class="card-inner">
@@ -53,16 +53,16 @@
               </div>
             </div>
           </div>
-          <p id="black-count" class="pile-count" style="margin-top: 12px; color: #8E8E93; font-size: 14px;">-- cards left</p>
+          <p id="black-count" class="pile-count" style="margin-top: 12px; color: #8E8E93; font-size: 14px;"></p>
         </div>
         
         <!-- White Pile -->
         <div class="pile-container" style="text-align: center;">
-          <div class="card-stack-wrapper" id="white-stack-wrapper">
+          <div class="card-stack-wrapper">
             <!-- Stacked cards behind (for visual effect) -->
-            <div class="stacked-card stacked-1" id="white-stacked-1" style="background: #fff; border: 2px solid #ddd;"></div>
-            <div class="stacked-card stacked-2" id="white-stacked-2" style="background: #fff; border: 2px solid #ddd;"></div>
-            <div class="stacked-card stacked-3" id="white-stacked-3" style="background: #fff; border: 2px solid #ddd;"></div>
+            <div class="stacked-card stacked-1" id="white-stack-1"></div>
+            <div class="stacked-card stacked-2" id="white-stack-2"></div>
+            <div class="stacked-card stacked-3" id="white-stack-3"></div>
             <!-- Main card -->
             <div id="white-pile" class="card-pile white">
               <div class="card-inner">
@@ -78,7 +78,7 @@
               </div>
             </div>
           </div>
-          <p id="white-count" class="pile-count" style="margin-top: 12px; color: #8E8E93; font-size: 14px;">-- cards left</p>
+          <p id="white-count" class="pile-count" style="margin-top: 12px; color: #8E8E93; font-size: 14px;"></p>
         </div>
         
       </div>
@@ -87,93 +87,48 @@
   </div>
 </div>
 
-<style>
-/* Card stack wrapper */
-.card-stack-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
-/* Stacked cards behind the main card */
-.stacked-card {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 12px;
-  pointer-events: none;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-.stacked-card.stacked-1 {
-  background: #1a1a1a;
-  border: 2px solid #444;
-  z-index: 1;
-}
-
-.stacked-card.stacked-2 {
-  background: #2a2a2a;
-  border: 2px solid #555;
-  z-index: 2;
-}
-
-.stacked-card.stacked-3 {
-  background: #333;
-  border: 2px solid #666;
-  z-index: 3;
-}
-
-/* White pile stacked cards */
-#white-stacked-1 {
-  background: #f5f5f5 !important;
-  border: 2px solid #ccc !important;
-}
-
-#white-stacked-2 {
-  background: #fafafa !important;
-  border: 2px solid #ddd !important;
-}
-
-#white-stacked-3 {
-  background: #fff !important;
-  border: 2px solid #e0e0e0 !important;
-}
-
-/* The main card pile sits on top */
-.card-pile {
-  position: relative;
-  z-index: 10;
-}
-</style>
-
 <script>
 (function() {
   const state = window.appState;
-  const { drawCard, flipCard, resetRound, reshufflePile, endGame, startSharing, finishSharing } = window.appFunctions;
+  const { drawCard, flipCard, resetRound, endGame, startSharing, finishSharing } = window.appFunctions;
   
-  // Generate random rotation between -6 and 6 degrees
+  // Generate random rotation between -5 and 5 degrees
   function getRandomRotation() {
-    return (Math.random() - 0.5) * 12; // -6 to +6 degrees
+    return (Math.random() - 0.5) * 10; // -5 to +5 degrees
   }
   
-  // Apply random rotations to stacked cards
+  // Generate random offset between -3 and 3 pixels
+  function getRandomOffset() {
+    return (Math.random() - 0.5) * 6; // -3 to +3 pixels
+  }
+  
+  // Apply random rotations to stacked cards for natural look
   function applyStackRotations() {
+    console.log('[Game] Applying stack rotations');
+    
     // Black pile stacked cards
-    const blackStack1 = document.getElementById('black-stacked-1');
-    const blackStack2 = document.getElementById('black-stacked-2');
-    const blackStack3 = document.getElementById('black-stacked-3');
+    for (let i = 1; i <= 3; i++) {
+      const el = document.getElementById(`black-stack-${i}`);
+      if (el) {
+        const rotation = getRandomRotation();
+        const offsetX = getRandomOffset();
+        const offsetY = getRandomOffset();
+        el.style.transform = `rotate(${rotation}deg) translate(${offsetX}px, ${offsetY}px)`;
+        console.log(`[Game] black-stack-${i}: rotate(${rotation.toFixed(1)}deg)`);
+      }
+    }
     
-    if (blackStack1) blackStack1.style.transform = `rotate(${getRandomRotation()}deg) translate(-2px, 2px)`;
-    if (blackStack2) blackStack2.style.transform = `rotate(${getRandomRotation()}deg) translate(-1px, 1px)`;
-    if (blackStack3) blackStack3.style.transform = `rotate(${getRandomRotation()}deg) translate(1px, -1px)`;
-    
-    // White pile stacked cards
-    const whiteStack1 = document.getElementById('white-stacked-1');
-    const whiteStack2 = document.getElementById('white-stacked-2');
-    const whiteStack3 = document.getElementById('white-stacked-3');
-    
-    if (whiteStack1) whiteStack1.style.transform = `rotate(${getRandomRotation()}deg) translate(-2px, 2px)`;
-    if (whiteStack2) whiteStack2.style.transform = `rotate(${getRandomRotation()}deg) translate(-1px, 1px)`;
-    if (whiteStack3) whiteStack3.style.transform = `rotate(${getRandomRotation()}deg) translate(1px, -1px)`;
+    // White pile stacked cards  
+    for (let i = 1; i <= 3; i++) {
+      const el = document.getElementById(`white-stack-${i}`);
+      if (el) {
+        const rotation = getRandomRotation();
+        const offsetX = getRandomOffset();
+        const offsetY = getRandomOffset();
+        el.style.transform = `rotate(${rotation}deg) translate(${offsetX}px, ${offsetY}px)`;
+        console.log(`[Game] white-stack-${i}: rotate(${rotation.toFixed(1)}deg)`);
+      }
+    }
   }
   
   // Helper to get correct image URL
@@ -234,6 +189,18 @@
     }
   }
   
+  function updateStackVisibility(pile, count) {
+    // Show/hide stacked cards based on deck size
+    for (let i = 1; i <= 3; i++) {
+      const el = document.getElementById(`${pile}-stack-${i}`);
+      if (el) {
+        // Show stack 1 if > 3 cards, stack 2 if > 2, stack 3 if > 1
+        const threshold = 4 - i;
+        el.style.opacity = count > threshold ? '1' : '0';
+      }
+    }
+  }
+  
   function updateCards() {
     const blackPile = document.getElementById('black-pile');
     const whitePile = document.getElementById('white-pile');
@@ -241,6 +208,12 @@
     const whiteFront = document.getElementById('white-front');
     const blackCount = document.getElementById('black-count');
     const whiteCount = document.getElementById('white-count');
+    
+    // Get deck counts
+    const blackDeckCount = state.blackDeck ? state.blackDeck.length : 0;
+    const whiteDeckCount = state.whiteDeck ? state.whiteDeck.length : 0;
+    
+    console.log('[Game] updateCards - blackDeck:', blackDeckCount, 'whiteDeck:', whiteDeckCount);
     
     // Update black card
     if (blackPile && blackFront) {
@@ -268,26 +241,17 @@
       }
     }
     
-    // Update card counts - show actual deck length
-    const blackDeckCount = state.blackDeck?.length || 0;
-    const whiteDeckCount = state.whiteDeck?.length || 0;
-    
-    if (blackCount) blackCount.textContent = `${blackDeckCount} cards left`;
-    if (whiteCount) whiteCount.textContent = `${whiteDeckCount} cards left`;
+    // Update card counts
+    if (blackCount) {
+      blackCount.textContent = `${blackDeckCount} cards left`;
+    }
+    if (whiteCount) {
+      whiteCount.textContent = `${whiteDeckCount} cards left`;
+    }
     
     // Update stack visibility based on deck size
     updateStackVisibility('black', blackDeckCount);
     updateStackVisibility('white', whiteDeckCount);
-  }
-  
-  function updateStackVisibility(pile, count) {
-    const stack1 = document.getElementById(`${pile}-stacked-1`);
-    const stack2 = document.getElementById(`${pile}-stacked-2`);
-    const stack3 = document.getElementById(`${pile}-stacked-3`);
-    
-    if (stack1) stack1.style.opacity = count > 3 ? '1' : '0';
-    if (stack2) stack2.style.opacity = count > 2 ? '1' : '0';
-    if (stack3) stack3.style.opacity = count > 1 ? '1' : '0';
   }
   
   // Event listeners
@@ -297,9 +261,9 @@
   
   // Card pile clicks
   document.getElementById('black-pile')?.addEventListener('click', () => {
-    if (!state.currentBlack && state.blackDeck.length > 0) {
+    if (!state.currentBlack && state.blackDeck && state.blackDeck.length > 0) {
       drawCard('black');
-      applyStackRotations(); // Randomize stack on each draw
+      applyStackRotations(); // Re-randomize on each draw
     } else if (state.currentBlack) {
       flipCard('black');
     }
@@ -307,9 +271,9 @@
   });
   
   document.getElementById('white-pile')?.addEventListener('click', () => {
-    if (!state.currentWhite && state.whiteDeck.length > 0) {
+    if (!state.currentWhite && state.whiteDeck && state.whiteDeck.length > 0) {
       drawCard('white');
-      applyStackRotations(); // Randomize stack on each draw
+      applyStackRotations(); // Re-randomize on each draw
     } else if (state.currentWhite) {
       flipCard('white');
     }
@@ -344,6 +308,11 @@
   });
   
   // Initial setup
+  console.log('[Game] Page initialized, state:', {
+    blackDeck: state.blackDeck?.length,
+    whiteDeck: state.whiteDeck?.length
+  });
+  
   checkOrientation();
   applyStackRotations();
   updateCards();
