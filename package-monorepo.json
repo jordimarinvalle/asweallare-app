@@ -1,0 +1,20 @@
+{
+  "name": "asweallare-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"yarn workspace asweallare-ui dev\" \"yarn workspace asweallare-admin dev\"",
+    "dev:ui": "yarn workspace asweallare-ui dev",
+    "dev:admin": "yarn workspace asweallare-admin dev",
+    "build": "yarn workspaces run build",
+    "build:ui": "yarn workspace asweallare-ui build",
+    "build:admin": "yarn workspace asweallare-admin build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
