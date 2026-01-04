@@ -404,7 +404,7 @@ async function handleCardMockupsZip(supabase, supabaseAdmin, zipFile, boxId) {
         .from(BUCKET_NAME)
         .getPublicUrl(storagePath)
       
-      const { error: dbError } = await supabase
+      const { error: dbError } = await supabaseAdmin
         .from('mockup_images')
         .insert({
           id: `${boxId}_card_${md5Hash}`,
