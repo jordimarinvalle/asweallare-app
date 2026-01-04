@@ -152,7 +152,7 @@ export async function PUT(request) {
     } else {
       // Insert new
       const newId = id || 'app_asweallare'
-      const { error: insertError } = await supabase
+      const { error: insertError } = await supabaseAdmin
         .from('app_config')
         .insert({
           id: newId,
