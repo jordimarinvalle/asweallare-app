@@ -272,7 +272,7 @@ async function handleSingleImageUpload(supabase, supabaseAdmin, file, boxId, ima
     for (const img of existing) {
       await deleteStorageFile(supabaseAdmin, img.image_path)
     }
-    await supabase
+    await supabaseAdmin
       .from('mockup_images')
       .delete()
       .eq('box_id', boxId)
