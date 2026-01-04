@@ -976,7 +976,7 @@ export async function POST(request) {
         created_at: new Date().toISOString()
       }
       
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('cards')
         .insert([card])
         .select()
