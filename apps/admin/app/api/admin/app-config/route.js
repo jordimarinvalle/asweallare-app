@@ -206,6 +206,7 @@ export async function POST(request) {
     const { app_id, platform, url } = body
     
     const supabase = createSupabaseServer()
+    const supabaseAdmin = getSupabaseAdmin()
     
     // Get max display order
     const { data: maxOrder } = await supabase
@@ -220,7 +221,7 @@ export async function POST(request) {
     const newId = `social_${uuidv4().slice(0, 8)}`
     
     // Insert the social link
-    const { error: insertError } = await supabase
+    const { error: insertError } = await supabaseAdmin
       .from('app_socials')
       .insert({
         id: newId,
