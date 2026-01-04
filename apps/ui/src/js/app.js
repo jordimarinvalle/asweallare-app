@@ -1,10 +1,13 @@
 import Framework7 from 'framework7/bundle'
 import { createClient } from '@supabase/supabase-js'
 
-// Initialize Supabase
+// Initialize Supabase - ONLY for authentication
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://pwdwemakaozxmutwswqa.supabase.co'
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_K-L2v83yXtTeHkSWtFX_ag_ZbjbDq8p'
 export const supabase = createClient(supabaseUrl, supabaseKey)
+
+// API Base URL - Use local backend for data
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 // App State
 window.appState = {
@@ -30,17 +33,18 @@ window.appState = {
 
 const state = window.appState
 
-// Data loading functions
+// ============================================================================
+// DATA LOADING FUNCTIONS - Use local API endpoints
+// ============================================================================
+
 async function loadAppConfig() {
   try {
-    const { data, error } = await supabase
-      .from('app_config')
-      .select('*')
-      .eq('slug', 'asweallare')
-      .single()
+    const response = await fetch(`${API_BASE}/app-config?slug=asweallare`)
+    const data = await response.json()
     
     if (data) {
       state.appConfig = data
+      console.log('App config loaded:', data)
     }
   } catch (err) {
     console.error('Error loading app config:', err)
@@ -49,14 +53,12 @@ async function loadAppConfig() {
 
 async function loadBoxes() {
   try {
-    const { data, error } = await supabase
-      .from('boxes')
-      .select('*, prices(*), collection_series(*)')
-      .eq('is_active', true)
-      .order('display_order')
+    const response = await fetch(`${API_BASE}/boxes`)
+    const data = await response.json()
     
-    if (data) {
+    if (data && Array.isArray(data)) {
       state.boxes = data
+      console.log('Boxes loaded:', data.length, 'boxes')
     }
   } catch (err) {
     console.error('Error loading boxes:', err)
@@ -65,14 +67,12 @@ async function loadBoxes() {
 
 async function loadPiles() {
   try {
-    const { data, error } = await supabase
-      .from('piles')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order')
+    const response = await fetch(`${API_BASE}/piles`)
+    const data = await response.json()
     
-    if (data) {
+    if (data && Array.isArray(data)) {
       state.piles = data
+      console.log('Piles loaded:', data.length, 'piles')
     }
   } catch (err) {
     console.error('Error loading piles:', err)
@@ -83,27 +83,37 @@ async function loadCardsForBoxes(boxIds) {
   if (!boxIds || boxIds.length === 0) return []
   
   try {
-    const { data, error } = await supabase
-      .from('cards')
-      .select('*, piles(*)')
-      .in('box_id', boxIds)
-      .eq('is_active', true)
+    // Fetch cards for each box
+    const allCards = []
     
-    if (data) {
-      const cardsWithColor = data.map(card => ({
-        ...card,
-        color: card.piles?.slug === 'black' ? 'black' : 'white'
-      }))
-      state.cards = cardsWithColor
-      return cardsWithColor
+    for (const boxId of boxIds) {
+      const response = await fetch(`${API_BASE}/boxes/${boxId}/cards`)
+      const data = await response.json()
+      
+      if (data && Array.isArray(data)) {
+        allCards.push(...data)
+      }
     }
+    
+    // Add color based on pile
+    const cardsWithColor = allCards.map(card => ({
+      ...card,
+      color: card.pile?.slug === 'black' || card.pile_id?.includes('black') ? 'black' : 'white'
+    }))
+    
+    state.cards = cardsWithColor
+    console.log('Cards loaded:', cardsWithColor.length, 'cards')
+    return cardsWithColor
   } catch (err) {
     console.error('Error loading cards:', err)
   }
   return []
 }
 
-// Game functions
+// ============================================================================
+// GAME FUNCTIONS
+// ============================================================================
+
 function shuffleArray(array) {
   const shuffled = [...array]
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -128,6 +138,8 @@ function startGame(boxIds) {
     state.blackFlipped = false
     state.whiteFlipped = false
     resetTimer()
+    
+    console.log('Game started with', blackCards.length, 'black cards and', whiteCards.length, 'white cards')
   })
 }
 
@@ -234,7 +246,10 @@ function endGame() {
   resetTimer()
 }
 
-// Auth functions
+// ============================================================================
+// AUTH FUNCTIONS - Use Supabase for authentication only
+// ============================================================================
+
 async function signInWithGoogle() {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -272,7 +287,10 @@ async function signOut() {
   state.user = null
 }
 
-// Export to window for use in pages
+// ============================================================================
+// EXPORT FUNCTIONS TO WINDOW
+// ============================================================================
+
 window.appFunctions = {
   loadAppConfig,
   loadBoxes,
@@ -291,12 +309,23 @@ window.appFunctions = {
   signOut
 }
 
-// Initialize app
+// ============================================================================
+// APP INITIALIZATION
+// ============================================================================
+
 async function initApp() {
-  // Check auth state
-  const { data: { session } } = await supabase.auth.getSession()
-  if (session?.user) {
-    state.user = session.user
+  console.log('Initializing AS WE ALL ARE UI App...')
+  console.log('API Base:', API_BASE)
+  
+  // Check auth state (Supabase)
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.user) {
+      state.user = session.user
+      console.log('User logged in:', session.user.email)
+    }
+  } catch (err) {
+    console.log('Auth check skipped (expected in local mode)')
   }
   
   // Listen for auth changes
@@ -304,12 +333,15 @@ async function initApp() {
     state.user = session?.user || null
   })
   
-  // Load initial data
+  // Load initial data from LOCAL API
+  console.log('Loading data from local API...')
   await Promise.all([
     loadAppConfig(),
     loadBoxes(),
     loadPiles()
   ])
+  
+  console.log('Data loaded. Boxes:', state.boxes.length)
   
   // Initialize Framework7
   const app = new Framework7({
@@ -344,6 +376,7 @@ async function initApp() {
   })
   
   window.f7App = app
+  console.log('Framework7 initialized')
 }
 
 // Wait for DOM and init
