@@ -1460,6 +1460,7 @@ export async function DELETE(request) {
   const url = new URL(request.url)
   const path = url.pathname.replace('/api/', '')
   const supabase = createSupabaseServer()
+  const supabaseAdmin = getSupabaseAdmin() // Service role client for admin operations
 
   try {
     const { user, error: authError } = await getAuthenticatedUser()
