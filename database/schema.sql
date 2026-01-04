@@ -242,5 +242,90 @@ CREATE TRIGGER update_user_memberships_updated_at
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================================
+-- 11. APP_CONFIG TABLE
+-- Application-wide configuration settings
+-- ============================================================================
+CREATE TABLE app_config (
+  id TEXT PRIMARY KEY DEFAULT 'default',
+  slug TEXT UNIQUE NOT NULL DEFAULT 'asweallare',
+  name TEXT DEFAULT 'AS WE ALL ARE',
+  title TEXT DEFAULT 'Unscripted Conversations',
+  tagline TEXT DEFAULT 'A therapeutic conversational card game',
+  promise TEXT DEFAULT 'Know more about each other without the need to ask any question',
+  header_text TEXT,
+  body_text TEXT,
+  footer_text TEXT,
+  admin_emails TEXT DEFAULT '',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TRIGGER update_app_config_updated_at
+  BEFORE UPDATE ON app_config
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================================
+-- 12. ADMIN_ACCESS_ATTEMPTS TABLE
+-- Logs unauthorized admin login attempts
+-- ============================================================================
+CREATE TABLE admin_access_attempts (
+  email TEXT PRIMARY KEY,
+  first_attempt_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  last_attempt_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  attempts_count INTEGER DEFAULT 1
+);
+
+CREATE INDEX idx_admin_access_attempts_last ON admin_access_attempts(last_attempt_at);
+
+-- ============================================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ============================================================================
+
+-- Enable RLS on all tables
+ALTER TABLE collection_series ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE boxes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE piles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bundles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_memberships ENABLE ROW LEVEL SECURITY;
+ALTER TABLE subscription_plans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE mockup_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_access_attempts ENABLE ROW LEVEL SECURITY;
+
+-- Public read access for content tables
+CREATE POLICY "Public read access" ON collection_series FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON prices FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON boxes FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON piles FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON cards FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON bundles FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON subscription_plans FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON mockup_images FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON app_config FOR SELECT USING (true);
+
+-- User-specific policies for user data tables
+CREATE POLICY "Users can view own products" ON user_products 
+  FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can view own memberships" ON user_memberships 
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- Service role full access (for admin operations)
+CREATE POLICY "Service role full access" ON collection_series FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role full access" ON prices FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role full access" ON boxes FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role full access" ON piles FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role full access" ON cards FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role full access" ON bundles FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role full access" ON user_products FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role full access" ON user_memberships FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role full access" ON subscription_plans FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role full access" ON mockup_images FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role full access" ON app_config FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role full access" ON admin_access_attempts FOR ALL USING (auth.role() = 'service_role');
+
+-- ============================================================================
 -- Done! Schema created successfully.
 -- ============================================================================
