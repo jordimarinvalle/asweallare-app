@@ -33,44 +33,52 @@
         
         <!-- Black Pile -->
         <div class="pile-container" style="text-align: center;">
-          <div id="black-pile" class="card-pile black">
-            <div class="card-inner">
-              <div class="card-back" style="background: #000; border: 2px solid #666;">
-                <img src="/assets/black-card-back.png" alt="Black card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" />
-                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-                  <span style="background:#D12128;color:white;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:500;">
-                    <i class="f7-icons" style="font-size:14px;">arrow_2_circlepath</i> Tap
-                  </span>
+          <div class="card-stack-wrapper" id="black-stack-wrapper">
+            <!-- Stacked cards behind (for visual effect) -->
+            <div class="stacked-card stacked-1" id="black-stacked-1"></div>
+            <div class="stacked-card stacked-2" id="black-stacked-2"></div>
+            <div class="stacked-card stacked-3" id="black-stacked-3"></div>
+            <!-- Main card -->
+            <div id="black-pile" class="card-pile black">
+              <div class="card-inner">
+                <div class="card-back" style="background: #000; border: 2px solid #666;">
+                  <img src="/assets/black-card-back.png" alt="Black card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'" />
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                    <span style="background:#D12128;color:white;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:500;">
+                      <i class="f7-icons" style="font-size:14px;">arrow_2_circlepath</i> Tap
+                    </span>
+                  </div>
                 </div>
+                <div id="black-front" class="card-front" style="background: #000; border: 2px solid #666;"></div>
               </div>
-              <div id="black-front" class="card-front" style="background: #000; border: 2px solid #666;"></div>
             </div>
           </div>
-          <p id="black-count" class="pile-count" style="margin-top: 12px; color: #8E8E93; font-size: 14px;">0 cards left</p>
-          <button id="reshuffle-black" class="button button-small" style="margin-top: 8px;">
-            <i class="f7-icons" style="font-size: 16px;">shuffle</i>
-          </button>
+          <p id="black-count" class="pile-count" style="margin-top: 12px; color: #8E8E93; font-size: 14px;">-- cards left</p>
         </div>
         
         <!-- White Pile -->
         <div class="pile-container" style="text-align: center;">
-          <div id="white-pile" class="card-pile white">
-            <div class="card-inner">
-              <div class="card-back" style="background: #fff; border: 2px solid #ddd;">
-                <img src="/assets/white-card-back.png" alt="White card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" />
-                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-                  <span style="background:#D12128;color:white;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:500;">
-                    <i class="f7-icons" style="font-size:14px;">arrow_2_circlepath</i> Tap
-                  </span>
+          <div class="card-stack-wrapper" id="white-stack-wrapper">
+            <!-- Stacked cards behind (for visual effect) -->
+            <div class="stacked-card stacked-1" id="white-stacked-1" style="background: #fff; border: 2px solid #ddd;"></div>
+            <div class="stacked-card stacked-2" id="white-stacked-2" style="background: #fff; border: 2px solid #ddd;"></div>
+            <div class="stacked-card stacked-3" id="white-stacked-3" style="background: #fff; border: 2px solid #ddd;"></div>
+            <!-- Main card -->
+            <div id="white-pile" class="card-pile white">
+              <div class="card-inner">
+                <div class="card-back" style="background: #fff; border: 2px solid #ddd;">
+                  <img src="/assets/white-card-back.png" alt="White card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'" />
+                  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                    <span style="background:#D12128;color:white;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:500;">
+                      <i class="f7-icons" style="font-size:14px;">arrow_2_circlepath</i> Tap
+                    </span>
+                  </div>
                 </div>
+                <div id="white-front" class="card-front" style="background: #fff; border: 2px solid #ddd;"></div>
               </div>
-              <div id="white-front" class="card-front" style="background: #fff; border: 2px solid #ddd;"></div>
             </div>
           </div>
-          <p id="white-count" class="pile-count" style="margin-top: 12px; color: #8E8E93; font-size: 14px;">0 cards left</p>
-          <button id="reshuffle-white" class="button button-small" style="margin-top: 8px;">
-            <i class="f7-icons" style="font-size: 16px;">shuffle</i>
-          </button>
+          <p id="white-count" class="pile-count" style="margin-top: 12px; color: #8E8E93; font-size: 14px;">-- cards left</p>
         </div>
         
       </div>
@@ -79,10 +87,105 @@
   </div>
 </div>
 
+<style>
+/* Card stack wrapper */
+.card-stack-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Stacked cards behind the main card */
+.stacked-card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  pointer-events: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.stacked-card.stacked-1 {
+  background: #1a1a1a;
+  border: 2px solid #444;
+  z-index: 1;
+}
+
+.stacked-card.stacked-2 {
+  background: #2a2a2a;
+  border: 2px solid #555;
+  z-index: 2;
+}
+
+.stacked-card.stacked-3 {
+  background: #333;
+  border: 2px solid #666;
+  z-index: 3;
+}
+
+/* White pile stacked cards */
+#white-stacked-1 {
+  background: #f5f5f5 !important;
+  border: 2px solid #ccc !important;
+}
+
+#white-stacked-2 {
+  background: #fafafa !important;
+  border: 2px solid #ddd !important;
+}
+
+#white-stacked-3 {
+  background: #fff !important;
+  border: 2px solid #e0e0e0 !important;
+}
+
+/* The main card pile sits on top */
+.card-pile {
+  position: relative;
+  z-index: 10;
+}
+</style>
+
 <script>
 (function() {
   const state = window.appState;
   const { drawCard, flipCard, resetRound, reshufflePile, endGame, startSharing, finishSharing } = window.appFunctions;
+  
+  // Generate random rotation between -6 and 6 degrees
+  function getRandomRotation() {
+    return (Math.random() - 0.5) * 12; // -6 to +6 degrees
+  }
+  
+  // Apply random rotations to stacked cards
+  function applyStackRotations() {
+    // Black pile stacked cards
+    const blackStack1 = document.getElementById('black-stacked-1');
+    const blackStack2 = document.getElementById('black-stacked-2');
+    const blackStack3 = document.getElementById('black-stacked-3');
+    
+    if (blackStack1) blackStack1.style.transform = `rotate(${getRandomRotation()}deg) translate(-2px, 2px)`;
+    if (blackStack2) blackStack2.style.transform = `rotate(${getRandomRotation()}deg) translate(-1px, 1px)`;
+    if (blackStack3) blackStack3.style.transform = `rotate(${getRandomRotation()}deg) translate(1px, -1px)`;
+    
+    // White pile stacked cards
+    const whiteStack1 = document.getElementById('white-stacked-1');
+    const whiteStack2 = document.getElementById('white-stacked-2');
+    const whiteStack3 = document.getElementById('white-stacked-3');
+    
+    if (whiteStack1) whiteStack1.style.transform = `rotate(${getRandomRotation()}deg) translate(-2px, 2px)`;
+    if (whiteStack2) whiteStack2.style.transform = `rotate(${getRandomRotation()}deg) translate(-1px, 1px)`;
+    if (whiteStack3) whiteStack3.style.transform = `rotate(${getRandomRotation()}deg) translate(1px, -1px)`;
+  }
+  
+  // Helper to get correct image URL
+  function getImageUrl(path) {
+    if (!path) return '';
+    // If it already starts with http/https, return as-is (no leading slash)
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    // Otherwise add leading slash if needed
+    return path.startsWith('/') ? path : '/' + path;
+  }
   
   function checkOrientation() {
     const isLandscape = window.innerWidth > window.innerHeight;
@@ -139,30 +242,52 @@
     const blackCount = document.getElementById('black-count');
     const whiteCount = document.getElementById('white-count');
     
+    // Update black card
     if (blackPile && blackFront) {
       if (state.currentBlack) {
         blackPile.classList.toggle('flipped', state.blackFlipped);
-        const imgPath = state.currentBlack.image_path || '';
-        const imgSrc = imgPath.startsWith('/') ? imgPath : '/' + imgPath;
-        blackFront.innerHTML = `<img src="${imgSrc}" alt="Card" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />`;
+        const imgSrc = getImageUrl(state.currentBlack.image_path);
+        blackFront.innerHTML = imgSrc 
+          ? `<img src="${imgSrc}" alt="Card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'" />`
+          : '';
       } else {
         blackPile.classList.remove('flipped');
       }
     }
     
+    // Update white card
     if (whitePile && whiteFront) {
       if (state.currentWhite) {
         whitePile.classList.toggle('flipped', state.whiteFlipped);
-        const imgPath = state.currentWhite.image_path || '';
-        const imgSrc = imgPath.startsWith('/') ? imgPath : '/' + imgPath;
-        whiteFront.innerHTML = `<img src="${imgSrc}" alt="Card" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />`;
+        const imgSrc = getImageUrl(state.currentWhite.image_path);
+        whiteFront.innerHTML = imgSrc
+          ? `<img src="${imgSrc}" alt="Card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'" />`
+          : '';
       } else {
         whitePile.classList.remove('flipped');
       }
     }
     
-    if (blackCount) blackCount.textContent = `${state.blackDeck.length} cards left`;
-    if (whiteCount) whiteCount.textContent = `${state.whiteDeck.length} cards left`;
+    // Update card counts - show actual deck length
+    const blackDeckCount = state.blackDeck?.length || 0;
+    const whiteDeckCount = state.whiteDeck?.length || 0;
+    
+    if (blackCount) blackCount.textContent = `${blackDeckCount} cards left`;
+    if (whiteCount) whiteCount.textContent = `${whiteDeckCount} cards left`;
+    
+    // Update stack visibility based on deck size
+    updateStackVisibility('black', blackDeckCount);
+    updateStackVisibility('white', whiteDeckCount);
+  }
+  
+  function updateStackVisibility(pile, count) {
+    const stack1 = document.getElementById(`${pile}-stacked-1`);
+    const stack2 = document.getElementById(`${pile}-stacked-2`);
+    const stack3 = document.getElementById(`${pile}-stacked-3`);
+    
+    if (stack1) stack1.style.opacity = count > 3 ? '1' : '0';
+    if (stack2) stack2.style.opacity = count > 2 ? '1' : '0';
+    if (stack3) stack3.style.opacity = count > 1 ? '1' : '0';
   }
   
   // Event listeners
@@ -174,6 +299,7 @@
   document.getElementById('black-pile')?.addEventListener('click', () => {
     if (!state.currentBlack && state.blackDeck.length > 0) {
       drawCard('black');
+      applyStackRotations(); // Randomize stack on each draw
     } else if (state.currentBlack) {
       flipCard('black');
     }
@@ -183,6 +309,7 @@
   document.getElementById('white-pile')?.addEventListener('click', () => {
     if (!state.currentWhite && state.whiteDeck.length > 0) {
       drawCard('white');
+      applyStackRotations(); // Randomize stack on each draw
     } else if (state.currentWhite) {
       flipCard('white');
     }
@@ -210,19 +337,6 @@
     updateTimerDisplay();
   });
   
-  // Reshuffle buttons
-  document.getElementById('reshuffle-black')?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    reshufflePile('black');
-    updateCards();
-  });
-  
-  document.getElementById('reshuffle-white')?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    reshufflePile('white');
-    updateCards();
-  });
-  
   // Exit button
   document.getElementById('exit-btn')?.addEventListener('click', () => {
     endGame();
@@ -231,6 +345,7 @@
   
   // Initial setup
   checkOrientation();
+  applyStackRotations();
   updateCards();
   updateTimerDisplay();
 })();
