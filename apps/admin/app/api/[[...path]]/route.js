@@ -976,7 +976,7 @@ export async function POST(request) {
         created_at: new Date().toISOString()
       }
       
-      const { data, error } = await supabaseAdminAdmin
+      const { data, error } = await supabaseAdmin
         .from('cards')
         .insert([card])
         .select()
@@ -1022,7 +1022,7 @@ export async function POST(request) {
         created_at: new Date().toISOString()
       }
       
-      const { data, error } = await supabaseAdminAdmin
+      const { data, error } = await supabaseAdmin
         .from('boxes')
         .insert([box])
         .select()
@@ -1407,7 +1407,7 @@ export async function PUT(request) {
       
       // Use service role client for admin operations (bypasses RLS)
       const supabaseAdmin = getSupabaseAdmin()
-      const { data, error } = await supabaseAdminAdmin
+      const { data, error } = await supabaseAdmin
         .from('piles')
         .update(updateData)
         .eq('id', pileId)
