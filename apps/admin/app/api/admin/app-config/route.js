@@ -99,6 +99,7 @@ export async function PUT(request) {
     } = body
     
     const supabase = createSupabaseServer()
+    const supabaseAdmin = getSupabaseAdmin()
     
     // Try to update existing config
     const { data: existing } = await supabase
@@ -109,7 +110,7 @@ export async function PUT(request) {
     
     if (existing) {
       // Update
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseAdmin
         .from('app_config')
         .update({
           name,
