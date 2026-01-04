@@ -5167,7 +5167,7 @@ function AppContent() {
                         {mockupsData.mainImage ? (
                           <div className="relative">
                             <img 
-                              src={mockupsData.mainImage.image_path} 
+                              src={getImageUrl(mockupsData.mainImage.image_path)} 
                               alt="Main mockup" 
                               className="w-full h-48 object-contain bg-gray-50 rounded-lg"
                             />
