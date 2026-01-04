@@ -1191,23 +1191,23 @@ export async function POST(request) {
         return handleCORS(NextResponse.json({ error: 'boxId required' }, { status: 400 }))
       }
       
-      // Build delete query
+      // Build delete query using supabaseAdmin for RLS bypass
       let deleteResult
       if (pileId) {
         // Delete cards for specific box and pile
-        const { data: cards } = await supabase.from('cards').select('*').eq('box_id', boxId).eq('pile_id', pileId)
+        const { data: cards } = await supabaseAdmin.from('cards').select('*').eq('box_id', boxId).eq('pile_id', pileId)
         if (cards && cards.length > 0) {
           for (const card of cards) {
-            await supabase.from('cards').delete().eq('id', card.id)
+            await supabaseAdmin.from('cards').delete().eq('id', card.id)
           }
         }
         deleteResult = { deleted: cards?.length || 0 }
       } else {
         // Delete all cards for box
-        const { data: cards } = await supabase.from('cards').select('*').eq('box_id', boxId)
+        const { data: cards } = await supabaseAdmin.from('cards').select('*').eq('box_id', boxId)
         if (cards && cards.length > 0) {
           for (const card of cards) {
-            await supabase.from('cards').delete().eq('id', card.id)
+            await supabaseAdmin.from('cards').delete().eq('id', card.id)
           }
         }
         deleteResult = { deleted: cards?.length || 0 }
