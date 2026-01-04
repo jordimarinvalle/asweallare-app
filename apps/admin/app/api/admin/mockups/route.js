@@ -184,17 +184,17 @@ export async function DELETE(request) {
       
       if (image) {
         await deleteStorageFile(supabaseAdmin, image.image_path)
-        await supabase.from('mockup_images').delete().eq('id', imageId)
+        await supabaseAdmin.from('mockup_images').delete().eq('id', imageId)
         deletedCount = 1
       }
     } else if (deleteType === 'all') {
-      deletedCount = await deleteAllMockupsForBox(supabase, supabaseAdmin, boxId)
+      deletedCount = await deleteAllMockupsForBox(supabaseAdmin, supabaseAdmin, boxId)
     } else if (deleteType === 'main') {
-      deletedCount = await deleteMockupsByType(supabase, supabaseAdmin, boxId, 'BOX_MAIN')
+      deletedCount = await deleteMockupsByType(supabaseAdmin, supabaseAdmin, boxId, 'BOX_MAIN')
     } else if (deleteType === 'secondary') {
-      deletedCount = await deleteMockupsByType(supabase, supabaseAdmin, boxId, 'BOX_SECONDARY')
+      deletedCount = await deleteMockupsByType(supabaseAdmin, supabaseAdmin, boxId, 'BOX_SECONDARY')
     } else if (deleteType === 'cards') {
-      deletedCount = await deleteMockupsByType(supabase, supabaseAdmin, boxId, 'CARD')
+      deletedCount = await deleteMockupsByType(supabaseAdmin, supabaseAdmin, boxId, 'CARD')
     } else {
       return NextResponse.json({ 
         error: 'Specify imageId or type (all, main, secondary, cards)' 
