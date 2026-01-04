@@ -4957,7 +4957,7 @@ function AppContent() {
                         {pileForm.imagePath && (
                           <div className="mt-2">
                             <img 
-                              src={`/${pileForm.imagePath}`} 
+                              src={pileForm.imagePath.startsWith('http') ? pileForm.imagePath : `/${pileForm.imagePath}`} 
                               alt="Pile preview" 
                               className="h-24 object-contain rounded border"
                               onError={(e) => e.target.style.display = 'none'}
