@@ -1,0 +1,5 @@
+{
+  "/api/auth/local/signin/route": "app/api/auth/local/signin/route.js",
+  "/api/auth/local/signup/route": "app/api/auth/local/signup/route.js",
+  "/api/[[...path]]/route": "app/api/[[...path]]/route.js"
+}
