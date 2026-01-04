@@ -1324,7 +1324,7 @@ export async function PUT(request) {
         updateData.full_box_id = null
       }
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('boxes')
         .update(updateData)
         .eq('id', boxId)
@@ -1347,7 +1347,7 @@ export async function PUT(request) {
       if (body.displayOrder !== undefined) updateData.display_order = body.displayOrder
       if (body.isActive !== undefined) updateData.is_active = body.isActive
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('collection_series')
         .update(updateData)
         .eq('id', seriesId)
@@ -1377,7 +1377,7 @@ export async function PUT(request) {
       if (body.displayOrder !== undefined) updateData.display_order = body.displayOrder
       if (body.isActive !== undefined) updateData.is_active = body.isActive
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('prices')
         .update(updateData)
         .eq('id', priceId)
@@ -1436,7 +1436,7 @@ export async function PUT(request) {
       if (body.displayOrder !== undefined) updateData.display_order = body.displayOrder
       if (body.isActive !== undefined) updateData.is_active = body.isActive
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('bundles')
         .update(updateData)
         .eq('id', bundleId)
@@ -1472,7 +1472,7 @@ export async function DELETE(request) {
     if (path.startsWith('admin/cards/')) {
       const cardId = path.split('/')[2]
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('cards')
         .delete()
         .eq('id', cardId)
@@ -1501,7 +1501,7 @@ export async function DELETE(request) {
         }, { status: 400 }))
       }
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('boxes')
         .delete()
         .eq('id', boxId)
@@ -1517,7 +1517,7 @@ export async function DELETE(request) {
     if (path.startsWith('admin/collection-series/')) {
       const seriesId = path.split('/')[2]
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('collection_series')
         .delete()
         .eq('id', seriesId)
@@ -1533,7 +1533,7 @@ export async function DELETE(request) {
     if (path.startsWith('admin/prices/')) {
       const priceId = path.split('/')[2]
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('prices')
         .delete()
         .eq('id', priceId)
@@ -1549,7 +1549,7 @@ export async function DELETE(request) {
     if (path.startsWith('admin/piles/')) {
       const pileId = path.split('/')[2]
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('piles')
         .delete()
         .eq('id', pileId)
@@ -1565,7 +1565,7 @@ export async function DELETE(request) {
     if (path.startsWith('admin/bundles/')) {
       const bundleId = path.split('/')[2]
       
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('bundles')
         .delete()
         .eq('id', bundleId)
