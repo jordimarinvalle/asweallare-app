@@ -2430,10 +2430,13 @@ function AppContent() {
     
     const loadAppConfig = async () => {
       try {
+        console.log('[DEBUG] Loading app config...')
         const response = await fetch('/api/app-config?slug=asweallare')
         const data = await response.json()
+        console.log('[DEBUG] App config response:', data)
         if (data && !data.error) {
           setAppConfig(data)
+          console.log('[DEBUG] App config set, admin_emails:', data.admin_emails)
         }
       } catch (err) {
         console.error('Failed to load app config:', err)
