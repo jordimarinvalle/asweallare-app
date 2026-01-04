@@ -260,8 +260,15 @@ function initExperiencePage(page) {
   console.log('[Experience] Initializing page')
   let selectedBoxIds = []
   
-  const container = page.$el.find('#deck-scroll')[0]
-  const playBtn = page.$el.find('#play-btn')[0]
+  // Use DOM queries - page.el is the page element
+  const pageEl = page.el || page.$el?.[0] || document.querySelector('.page[data-name="experience"]')
+  if (!pageEl) {
+    console.log('[Experience] Page element not found')
+    return
+  }
+  
+  const container = pageEl.querySelector('#deck-scroll')
+  const playBtn = pageEl.querySelector('#play-btn')
   
   if (!container) {
     console.log('[Experience] Container not found')
