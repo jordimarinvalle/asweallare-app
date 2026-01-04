@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServer } from '../../../../../lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
+
+// Create Supabase admin client with service role for write operations
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
+}
 
 // DELETE /api/admin/app-config/socials?id=xxx - Delete a social link
 export async function DELETE(request) {
@@ -11,9 +20,9 @@ export async function DELETE(request) {
       return NextResponse.json({ error: 'Social ID required' }, { status: 400 })
     }
     
-    const supabase = createSupabaseServer()
+    const supabaseAdmin = getSupabaseAdmin()
     
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('app_socials')
       .delete()
       .eq('id', id)
@@ -39,6 +48,7 @@ export async function PUT(request) {
     }
     
     const supabase = createSupabaseServer()
+    const supabaseAdmin = getSupabaseAdmin()
     
     const updateData = { updated_at: new Date().toISOString() }
     if (url !== undefined) updateData.url = url
@@ -46,7 +56,7 @@ export async function PUT(request) {
     if (is_active !== undefined) updateData.is_active = is_active
     
     // Update the record
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('app_socials')
       .update(updateData)
       .eq('id', id)
