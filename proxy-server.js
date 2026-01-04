@@ -12,13 +12,23 @@ const ADMIN_PORT = 3001;
 const server = http.createServer((req, res) => {
   const url = req.url || '/';
   
-  // Route /admin/* and /api/* to Admin app
-  if (url.startsWith('/admin') || url.startsWith('/api')) {
+  // Route /admin/*, /api/*, and /_next/* (when referred from admin) to Admin app
+  if (url.startsWith('/admin')) {
     // Strip /admin prefix for admin routes
-    if (url.startsWith('/admin')) {
-      req.url = url.replace(/^\/admin/, '') || '/';
-    }
+    req.url = url.replace(/^\/admin/, '') || '/';
     proxy.web(req, res, { target: `http://127.0.0.1:${ADMIN_PORT}` });
+  } else if (url.startsWith('/api')) {
+    // API routes go to admin
+    proxy.web(req, res, { target: `http://127.0.0.1:${ADMIN_PORT}` });
+  } else if (url.startsWith('/_next') || url.startsWith('/__nextjs')) {
+    // Next.js assets - check referer to determine which app
+    const referer = req.headers.referer || '';
+    if (referer.includes('/admin')) {
+      proxy.web(req, res, { target: `http://127.0.0.1:${ADMIN_PORT}` });
+    } else {
+      // Default to UI for /_next requests (UI uses Vite, shouldn't have /_next)
+      proxy.web(req, res, { target: `http://127.0.0.1:${ADMIN_PORT}` });
+    }
   } else {
     // Everything else goes to UI app
     proxy.web(req, res, { target: `http://127.0.0.1:${UI_PORT}` });
@@ -29,7 +39,7 @@ const server = http.createServer((req, res) => {
 server.on('upgrade', (req, socket, head) => {
   const url = req.url || '/';
   
-  if (url.startsWith('/admin') || url.startsWith('/api')) {
+  if (url.startsWith('/admin') || url.startsWith('/api') || url.startsWith('/_next')) {
     proxy.ws(req, socket, head, { target: `http://127.0.0.1:${ADMIN_PORT}` });
   } else {
     proxy.ws(req, socket, head, { target: `http://127.0.0.1:${UI_PORT}` });
