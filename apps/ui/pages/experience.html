@@ -34,7 +34,10 @@
     </div>
     
     <div id="deck-scroll" class="deck-scroll">
-      <!-- Decks will be rendered here dynamically -->
+      <!-- Loading indicator -->
+      <div id="loading-indicator" style="padding: 40px; text-align: center; color: #8E8E93;">
+        Loading decks...
+      </div>
     </div>
     
     <div class="block" style="margin-top: 24px;">
@@ -59,26 +62,54 @@
     if (!container) return;
     
     const boxes = state.boxes || [];
+    console.log('Rendering decks, boxes:', boxes.length);
     
-    container.innerHTML = boxes.map(box => {
-      const heroImage = box.path ? `/assets/collections/${box.path}/hero.jpg` : '/assets/logo-asweallare.png';
-      const isLocked = !box.is_sample;
+    if (boxes.length === 0) {
+      container.innerHTML = `
+        <div style="padding: 40px; text-align: center; color: #8E8E93;">
+          No decks available. Check your connection to the local API.
+        </div>
+      `;
+      return;
+    }
+    
+    // Filter to show sample boxes and boxes user has access to
+    const availableBoxes = boxes.filter(b => b.is_sample || b.hasAccess || state.hasAllAccess);
+    const lockedBoxes = boxes.filter(b => !b.is_sample && !b.hasAccess && !state.hasAllAccess);
+    
+    const renderTile = (box, locked = false) => {
+      const heroImage = box.path ? `/collections/${box.path}/hero.jpg` : '/assets/logo-asweallare.png';
       
       return `
-        <div class="deck-tile" data-box-id="${box.id}" data-locked="${isLocked}" data-sample="${box.is_sample}">
-          <img src="${heroImage}" alt="${box.name}" onerror="this.src='/assets/logo-asweallare.png'" />
+        <div class="deck-tile ${locked ? 'locked' : ''}" 
+             data-box-id="${box.id}" 
+             data-locked="${locked}" 
+             data-sample="${box.is_sample}"
+             style="border: 2px solid ${locked ? '#ddd' : 'transparent'};">
+          <img src="${heroImage}" alt="${box.name}" 
+               onerror="this.src='/assets/logo-asweallare.png'" 
+               style="opacity: ${locked ? '0.6' : '1'};" />
           ${box.is_sample ? '<span class="sample-badge">SAMPLE</span>' : ''}
-          ${isLocked && !box.is_sample ? `
+          ${locked ? `
             <div class="lock-overlay">
               <i class="f7-icons" style="color: white; font-size: 32px;">lock_fill</i>
             </div>
           ` : ''}
           <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 12px; background: linear-gradient(transparent, rgba(0,0,0,0.7));">
             <p style="color: white; font-weight: 600; font-size: 14px; margin: 0;">${box.name}</p>
+            ${box.tagline ? `<p style="color: rgba(255,255,255,0.7); font-size: 11px; margin: 4px 0 0 0;">${box.tagline}</p>` : ''}
           </div>
         </div>
       `;
-    }).join('');
+    };
+    
+    // Render available first, then locked
+    const allTiles = [
+      ...availableBoxes.map(b => renderTile(b, false)),
+      ...lockedBoxes.map(b => renderTile(b, true))
+    ];
+    
+    container.innerHTML = allTiles.join('');
     
     // Add click handlers
     container.querySelectorAll('.deck-tile').forEach(tile => {
@@ -87,23 +118,31 @@
         const isLocked = tile.dataset.locked === 'true';
         const isSample = tile.dataset.sample === 'true';
         
-        if (isLocked && !isSample) {
+        if (isLocked) {
           window.f7App.dialog.alert('This deck is locked. Purchase it in the Store to unlock.', 'Locked');
           return;
         }
         
         if (selectedBoxIds.includes(boxId)) {
           selectedBoxIds = selectedBoxIds.filter(id => id !== boxId);
-          tile.classList.remove('selected');
+          tile.style.borderColor = 'transparent';
+          tile.style.transform = 'scale(1)';
         } else {
           selectedBoxIds.push(boxId);
-          tile.classList.add('selected');
+          tile.style.borderColor = '#007AFF';
+          tile.style.transform = 'scale(0.95)';
         }
         
         const playBtn = document.getElementById('play-btn');
         if (playBtn) {
-          playBtn.classList.toggle('disabled', selectedBoxIds.length === 0);
+          if (selectedBoxIds.length > 0) {
+            playBtn.classList.remove('disabled');
+          } else {
+            playBtn.classList.add('disabled');
+          }
         }
+        
+        console.log('Selected boxes:', selectedBoxIds);
       });
     });
   }
@@ -113,13 +152,31 @@
   if (playBtn) {
     playBtn.addEventListener('click', () => {
       if (selectedBoxIds.length > 0) {
+        console.log('Starting game with boxes:', selectedBoxIds);
         startGame(selectedBoxIds);
         window.f7App.views.main.router.navigate('/game/');
       }
     });
   }
   
-  // Initial render
-  setTimeout(renderDecks, 100);
+  // Try to render immediately if data is already loaded
+  if (state.boxes && state.boxes.length > 0) {
+    console.log('Data already loaded, rendering immediately');
+    renderDecks();
+  } else {
+    console.log('Waiting for data to load...');
+    // Poll for data (since it might still be loading)
+    let attempts = 0;
+    const checkData = setInterval(() => {
+      attempts++;
+      if (state.boxes && state.boxes.length > 0) {
+        clearInterval(checkData);
+        renderDecks();
+      } else if (attempts > 20) {
+        clearInterval(checkData);
+        renderDecks(); // Render even if empty to show message
+      }
+    }, 250);
+  }
 })();
 </script>
