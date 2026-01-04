@@ -291,8 +291,8 @@ window.appFunctions = {
   signOut
 }
 
-// Wait for DOM
-document.addEventListener('DOMContentLoaded', async () => {
+// Initialize app
+async function initApp() {
   // Check auth state
   const { data: { session } } = await supabase.auth.getSession()
   if (session?.user) {
@@ -305,9 +305,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   })
   
   // Load initial data
-  await loadAppConfig()
-  await loadBoxes()
-  await loadPiles()
+  await Promise.all([
+    loadAppConfig(),
+    loadBoxes(),
+    loadPiles()
+  ])
   
   // Initialize Framework7
   const app = new Framework7({
@@ -320,31 +322,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     routes: [
       {
         path: '/',
-        url: './pages/home.html'
+        url: '/pages/home.html'
       },
       {
         path: '/experience/',
-        url: './pages/experience.html'
+        url: '/pages/experience.html'
       },
       {
         path: '/game/',
-        url: './pages/game.html'
+        url: '/pages/game.html'
       },
       {
         path: '/store/',
-        url: './pages/store.html'
+        url: '/pages/store.html'
       },
       {
         path: '/profile/',
-        url: './pages/profile.html'
+        url: '/pages/profile.html'
       }
     ]
   })
   
   window.f7App = app
-  
-  // Navigate to home
-  const mainView = app.views.create('.view-main', {
-    url: '/'
-  })
-})
+}
+
+// Wait for DOM and init
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp)
+} else {
+  initApp()
+}
