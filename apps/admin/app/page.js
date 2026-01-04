@@ -4992,7 +4992,7 @@ function AppContent() {
                           <div className="w-20 h-28 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center">
                             {pile.imagePath ? (
                               <img 
-                                src={pile.imagePath.startsWith('/') ? pile.imagePath : `/${pile.imagePath}`} 
+                                src={pile.imagePath.startsWith('http') ? pile.imagePath : (pile.imagePath.startsWith('/') ? pile.imagePath : `/${pile.imagePath}`)} 
                                 alt={pile.name}
                                 className="w-full h-full object-cover"
                                 onError={(e) => { 
