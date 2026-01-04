@@ -1061,7 +1061,7 @@ function BoxSelectionScreen({
             {/* Image */}
             <div className="flex items-center justify-center h-[80vh]">
               <img
-                src={lightboxImage.images[lightboxImage.index]?.imagePath}
+                src={getImageUrl(lightboxImage.images[lightboxImage.index]?.imagePath)}
                 alt={`Card ${lightboxImage.index + 1}`}
                 className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
               />
