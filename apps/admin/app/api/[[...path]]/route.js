@@ -1383,6 +1383,8 @@ export async function PUT(request) {
       const pileId = path.split('/')[2]
       const body = await request.json()
       
+      console.log('[PILE UPDATE] pileId:', pileId, 'body:', JSON.stringify(body))
+      
       const updateData = {}
       if (body.slug !== undefined) updateData.slug = body.slug
       if (body.name !== undefined) updateData.name = body.name
@@ -1391,16 +1393,21 @@ export async function PUT(request) {
       if (body.displayOrder !== undefined) updateData.display_order = body.displayOrder
       if (body.isActive !== undefined) updateData.is_active = body.isActive
       
-      const { error } = await supabase
+      console.log('[PILE UPDATE] updateData:', JSON.stringify(updateData))
+      
+      const { data, error } = await supabase
         .from('piles')
         .update(updateData)
         .eq('id', pileId)
+        .select()
+      
+      console.log('[PILE UPDATE] result:', JSON.stringify({ data, error }))
       
       if (error) {
         return handleCORS(NextResponse.json({ error: error.message }, { status: 500 }))
       }
       
-      return handleCORS(NextResponse.json({ success: true }))
+      return handleCORS(NextResponse.json({ success: true, data }))
     }
 
     // ADMIN ROUTES - Update bundle
