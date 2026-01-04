@@ -1167,7 +1167,7 @@ function BoxSelectionScreen({
                       }`}
                     >
                       <img
-                        src={boxMockups[seeMoreBox.id].mainImage.imagePath}
+                        src={getImageUrl(boxMockups[seeMoreBox.id].mainImage.imagePath)}
                         alt="Box front"
                         className="w-full h-full object-cover"
                       />
