@@ -1404,7 +1404,9 @@ export async function PUT(request) {
       
       console.log('[PILE UPDATE] updateData:', JSON.stringify(updateData))
       
-      const { data, error } = await supabase
+      // Use service role client for admin operations (bypasses RLS)
+      const supabaseAdmin = getSupabaseAdmin()
+      const { data, error } = await supabaseAdmin
         .from('piles')
         .update(updateData)
         .eq('id', pileId)
