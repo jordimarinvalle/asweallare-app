@@ -35,14 +35,13 @@ window.appState = {
 const state = window.appState
 
 // ============================================================================
-// DATA LOADING FUNCTIONS - Use local API endpoints
+// DATA LOADING FUNCTIONS
 // ============================================================================
 
 async function loadAppConfig() {
   try {
     const response = await fetch(`${API_BASE}/app-config?slug=asweallare`)
     const data = await response.json()
-    
     if (data) {
       state.appConfig = data
       console.log('App config loaded:', data.name || 'default')
@@ -56,8 +55,6 @@ async function loadBoxes() {
   try {
     const response = await fetch(`${API_BASE}/boxes`)
     const data = await response.json()
-    
-    // API returns { boxes: [...], hasAllAccess: boolean }
     if (data && data.boxes) {
       state.boxes = data.boxes
       state.hasAllAccess = data.hasAllAccess || false
@@ -68,33 +65,13 @@ async function loadBoxes() {
   }
 }
 
-async function loadPiles() {
-  try {
-    // Piles are returned with admin/piles endpoint
-    const response = await fetch(`${API_BASE}/admin/piles`)
-    const data = await response.json()
-    
-    // API returns { piles: [...] }
-    if (data && data.piles) {
-      state.piles = data.piles
-      console.log('Piles loaded:', data.piles.length, 'piles')
-    }
-  } catch (err) {
-    console.error('Error loading piles:', err)
-    // Piles might fail without auth - that's OK for guest mode
-  }
-}
-
 async function loadCardsForBoxes(boxIds) {
   if (!boxIds || boxIds.length === 0) return []
   
   try {
-    // Use the cards endpoint with box_ids parameter
     const boxIdsParam = boxIds.join(',')
     const response = await fetch(`${API_BASE}/cards?box_ids=${boxIdsParam}`)
     const data = await response.json()
-    
-    // API returns { cards: [...] } with color field already set
     if (data && data.cards) {
       state.cards = data.cards
       console.log('Cards loaded:', data.cards.length, 'cards')
@@ -124,7 +101,6 @@ function startGame(boxIds) {
   state.gameStarted = true
   
   loadCardsForBoxes(boxIds).then(cards => {
-    // Cards already have 'color' field from API (black/white based on pile slug)
     const blackCards = cards.filter(c => c.color === 'black')
     const whiteCards = cards.filter(c => c.color === 'white')
     
@@ -244,36 +220,28 @@ function endGame() {
 }
 
 // ============================================================================
-// AUTH FUNCTIONS - Use Supabase for authentication only
+// AUTH FUNCTIONS
 // ============================================================================
 
 async function signInWithGoogle() {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: {
-      redirectTo: window.location.origin
-    }
+    options: { redirectTo: window.location.origin }
   })
   if (error) {
     console.error('Google sign in error:', error)
-    if (window.f7App) {
-      window.f7App.dialog.alert('Sign in failed. Please try again.', 'Error')
-    }
+    window.f7App?.dialog.alert('Sign in failed. Please try again.', 'Error')
   }
 }
 
 async function signInWithMagicLink(email) {
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: {
-      emailRedirectTo: window.location.origin
-    }
+    options: { emailRedirectTo: window.location.origin }
   })
   if (error) {
     console.error('Magic link error:', error)
-    if (window.f7App) {
-      window.f7App.dialog.alert('Failed to send magic link. Please try again.', 'Error')
-    }
+    window.f7App?.dialog.alert('Failed to send magic link. Please try again.', 'Error')
     return false
   }
   return true
@@ -285,25 +253,213 @@ async function signOut() {
 }
 
 // ============================================================================
-// EXPORT FUNCTIONS TO WINDOW
+// PAGE INITIALIZATION FUNCTIONS
 // ============================================================================
 
+function initExperiencePage(page) {
+  console.log('[Experience] Initializing page')
+  let selectedBoxIds = []
+  
+  const container = page.$el.find('#deck-scroll')[0]
+  const playBtn = page.$el.find('#play-btn')[0]
+  
+  if (!container) {
+    console.log('[Experience] Container not found')
+    return
+  }
+  
+  function renderDecks() {
+    console.log('[Experience] Rendering decks, boxes:', state.boxes.length)
+    
+    if (state.boxes.length === 0) {
+      container.innerHTML = '<div style="padding: 40px; text-align: center; color: #8E8E93;">No decks available.</div>'
+      return
+    }
+    
+    let html = ''
+    state.boxes.forEach(box => {
+      const isLocked = !box.is_sample && !box.hasAccess && !state.hasAllAccess
+      const heroImage = box.path ? `/collections/${box.path}/hero.jpg` : '/assets/logo-asweallare.png'
+      
+      html += `
+        <div class="deck-tile" data-box-id="${box.id}" data-locked="${isLocked}" data-sample="${box.is_sample}" style="border: 2px solid transparent;">
+          <img src="${heroImage}" alt="${box.name}" onerror="this.src='/assets/logo-asweallare.png'" style="opacity: ${isLocked ? '0.6' : '1'};" />
+          ${box.is_sample ? '<span class="sample-badge">SAMPLE</span>' : ''}
+          ${isLocked ? '<div class="lock-overlay"><i class="f7-icons" style="color: white; font-size: 32px;">lock_fill</i></div>' : ''}
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 12px; background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+            <p style="color: white; font-weight: 600; font-size: 14px; margin: 0;">${box.name}</p>
+            ${box.tagline ? `<p style="color: rgba(255,255,255,0.7); font-size: 11px; margin: 4px 0 0 0;">${box.tagline}</p>` : ''}
+          </div>
+        </div>
+      `
+    })
+    
+    container.innerHTML = html
+    
+    // Add click handlers
+    container.querySelectorAll('.deck-tile').forEach(tile => {
+      tile.addEventListener('click', () => {
+        const boxId = tile.dataset.boxId
+        const isLocked = tile.dataset.locked === 'true'
+        
+        if (isLocked) {
+          window.f7App?.dialog.alert('This deck is locked. Purchase it in the Store to unlock.', 'Locked')
+          return
+        }
+        
+        const idx = selectedBoxIds.indexOf(boxId)
+        if (idx > -1) {
+          selectedBoxIds.splice(idx, 1)
+          tile.style.borderColor = 'transparent'
+          tile.style.transform = 'scale(1)'
+        } else {
+          selectedBoxIds.push(boxId)
+          tile.style.borderColor = '#007AFF'
+          tile.style.transform = 'scale(0.95)'
+        }
+        
+        if (playBtn) {
+          playBtn.classList.toggle('disabled', selectedBoxIds.length === 0)
+        }
+        console.log('[Experience] Selected:', selectedBoxIds)
+      })
+    })
+  }
+  
+  // Play button
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      if (selectedBoxIds.length > 0) {
+        console.log('[Experience] Starting game with:', selectedBoxIds)
+        startGame(selectedBoxIds)
+        window.f7App?.views.main.router.navigate('/game/')
+      }
+    })
+  }
+  
+  // Render decks
+  renderDecks()
+}
+
+function initGamePage(page) {
+  console.log('[Game] Initializing page')
+  
+  const rotateScreen = page.$el.find('#rotate-screen')[0]
+  const gameContent = page.$el.find('#game-content')[0]
+  const blackPile = page.$el.find('#black-pile')[0]
+  const whitePile = page.$el.find('#white-pile')[0]
+  const blackFront = page.$el.find('#black-front')[0]
+  const whiteFront = page.$el.find('#white-front')[0]
+  const blackCount = page.$el.find('#black-count')[0]
+  const whiteCount = page.$el.find('#white-count')[0]
+  const timerDisplay = page.$el.find('#timer-display')[0]
+  const resetBtn = page.$el.find('#reset-btn')[0]
+  const exitBtn = page.$el.find('#exit-btn')[0]
+  const reshuffleBlack = page.$el.find('#reshuffle-black')[0]
+  const reshuffleWhite = page.$el.find('#reshuffle-white')[0]
+  
+  function checkOrientation() {
+    const isLandscape = window.innerWidth > window.innerHeight
+    if (rotateScreen) rotateScreen.style.display = isLandscape ? 'none' : 'flex'
+    if (gameContent) gameContent.style.display = isLandscape ? 'flex' : 'none'
+  }
+  
+  function updateTimerDisplay() {
+    if (!timerDisplay) return
+    timerDisplay.className = `timer-display ${state.timerState}`
+    
+    switch (state.timerState) {
+      case 'idle':
+        timerDisplay.textContent = 'Tap on the cards to flip them and start your turn'
+        break
+      case 'countdown':
+        timerDisplay.textContent = `Ready? Tap to begin sharing (${state.timerSeconds}s)`
+        break
+      case 'waiting':
+        timerDisplay.textContent = 'Ready when you are — tap to start sharing'
+        break
+      case 'countup':
+        const mins = Math.floor(state.timerSeconds / 60)
+        let msg = "Tap when you're done sharing"
+        if (mins >= 3) msg = "Tap when done. 3+ minutes — wrapping up?"
+        else if (mins >= 2) msg = "Tap when done. 2 minutes — you're in the flow."
+        else if (mins >= 1) msg = "Tap when done. 1 minute — keep sharing."
+        timerDisplay.textContent = msg
+        break
+      case 'finished':
+        const finMins = Math.floor(state.timerSeconds / 60)
+        const finSecs = state.timerSeconds % 60
+        let timeStr = finSecs + 's'
+        if (finMins > 0) timeStr = `${finMins}m ${finSecs}s`
+        timerDisplay.textContent = `Done (${timeStr}) — tap to reset for next turn`
+        break
+    }
+  }
+  
+  function updateCards() {
+    if (blackPile && blackFront) {
+      if (state.currentBlack) {
+        blackPile.classList.toggle('flipped', state.blackFlipped)
+        const imgSrc = state.currentBlack.image_path?.startsWith('/') ? state.currentBlack.image_path : '/' + (state.currentBlack.image_path || '')
+        blackFront.innerHTML = `<img src="${imgSrc}" alt="Card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'" />`
+      } else {
+        blackPile.classList.remove('flipped')
+      }
+    }
+    
+    if (whitePile && whiteFront) {
+      if (state.currentWhite) {
+        whitePile.classList.toggle('flipped', state.whiteFlipped)
+        const imgSrc = state.currentWhite.image_path?.startsWith('/') ? state.currentWhite.image_path : '/' + (state.currentWhite.image_path || '')
+        whiteFront.innerHTML = `<img src="${imgSrc}" alt="Card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'" />`
+      } else {
+        whitePile.classList.remove('flipped')
+      }
+    }
+    
+    if (blackCount) blackCount.textContent = `${state.blackDeck.length} cards left`
+    if (whiteCount) whiteCount.textContent = `${state.whiteDeck.length} cards left`
+  }
+  
+  // Event listeners
+  window.addEventListener('resize', checkOrientation)
+  window.addEventListener('orientationchange', checkOrientation)
+  document.addEventListener('timer-update', updateTimerDisplay)
+  
+  blackPile?.addEventListener('click', () => {
+    if (!state.currentBlack && state.blackDeck.length > 0) drawCard('black')
+    else if (state.currentBlack) flipCard('black')
+    updateCards()
+  })
+  
+  whitePile?.addEventListener('click', () => {
+    if (!state.currentWhite && state.whiteDeck.length > 0) drawCard('white')
+    else if (state.currentWhite) flipCard('white')
+    updateCards()
+  })
+  
+  timerDisplay?.addEventListener('click', () => {
+    if (state.timerState === 'countdown' || state.timerState === 'waiting') startSharing()
+    else if (state.timerState === 'countup') finishSharing()
+    else if (state.timerState === 'finished') { resetRound(); updateCards() }
+    updateTimerDisplay()
+  })
+  
+  resetBtn?.addEventListener('click', () => { resetRound(); updateCards(); updateTimerDisplay() })
+  exitBtn?.addEventListener('click', () => { endGame(); window.f7App?.views.main.router.navigate('/experience/') })
+  reshuffleBlack?.addEventListener('click', e => { e.stopPropagation(); reshufflePile('black'); updateCards() })
+  reshuffleWhite?.addEventListener('click', e => { e.stopPropagation(); reshufflePile('white'); updateCards() })
+  
+  checkOrientation()
+  updateCards()
+  updateTimerDisplay()
+}
+
+// Export functions
 window.appFunctions = {
-  loadAppConfig,
-  loadBoxes,
-  loadPiles,
-  loadCardsForBoxes,
-  startGame,
-  drawCard,
-  flipCard,
-  resetRound,
-  reshufflePile,
-  endGame,
-  startSharing,
-  finishSharing,
-  signInWithGoogle,
-  signInWithMagicLink,
-  signOut
+  loadAppConfig, loadBoxes, loadCardsForBoxes,
+  startGame, drawCard, flipCard, resetRound, reshufflePile, endGame,
+  startSharing, finishSharing, signInWithGoogle, signInWithMagicLink, signOut
 }
 
 // ============================================================================
@@ -316,7 +472,7 @@ async function initApp() {
   console.log('API Base:', API_BASE)
   console.log('===========================================')
   
-  // Check auth state (Supabase) - optional for local mode
+  // Check auth state
   try {
     const { data: { session } } = await supabase.auth.getSession()
     if (session?.user) {
@@ -324,67 +480,30 @@ async function initApp() {
       console.log('User logged in:', session.user.email)
     }
   } catch (err) {
-    console.log('Auth check skipped (expected in local mode)')
+    console.log('Auth check skipped')
   }
   
-  // Listen for auth changes
   supabase.auth.onAuthStateChange((event, session) => {
     state.user = session?.user || null
   })
   
-  // Load initial data from LOCAL API
+  // Load data
   console.log('Loading data from local API...')
-  
-  try {
-    await loadAppConfig()
-  } catch (e) {
-    console.log('App config load error (non-critical):', e.message)
-  }
-  
-  try {
-    await loadBoxes()
-  } catch (e) {
-    console.log('Boxes load error:', e.message)
-  }
-  
-  try {
-    await loadPiles()
-  } catch (e) {
-    console.log('Piles load error (may require auth):', e.message)
-  }
-  
+  await Promise.all([loadAppConfig(), loadBoxes()])
   console.log('Data loaded. Boxes:', state.boxes.length)
-  console.log('Boxes:', state.boxes.map(b => b.name).join(', '))
   
-  // Initialize Framework7
+  // Initialize Framework7 with page callbacks
   const app = new Framework7({
     el: '#app',
     name: 'AS WE ALL ARE',
     theme: 'ios',
-    colors: {
-      primary: '#007AFF'
-    },
+    colors: { primary: '#007AFF' },
     routes: [
-      {
-        path: '/',
-        url: '/pages/home.html'
-      },
-      {
-        path: '/experience/',
-        url: '/pages/experience.html'
-      },
-      {
-        path: '/game/',
-        url: '/pages/game.html'
-      },
-      {
-        path: '/store/',
-        url: '/pages/store.html'
-      },
-      {
-        path: '/profile/',
-        url: '/pages/profile.html'
-      }
+      { path: '/', url: '/pages/home.html' },
+      { path: '/experience/', url: '/pages/experience.html', on: { pageInit: initExperiencePage } },
+      { path: '/game/', url: '/pages/game.html', on: { pageInit: initGamePage } },
+      { path: '/store/', url: '/pages/store.html' },
+      { path: '/profile/', url: '/pages/profile.html' }
     ]
   })
   
@@ -392,7 +511,6 @@ async function initApp() {
   console.log('Framework7 initialized')
 }
 
-// Wait for DOM and init
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initApp)
 } else {
