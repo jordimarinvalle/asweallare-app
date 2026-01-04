@@ -291,7 +291,7 @@ function CardPile({
                 // Also check image_path field
                 <div className={`w-full h-full border-2 ${borderColor} rounded-lg overflow-hidden`}>
                   <img 
-                    src={getImageUrl(currentCard.image_path ? currentCard.image_path : `/${currentCard.image_path}`}
+                    src={getImageUrl(currentCard.image_path)}
                     alt={currentCard.title || currentCard.text || 'Card'}
                     className="w-full h-full object-cover"
                   />
