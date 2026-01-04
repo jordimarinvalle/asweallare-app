@@ -6,8 +6,10 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://pwdwemakaozxmu
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_K-L2v83yXtTeHkSWtFX_ag_ZbjbDq8p'
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
-// API Base URL - Use local backend for data
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+// API Base URL - Use environment variable, fallback to relative path for same-origin
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
+
+console.log('[UI App] API_BASE:', API_BASE)
 
 // App State
 window.appState = {
