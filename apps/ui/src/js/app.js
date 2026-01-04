@@ -7,7 +7,7 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_K-
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
 // App State
-const state = {
+window.appState = {
   user: null,
   appConfig: null,
   boxes: [],
@@ -23,55 +23,12 @@ const state = {
   blackFlipped: false,
   whiteFlipped: false,
   // Timer state
-  timerState: 'idle', // idle, countdown, waiting, countup, finished
+  timerState: 'idle',
   timerSeconds: 15,
   timerInterval: null
 }
 
-// Routes
-import { routes } from './routes.js'
-
-// Initialize Framework7 App
-const app = new Framework7({
-  el: '#app',
-  name: 'AS WE ALL ARE',
-  theme: 'ios',
-  colors: {
-    primary: '#007AFF'
-  },
-  routes: routes,
-  view: {
-    iosDynamicNavbar: true,
-    browserHistory: true,
-    browserHistorySeparator: ''
-  },
-  on: {
-    init: async function() {
-      // Check auth state
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {
-        state.user = session.user
-      }
-      
-      // Listen for auth changes
-      supabase.auth.onAuthStateChange((event, session) => {
-        state.user = session?.user || null
-        // Refresh current view if needed
-        if (app.views.main) {
-          const currentRoute = app.views.main.router.currentRoute
-          if (currentRoute && currentRoute.path === '/profile/') {
-            app.views.main.router.refreshPage()
-          }
-        }
-      })
-      
-      // Load initial data
-      await loadAppConfig()
-      await loadBoxes()
-      await loadPiles()
-    }
-  }
-})
+const state = window.appState
 
 // Data loading functions
 async function loadAppConfig() {
@@ -133,7 +90,6 @@ async function loadCardsForBoxes(boxIds) {
       .eq('is_active', true)
     
     if (data) {
-      // Add color based on pile
       const cardsWithColor = data.map(card => ({
         ...card,
         color: card.piles?.slug === 'black' ? 'black' : 'white'
@@ -161,7 +117,6 @@ function startGame(boxIds) {
   state.selectedBoxIds = boxIds
   state.gameStarted = true
   
-  // Load cards and setup decks
   loadCardsForBoxes(boxIds).then(cards => {
     const blackCards = cards.filter(c => c.color === 'black')
     const whiteCards = cards.filter(c => c.color === 'white')
@@ -202,7 +157,6 @@ function flipCard(pile) {
 
 function checkBothFlipped() {
   if (state.blackFlipped && state.whiteFlipped && state.timerState === 'idle') {
-    // Start countdown
     startCountdown()
   }
 }
@@ -226,7 +180,6 @@ function startCountdown() {
       clearInterval(state.timerInterval)
       state.timerState = 'waiting'
     }
-    // Trigger UI update
     document.dispatchEvent(new CustomEvent('timer-update'))
   }, 1000)
 }
@@ -291,7 +244,9 @@ async function signInWithGoogle() {
   })
   if (error) {
     console.error('Google sign in error:', error)
-    app.dialog.alert('Sign in failed. Please try again.', 'Error')
+    if (window.f7App) {
+      window.f7App.dialog.alert('Sign in failed. Please try again.', 'Error')
+    }
   }
 }
 
@@ -304,7 +259,9 @@ async function signInWithMagicLink(email) {
   })
   if (error) {
     console.error('Magic link error:', error)
-    app.dialog.alert('Failed to send magic link. Please try again.', 'Error')
+    if (window.f7App) {
+      window.f7App.dialog.alert('Failed to send magic link. Please try again.', 'Error')
+    }
     return false
   }
   return true
@@ -315,10 +272,8 @@ async function signOut() {
   state.user = null
 }
 
-// Export for use in pages
-export {
-  app,
-  state,
+// Export to window for use in pages
+window.appFunctions = {
   loadAppConfig,
   loadBoxes,
   loadPiles,
@@ -335,3 +290,61 @@ export {
   signInWithMagicLink,
   signOut
 }
+
+// Wait for DOM
+document.addEventListener('DOMContentLoaded', async () => {
+  // Check auth state
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session?.user) {
+    state.user = session.user
+  }
+  
+  // Listen for auth changes
+  supabase.auth.onAuthStateChange((event, session) => {
+    state.user = session?.user || null
+  })
+  
+  // Load initial data
+  await loadAppConfig()
+  await loadBoxes()
+  await loadPiles()
+  
+  // Initialize Framework7
+  const app = new Framework7({
+    el: '#app',
+    name: 'AS WE ALL ARE',
+    theme: 'ios',
+    colors: {
+      primary: '#007AFF'
+    },
+    routes: [
+      {
+        path: '/',
+        url: './pages/home.html'
+      },
+      {
+        path: '/experience/',
+        url: './pages/experience.html'
+      },
+      {
+        path: '/game/',
+        url: './pages/game.html'
+      },
+      {
+        path: '/store/',
+        url: './pages/store.html'
+      },
+      {
+        path: '/profile/',
+        url: './pages/profile.html'
+      }
+    ]
+  })
+  
+  window.f7App = app
+  
+  // Navigate to home
+  const mainView = app.views.create('.view-main', {
+    url: '/'
+  })
+})
