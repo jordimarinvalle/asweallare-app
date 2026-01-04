@@ -2152,7 +2152,7 @@ function AppContent() {
   const isAdmin = user?.is_admin === true || (user?.email && adminEmails.includes(user.email.toLowerCase()))
   
   // Debug logging for admin check
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       console.log('[DEBUG] Admin check:', {
         userEmail: user.email,
@@ -2161,7 +2161,7 @@ function AppContent() {
         appConfigLoaded: !!appConfig
       })
     }
-  }, [user, appConfig, adminEmails, isAdmin])
+  }, [user, appConfig])
   
   // Admin
   const [adminCards, setAdminCards] = useState([])
