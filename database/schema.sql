@@ -1,6 +1,7 @@
 -- ============================================================================
 -- AS WE ALL ARE - Database Schema
 -- Clean setup script - run this for a fresh database
+-- Compatible with Supabase
 -- ============================================================================
 
 -- Drop existing tables (in correct order due to foreign keys)
@@ -9,13 +10,13 @@ DROP TABLE IF EXISTS app_config CASCADE;
 DROP TABLE IF EXISTS user_memberships CASCADE;
 DROP TABLE IF EXISTS bundles CASCADE;
 DROP TABLE IF EXISTS user_products CASCADE;
+DROP TABLE IF EXISTS mockup_images CASCADE;
 DROP TABLE IF EXISTS cards CASCADE;
 DROP TABLE IF EXISTS piles CASCADE;
 DROP TABLE IF EXISTS boxes CASCADE;
 DROP TABLE IF EXISTS prices CASCADE;
 DROP TABLE IF EXISTS collection_series CASCADE;
 DROP TABLE IF EXISTS subscription_plans CASCADE;
-DROP TABLE IF EXISTS mockup_images CASCADE;
 
 -- ============================================================================
 -- 1. COLLECTION_SERIES TABLE
@@ -63,12 +64,17 @@ CREATE TABLE boxes (
   description_short TEXT,
   tagline TEXT,
   topics TEXT[],
+  price DECIMAL(10,2) DEFAULT 0,
   price_id TEXT REFERENCES prices(id),
   color TEXT DEFAULT '#000000',
   color_palette TEXT[],
+  path TEXT,  -- Asset path for box images
   display_order INTEGER DEFAULT 0,
   is_sample BOOLEAN DEFAULT false,
+  is_demo BOOLEAN DEFAULT false,
   full_box_id TEXT REFERENCES boxes(id),  -- Links sample box to its full version
+  level INTEGER DEFAULT 1,
+  variant TEXT DEFAULT 'full',
   is_active BOOLEAN DEFAULT true,
   collection_series_id TEXT REFERENCES collection_series(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -185,6 +191,36 @@ CREATE TABLE mockup_images (
 );
 
 -- ============================================================================
+-- 11. APP_CONFIG TABLE
+-- Application-wide configuration settings
+-- ============================================================================
+CREATE TABLE app_config (
+  id TEXT PRIMARY KEY DEFAULT 'default',
+  slug TEXT UNIQUE NOT NULL DEFAULT 'asweallare',
+  name TEXT DEFAULT 'AS WE ALL ARE',
+  title TEXT DEFAULT 'Unscripted Conversations',
+  tagline TEXT DEFAULT 'A therapeutic conversational card game',
+  promise TEXT DEFAULT 'Know more about each other without the need to ask any question',
+  header_text TEXT,
+  body_text TEXT,
+  footer_text TEXT,
+  admin_emails TEXT DEFAULT '',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================================================
+-- 12. ADMIN_ACCESS_ATTEMPTS TABLE
+-- Logs unauthorized admin login attempts
+-- ============================================================================
+CREATE TABLE admin_access_attempts (
+  email TEXT PRIMARY KEY,
+  first_attempt_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  last_attempt_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  attempts_count INTEGER DEFAULT 1
+);
+
+-- ============================================================================
 -- INDEXES
 -- ============================================================================
 CREATE INDEX idx_mockup_images_box_id ON mockup_images(box_id);
@@ -200,10 +236,12 @@ CREATE INDEX idx_boxes_price ON boxes(price_id);
 CREATE INDEX idx_boxes_display_order ON boxes(display_order);
 CREATE INDEX idx_boxes_is_sample ON boxes(is_sample);
 CREATE INDEX idx_boxes_full_box ON boxes(full_box_id);
+CREATE INDEX idx_boxes_path ON boxes(path);
 CREATE INDEX idx_bundles_price ON bundles(price_id);
 CREATE INDEX idx_user_products_user_id ON user_products(user_id);
 CREATE INDEX idx_user_memberships_user_id ON user_memberships(user_id);
 CREATE INDEX idx_user_memberships_expires ON user_memberships(expires_at);
+CREATE INDEX idx_admin_access_attempts_last ON admin_access_attempts(last_attempt_at);
 
 -- ============================================================================
 -- UPDATED_AT TRIGGER FUNCTION
@@ -241,41 +279,9 @@ CREATE TRIGGER update_user_memberships_updated_at
   BEFORE UPDATE ON user_memberships
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- ============================================================================
--- 11. APP_CONFIG TABLE
--- Application-wide configuration settings
--- ============================================================================
-CREATE TABLE app_config (
-  id TEXT PRIMARY KEY DEFAULT 'default',
-  slug TEXT UNIQUE NOT NULL DEFAULT 'asweallare',
-  name TEXT DEFAULT 'AS WE ALL ARE',
-  title TEXT DEFAULT 'Unscripted Conversations',
-  tagline TEXT DEFAULT 'A therapeutic conversational card game',
-  promise TEXT DEFAULT 'Know more about each other without the need to ask any question',
-  header_text TEXT,
-  body_text TEXT,
-  footer_text TEXT,
-  admin_emails TEXT DEFAULT '',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 CREATE TRIGGER update_app_config_updated_at
   BEFORE UPDATE ON app_config
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- ============================================================================
--- 12. ADMIN_ACCESS_ATTEMPTS TABLE
--- Logs unauthorized admin login attempts
--- ============================================================================
-CREATE TABLE admin_access_attempts (
-  email TEXT PRIMARY KEY,
-  first_attempt_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  last_attempt_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  attempts_count INTEGER DEFAULT 1
-);
-
-CREATE INDEX idx_admin_access_attempts_last ON admin_access_attempts(last_attempt_at);
 
 -- ============================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
