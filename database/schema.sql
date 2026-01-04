@@ -4,6 +4,8 @@
 -- ============================================================================
 
 -- Drop existing tables (in correct order due to foreign keys)
+DROP TABLE IF EXISTS admin_access_attempts CASCADE;
+DROP TABLE IF EXISTS app_config CASCADE;
 DROP TABLE IF EXISTS user_memberships CASCADE;
 DROP TABLE IF EXISTS bundles CASCADE;
 DROP TABLE IF EXISTS user_products CASCADE;
@@ -13,6 +15,7 @@ DROP TABLE IF EXISTS boxes CASCADE;
 DROP TABLE IF EXISTS prices CASCADE;
 DROP TABLE IF EXISTS collection_series CASCADE;
 DROP TABLE IF EXISTS subscription_plans CASCADE;
+DROP TABLE IF EXISTS mockup_images CASCADE;
 
 -- ============================================================================
 -- 1. COLLECTION_SERIES TABLE
