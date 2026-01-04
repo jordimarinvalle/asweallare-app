@@ -5311,7 +5311,7 @@ function AppContent() {
                               title={mockup.image_path}
                             >
                               <img 
-                                src={mockup.image_path} 
+                                src={getImageUrl(mockup.image_path)} 
                                 alt={`Card mockup ${mockup.display_order}`}
                                 className="w-full aspect-[3/4] object-cover"
                               />
