@@ -3,8 +3,8 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
 
-// Helper to get authenticated user (supports both local and Supabase)
-async function getAuthenticatedUser() {
+// Helper to get authenticated user and check admin status
+async function getAuthenticatedUserAndCheckAdmin() {
   // In local mode, check the auth-token cookie
   if (process.env.LOCAL_MODE === 'true') {
     const { cookies } = await import('next/headers')
@@ -16,40 +16,61 @@ async function getAuthenticatedUser() {
     if (token) {
       const user = await getUserFromToken(token)
       if (user) {
-        return { user, error: null }
+        return { user, isAdmin: true, error: null } // Local mode: all authenticated users are admins
       }
     }
-    return { user: null, error: 'Not authenticated' }
+    return { user: null, isAdmin: false, error: 'Not authenticated' }
   }
   
   // Supabase mode
   const { createSupabaseServer } = await import('../../../../lib/supabase-server')
+  const { createClient } = await import('@supabase/supabase-js')
+  
   const supabase = createSupabaseServer()
   const { data: { user }, error } = await supabase.auth.getUser()
-  return { user, error }
+  
+  if (error || !user) {
+    return { user: null, isAdmin: false, error: error?.message || 'Not authenticated' }
+  }
+  
+  // Check if user is admin by querying app_config admin_emails
+  try {
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+    
+    const { data: config } = await supabaseAdmin
+      .from('app_config')
+      .select('admin_emails')
+      .single()
+    
+    const adminEmails = config?.admin_emails || []
+    const isAdmin = adminEmails.includes(user.email)
+    
+    return { user, isAdmin, error: null }
+  } catch (dbError) {
+    console.error('[UPLOAD] Error checking admin status:', dbError)
+    return { user, isAdmin: false, error: null }
+  }
 }
-
-// Admin email restriction (for Supabase mode)
-const ADMIN_EMAIL = 'mocasin@gmail.com'
 
 export async function POST(request) {
   try {
-    // Check auth
-    const { user, error: authError } = await getAuthenticatedUser()
+    // Check auth and admin status
+    const { user, isAdmin, error: authError } = await getAuthenticatedUserAndCheckAdmin()
     
-    // In local mode, any authenticated user is admin
-    // In Supabase mode, check admin email or is_admin flag
-    const isLocalMode = process.env.LOCAL_MODE === 'true'
-    const isAuthorized = isLocalMode 
-      ? (user !== null)
-      : (user && (user.email === ADMIN_EMAIL || user.is_admin))
-    
-    if (authError || !isAuthorized) {
-      console.log('[UPLOAD] Auth failed:', { authError, user: user?.email, isLocalMode })
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (authError || !user) {
+      console.log('[UPLOAD] Auth failed:', { authError, user: user?.email })
+      return NextResponse.json({ error: 'Unauthorized - Not authenticated' }, { status: 401 })
     }
     
-    console.log('[UPLOAD] Auth passed for:', user?.email)
+    if (!isAdmin) {
+      console.log('[UPLOAD] Admin check failed:', { user: user?.email, isAdmin })
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 })
+    }
+    
+    console.log('[UPLOAD] Auth passed for admin:', user?.email)
     
     const formData = await request.formData()
     const file = formData.get('file')
