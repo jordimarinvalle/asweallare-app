@@ -351,19 +351,25 @@ function initExperiencePage(page) {
 function initGamePage(page) {
   console.log('[Game] Initializing page')
   
-  const rotateScreen = page.$el.find('#rotate-screen')[0]
-  const gameContent = page.$el.find('#game-content')[0]
-  const blackPile = page.$el.find('#black-pile')[0]
-  const whitePile = page.$el.find('#white-pile')[0]
-  const blackFront = page.$el.find('#black-front')[0]
-  const whiteFront = page.$el.find('#white-front')[0]
-  const blackCount = page.$el.find('#black-count')[0]
-  const whiteCount = page.$el.find('#white-count')[0]
-  const timerDisplay = page.$el.find('#timer-display')[0]
-  const resetBtn = page.$el.find('#reset-btn')[0]
-  const exitBtn = page.$el.find('#exit-btn')[0]
-  const reshuffleBlack = page.$el.find('#reshuffle-black')[0]
-  const reshuffleWhite = page.$el.find('#reshuffle-white')[0]
+  const pageEl = page.el || page.$el?.[0] || document.querySelector('.page[data-name="game"]')
+  if (!pageEl) {
+    console.log('[Game] Page element not found')
+    return
+  }
+  
+  const rotateScreen = pageEl.querySelector('#rotate-screen')
+  const gameContent = pageEl.querySelector('#game-content')
+  const blackPile = pageEl.querySelector('#black-pile')
+  const whitePile = pageEl.querySelector('#white-pile')
+  const blackFront = pageEl.querySelector('#black-front')
+  const whiteFront = pageEl.querySelector('#white-front')
+  const blackCount = pageEl.querySelector('#black-count')
+  const whiteCount = pageEl.querySelector('#white-count')
+  const timerDisplay = pageEl.querySelector('#timer-display')
+  const resetBtn = pageEl.querySelector('#reset-btn')
+  const exitBtn = pageEl.querySelector('#exit-btn')
+  const reshuffleBlack = pageEl.querySelector('#reshuffle-black')
+  const reshuffleWhite = pageEl.querySelector('#reshuffle-white')
   
   function checkOrientation() {
     const isLandscape = window.innerWidth > window.innerHeight
