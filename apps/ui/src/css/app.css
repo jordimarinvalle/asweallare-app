@@ -65,6 +65,8 @@
   height: 352px;
   perspective: 1000px;
   cursor: pointer;
+  position: relative;
+  z-index: 10;
 }
 
 .card-pile .card-back,
@@ -90,6 +92,64 @@
   height: 100%;
   transform-style: preserve-3d;
   transition: transform 0.5s ease;
+}
+
+/* Card stack wrapper - contains stacked cards behind main card */
+.card-stack-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 252px;
+  height: 352px;
+}
+
+/* Stacked cards behind the main card for visual depth effect */
+.stacked-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 252px;
+  height: 352px;
+  border-radius: 12px;
+  pointer-events: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Black pile stacked cards - darker shades */
+.pile-container:first-child .stacked-card.stacked-1 {
+  background: #1a1a1a;
+  border: 2px solid #333;
+  z-index: 1;
+}
+
+.pile-container:first-child .stacked-card.stacked-2 {
+  background: #222;
+  border: 2px solid #444;
+  z-index: 2;
+}
+
+.pile-container:first-child .stacked-card.stacked-3 {
+  background: #2a2a2a;
+  border: 2px solid #555;
+  z-index: 3;
+}
+
+/* White pile stacked cards - lighter shades */
+.pile-container:last-child .stacked-card.stacked-1 {
+  background: #e8e8e8;
+  border: 2px solid #ccc;
+  z-index: 1;
+}
+
+.pile-container:last-child .stacked-card.stacked-2 {
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  z-index: 2;
+}
+
+.pile-container:last-child .stacked-card.stacked-3 {
+  background: #f8f8f8;
+  border: 2px solid #e5e5e5;
+  z-index: 3;
 }
 
 /* Game screen - landscape only */
