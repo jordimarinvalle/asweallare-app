@@ -385,11 +385,18 @@ function initGamePage(page) {
   const whiteFront = pageEl.querySelector('#white-front')
   const blackCount = pageEl.querySelector('#black-count')
   const whiteCount = pageEl.querySelector('#white-count')
+  const blackPileWrapper = pageEl.querySelector('#black-pile-wrapper')
+  const whitePileWrapper = pageEl.querySelector('#white-pile-wrapper')
   const timerDisplay = pageEl.querySelector('#timer-display')
   const resetBtn = pageEl.querySelector('#reset-btn')
   const exitBtn = pageEl.querySelector('#exit-btn')
-  const reshuffleBlack = pageEl.querySelector('#reshuffle-black')
-  const reshuffleWhite = pageEl.querySelector('#reshuffle-white')
+  
+  // Helper to get correct image URL
+  function getImageUrl(path) {
+    if (!path) return ''
+    if (path.startsWith('http://') || path.startsWith('https://')) return path
+    return path.startsWith('/') ? path : '/' + path
+  }
   
   function checkOrientation() {
     const isLandscape = window.innerWidth > window.innerHeight
@@ -429,15 +436,29 @@ function initGamePage(page) {
     }
   }
   
+  function updatePileVisibility() {
+    const blackDeckLen = state.blackDeck ? state.blackDeck.length : 0
+    const whiteDeckLen = state.whiteDeck ? state.whiteDeck.length : 0
+    const hasCurrentBlack = state.currentBlack !== null
+    const hasCurrentWhite = state.currentWhite !== null
+    
+    const showBlack = blackDeckLen > 0 || hasCurrentBlack
+    const showWhite = whiteDeckLen > 0 || hasCurrentWhite
+    
+    if (blackPileWrapper) blackPileWrapper.style.display = showBlack ? 'block' : 'none'
+    if (whitePileWrapper) whitePileWrapper.style.display = showWhite ? 'block' : 'none'
+  }
+  
   function updateCards() {
+    const blackDeckLen = state.blackDeck ? state.blackDeck.length : 0
+    const whiteDeckLen = state.whiteDeck ? state.whiteDeck.length : 0
+    
+    console.log('[Game] updateCards - black:', blackDeckLen, 'white:', whiteDeckLen)
+    
     if (blackPile && blackFront) {
       if (state.currentBlack) {
         blackPile.classList.toggle('flipped', state.blackFlipped)
-        const imgPath = state.currentBlack.image_path || ''
-        // Don't add / prefix if it's already a full URL
-        const imgSrc = imgPath.startsWith('http://') || imgPath.startsWith('https://') 
-          ? imgPath 
-          : (imgPath.startsWith('/') ? imgPath : '/' + imgPath)
+        const imgSrc = getImageUrl(state.currentBlack.image_path || '')
         blackFront.innerHTML = `<img src="${imgSrc}" alt="Card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'" />`
       } else {
         blackPile.classList.remove('flipped')
@@ -447,19 +468,17 @@ function initGamePage(page) {
     if (whitePile && whiteFront) {
       if (state.currentWhite) {
         whitePile.classList.toggle('flipped', state.whiteFlipped)
-        const imgPath = state.currentWhite.image_path || ''
-        // Don't add / prefix if it's already a full URL
-        const imgSrc = imgPath.startsWith('http://') || imgPath.startsWith('https://') 
-          ? imgPath 
-          : (imgPath.startsWith('/') ? imgPath : '/' + imgPath)
+        const imgSrc = getImageUrl(state.currentWhite.image_path || '')
         whiteFront.innerHTML = `<img src="${imgSrc}" alt="Card" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display='none'" />`
       } else {
         whitePile.classList.remove('flipped')
       }
     }
     
-    if (blackCount) blackCount.textContent = `${state.blackDeck.length} cards left`
-    if (whiteCount) whiteCount.textContent = `${state.whiteDeck.length} cards left`
+    if (blackCount) blackCount.textContent = `${blackDeckLen} cards left`
+    if (whiteCount) whiteCount.textContent = `${whiteDeckLen} cards left`
+    
+    updatePileVisibility()
   }
   
   // Event listeners
@@ -467,14 +486,20 @@ function initGamePage(page) {
   window.addEventListener('orientationchange', checkOrientation)
   document.addEventListener('timer-update', updateTimerDisplay)
   
+  // Listen for cards-loaded event
+  document.addEventListener('cards-loaded', () => {
+    console.log('[Game] Cards loaded event received')
+    updateCards()
+  })
+  
   blackPile?.addEventListener('click', () => {
-    if (!state.currentBlack && state.blackDeck.length > 0) drawCard('black')
+    if (!state.currentBlack && state.blackDeck && state.blackDeck.length > 0) drawCard('black')
     else if (state.currentBlack) flipCard('black')
     updateCards()
   })
   
   whitePile?.addEventListener('click', () => {
-    if (!state.currentWhite && state.whiteDeck.length > 0) drawCard('white')
+    if (!state.currentWhite && state.whiteDeck && state.whiteDeck.length > 0) drawCard('white')
     else if (state.currentWhite) flipCard('white')
     updateCards()
   })
@@ -488,8 +513,6 @@ function initGamePage(page) {
   
   resetBtn?.addEventListener('click', () => { resetRound(); updateCards(); updateTimerDisplay() })
   exitBtn?.addEventListener('click', () => { endGame(); window.f7App?.views.main.router.navigate('/experience/') })
-  reshuffleBlack?.addEventListener('click', e => { e.stopPropagation(); reshufflePile('black'); updateCards() })
-  reshuffleWhite?.addEventListener('click', e => { e.stopPropagation(); reshufflePile('white'); updateCards() })
   
   checkOrientation()
   updateCards()
